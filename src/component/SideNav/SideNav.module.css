@@ -1,0 +1,30 @@
+.container{
+    width: 250px;
+    min-height: 100vh;
+    background-color: white;
+    border-right: 2px solid rgb(220, 220, 220);
+}
+.logoContainer{
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 2px solid rgb(220, 220, 220);
+}
+.logo{
+    font-size: 30px;
+    color: rgb(33,150,243);
+    margin-right: 10px;
+}
+.name{
+    font-size: 20px;
+    font-weight: bold;
+}
+.navLogo{
+    font-size: 24px;
+    color: black;
+    margin-right: 10px;
+}
+.activeNav{
+    background-color: rgb(231,241,251) !important;
+}   

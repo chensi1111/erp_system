@@ -1,0 +1,123 @@
+.wrapper {
+    position: absolute;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+}
+
+.container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: fit-content;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: rgb(246,247,248);
+    padding: 20px;
+    z-index: 999;
+}
+
+.allInputs {
+    padding: 20px 10px 10px;
+    background-color: rgb(240,240,240);
+    border-radius: 10px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.singleInput {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.singleInput .inputContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.singleInput .inputTitle {
+    width: 70px;
+    white-space: nowrap;
+}
+
+.input,textarea {
+    border: 1px solid gray;
+}
+.singleInput .input {
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+    padding: 3px 5px;
+    box-sizing: border-box;
+}
+
+.multipleInput {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.multipleInput .inputContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1; 
+    min-width: 0;
+}
+
+.multipleInput .inputTitle {
+    width: 70px;
+    white-space: nowrap;
+}
+
+.multipleInput .input {
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+    padding: 3px 5px;
+    box-sizing: border-box;
+}
+textarea {
+    flex: 1;
+    min-width: 0;
+    height: 80px;
+    padding: 3px 5px;
+    box-sizing: border-box;
+    resize: none;
+}
+.buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+.button {
+  width: 120px;
+  height: 35px;
+  background-color: rgb(17, 115, 212);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+.button:hover {
+  background-color: rgb(10, 90, 170);
+}
+.button.cancel {
+    background-color: #e53935;
+}
+.button.cancel:hover {
+    background-color: #c62828;
+}
