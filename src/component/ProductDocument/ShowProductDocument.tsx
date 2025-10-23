@@ -67,7 +67,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
   };
   const handleSave = async () => {
     try {
-      const response = await axios.post('/api/prodcut/update', {...formData});
+      const response = await axios.post('/api/product/update', {...formData});
       if(response.data.code=='000') {
         onSuccess()
         toast.success('更新成功');
