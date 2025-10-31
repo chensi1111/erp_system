@@ -1,9 +1,11 @@
 import style from "./ShowProductDocument.module.css";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
 interface ProductDetail {
   product_id: string;
   product_name:  string;
@@ -12,12 +14,14 @@ interface ProductDetail {
   manufactor:string;
   brand:string;
   size:string;
+  color:string;
   product_type1:string;
   product_type2:string;
   product_type3:string;
   product_type4:string;
   price:number;
-  sale_price:number;
+  last_cost:number;
+  average_cost:number;
   remark: string;
 }
 interface ShowProductDocumentProps {
@@ -26,45 +30,34 @@ interface ShowProductDocumentProps {
   detail: ProductDetail;
   type: boolean;
 }
-interface manufactorList{
-  manufactor_id:string,
-  manufactor_name:string
-}
-interface brandList{
-  brand_id:string,
-  brand_name:string
-}
-interface sizeList{
-  size_id:string,
-  size_name:string
-}
-interface typeList{
-  type_id:string,
-  type_name:string
-}
 const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD');
+  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocumentProps)=> {
+  const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const [isEditing, setIsEditing] = useState(type);
   const [formData, setFormData] = useState<ProductDetail>(detail);
-  const [manufactorName, setManufactorName] = useState('');
-  const [brandName,setBrandName] = useState('');
-  const [sizeName,setSizeName] = useState('');
-  const [type1Name,setType1Name] = useState('')
-  const [type2Name,setType2Name] = useState('')
-  const [type3Name,setType3Name] = useState('')
-  const [type4Name,setType4Name] = useState('')
-
-  const [manufactorList,setManufactorList]=useState<manufactorList[]>([]);
-  const [brandList,setBrandList]=useState<brandList[]>([]);
-  const [sizeList,setSizeList]=useState<sizeList[]>([]);
-  const [typeList,setTypeList]=useState<typeList[]>([]);
   const title=detail.product_name;
   const handleChange = (key: keyof ProductDetail, value: string | number) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
+  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
+  switch (type) {
+    case 'manufactor':
+      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
+    case 'brand':
+      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
+    case 'size':
+      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
+    case 'color':
+      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
+    case 'type':
+      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
+    default:
+      return '';
+  }
+};
   const handleSave = async () => {
     try {
       const response = await axios.post('/api/product/update', {...formData});
@@ -77,99 +70,29 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
-    const handleSelectChange = (type:string,value:string) =>{
-    if(type==='manufactor'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = manufactorList.find(item => item.manufactor_id === value);
-      setManufactorName(found ? found.manufactor_name : '');
-    }else if(type==='brand'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = brandList.find(item => item.brand_id === value);
-      setBrandName(found ? found.brand_name : '');
-    }else if(type==='size'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = sizeList.find(item => item.size_id === value);
-      setSizeName(found ? found.size_name : '');
-    }else if(type==='product_type1'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = typeList.find(item => item.type_id === value);
-      setType1Name(found ? found.type_name : '');
-    }else if(type==='product_type2'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = typeList.find(item => item.type_id === value);
-      setType2Name(found ? found.type_name : '');
-    }else if(type==='product_type3'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = typeList.find(item => item.type_id === value);
-      setType3Name(found ? found.type_name : '');
-    }else if(type==='product_type4'){
-      setFormData(prev => ({ ...prev, [type]: value }));
-      const found = typeList.find(item => item.type_id === value);
-      setType4Name(found ? found.type_name : '');
-    }
-  }
-  const getProductInfos=async()=>{
-    const response = await axios.post('/api/product/info');
-    if(response.data.code=='000') {
-      setManufactorList(response.data.data.manufactorList);
-      setBrandList(response.data.data.brandList);
-      setSizeList(response.data.data.sizeList);
-      setTypeList(response.data.data.typeList);
-    }
-  }
-  useEffect(()=>{
-    getProductInfos();
-  },[]);
-  useEffect(() => {
-  if (formData.manufactor) {
-    handleSelectChange('manufactor', formData.manufactor);
-  }
-  if (formData.brand) {
-    handleSelectChange('brand', formData.brand);
-  }
-  if (formData.size) {
-    handleSelectChange('size', formData.size);
-  }
-  if (formData.product_type1) {
-    handleSelectChange('product_type1', formData.product_type1);
-  }
-  if (formData.product_type2) {
-    handleSelectChange('product_type2', formData.product_type2);
-  }
-  if (formData.product_type3) {
-    handleSelectChange('product_type3', formData.product_type3);
-  }
-  if (formData.product_type4) {
-    handleSelectChange('product_type4', formData.product_type4);
-  }
-}, [manufactorList, brandList, sizeList, typeList]);
-
   return (
-    <div
-      className={style.wrapper}
-      onClick={() => onClose()}
-    >
+    <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
         <div className={style.title}>{title}</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>廠商編號</div>
-              <input type="text" className={style.input} value={formData.product_id} readOnly />
+              <div className={style.inputTitle}>商品編號</div>
+              <input type="text" className={style.input} value={formData.product_id} readOnly tabIndex={-1} />
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>品名規格</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.specification} onChange={(e)=>handleChange("specification",e.target.value)}/>
+              <div className={style.inputTitle}>商品規格</div>
+              <input type="text" className={style.input} value={formData.specification} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>建檔日期</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly/>
+              <div className={style.inputTitle}>建檔時間</div>
+              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品名稱</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.product_name} onChange={(e) => handleChange("product_name", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.product_name} onChange={(e) => handleChange("product_name", e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.selectContainer}>
@@ -178,14 +101,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="manufactors"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.manufactor}
-                onChange={(e)=>handleSelectChange('manufactor',e.target.value)}
+                onChange={(e)=>handleChange('manufactor',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="manufactors">
-                  {manufactorList.map((item) => (
+                  {productInfoRelation.manufactorList.map((item) => (
                     <option key={item.manufactor_id} value={item.manufactor_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={manufactorName}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',formData.manufactor)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>品牌</div>
@@ -193,14 +117,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="brands"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.brand}
-                onChange={(e)=>handleSelectChange('brand',e.target.value)}
+                onChange={(e)=>handleChange('brand',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="brands">
-                  {brandList.map((item) => (
+                  {productInfoRelation.brandList.map((item) => (
                     <option key={item.brand_id} value={item.brand_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={brandName}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('brand',formData.brand)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>尺碼</div>
@@ -208,14 +133,31 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="sizes"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.size}
-                onChange={(e)=>handleSelectChange('size',e.target.value)}
+                onChange={(e)=>handleChange('size',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="sizes">
-                  {sizeList.map((item) => (
+                  {productInfoRelation.sizeList.map((item) => (
                     <option key={item.size_id} value={item.size_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={sizeName}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('size',formData.size)}></input>
+          </div>
+          <div className={style.selectContainer}>
+              <div className={style.inputTitle}>顏色</div>
+                <input
+                list="colors"
+                className={classNames(style.input,isEditing && style.edit)}
+                value={formData.color}
+                onChange={(e)=>handleChange('color',e.target.value)}
+                maxLength={5}
+                />
+                <datalist id="colors">
+                  {productInfoRelation.colorList.map((item) => (
+                    <option key={item.color_id} value={item.color_id} />
+                 ))}
+              </datalist>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('color',formData.color)}></input>
           </div>
           <div className={style.typeContainer}>
             <div className={style.selectContainer}>
@@ -224,14 +166,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="types1"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.product_type1}
-                onChange={(e)=>handleSelectChange('product_type1',e.target.value)}
+                onChange={(e)=>handleChange('product_type1',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="types1">
-                  {typeList.map((item) => (
+                  {productInfoRelation.typeList.map((item) => (
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={type1Name}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type1)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別2</div>
@@ -239,14 +182,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="types2"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.product_type2}
-                onChange={(e)=>handleSelectChange('product_type2',e.target.value)}
+                onChange={(e)=>handleChange('product_type2',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="types2">
-                  {typeList.map((item) => (
+                  {productInfoRelation.typeList.map((item) => (
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={type2Name}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type2)}></input>
             </div>
           </div>
           <div className={style.typeContainer}>
@@ -256,14 +200,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="types3"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.product_type3}
-                onChange={(e)=>handleSelectChange('product_type3',e.target.value)}
+                onChange={(e)=>handleChange('product_type3',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="types3">
-                  {typeList.map((item) => (
+                  {productInfoRelation.typeList.map((item) => (
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={type3Name}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type3)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別4</div>
@@ -271,14 +216,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                 list="types4"
                 className={classNames(style.input,isEditing && style.edit)}
                 value={formData.product_type4}
-                onChange={(e)=>handleSelectChange('product_type4',e.target.value)}
+                onChange={(e)=>handleChange('product_type4',e.target.value)}
+                maxLength={5}
                 />
                 <datalist id="types4">
-                  {typeList.map((item) => (
+                  {productInfoRelation.typeList.map((item) => (
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={type4Name}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type4)}></input>
             </div>
           </div>
           <div className={style.multipleInput}>
@@ -287,14 +233,18 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
               <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.price} onChange={(e)=>handleChange('price',e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>特價</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.sale_price} onChange={(e)=>handleChange('sale_price',e.target.value)}/>
+              <div className={style.inputTitle}>最新進價</div>
+              <input type="text" className={style.input} value={formData.last_cost||''} readOnly tabIndex={-1}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>平均進價</div>
+              <input type="text" className={style.input} value={formData.average_cost||''} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>備註</div>
-              <textarea value={formData.remark} readOnly={!isEditing} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)}></textarea>
+              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)} maxLength={100}></textarea>
             </div>
           </div>
           {!isEditing && <div className={style.buttons}>

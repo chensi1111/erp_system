@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import manufactorDocumentReducer from './manufactorDocumentSlice';
+import productInfoRelationSlice from './productInfoRelationSlice';
 
 export const store = configureStore({
   reducer: {
-    manufactorDocument: manufactorDocumentReducer,
+    productInfoRelation: productInfoRelationSlice,
   },
 });
 

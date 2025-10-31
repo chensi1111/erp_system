@@ -26,7 +26,7 @@ interface ManufactorDetail {
   remark: string;
 }
 function ManufactorDocument() {
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('ASC');
+  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
   const [searchType, setSearchType] = useState('manufactor_id');
   const [filter, setFilter] = useState({
     manufactor_id: '',

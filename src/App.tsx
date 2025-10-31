@@ -8,6 +8,11 @@ import ProductDocument from "./pages/Documents/ProdductDocument/ProductDocument"
 import BrandDocument from "./pages/Documents/BrandDocument/BrandDocument";
 import SizeDocument from "./pages/Documents/SizeDocument/SizeDocument";
 import TypeDocument from "./pages/Documents/TypeDocument/TypeDocument";
+import ManufactorRestock from "./pages/Daily/ManufactorRestock/ManufactorRestock";
+import ColorDocument from "./pages/Documents/ColorDocument/ColorDocument";
+import StockSearch from "./pages/Stock/StockSearch/StockSearch";
+import ProductSale from "./pages/Daily/ProductSale/ProductSale";
+import StockHistory from "./pages/Stock/StockHistory/StockHistory";
 function App() {
   return (
     <BrowserRouter>
@@ -35,6 +40,26 @@ function App() {
           <Route
             path="/documents/type"
             element={<TypeDocument />}
+          />
+          <Route
+            path="/documents/color"
+            element={<ColorDocument />}
+          />
+          <Route
+            path="/daily/manufactorRestock"
+            element={<ManufactorRestock />}
+          />
+          <Route
+            path="/daily/productSale"
+            element={<ProductSale />}
+          />
+          <Route
+            path="/stock/stockSearch"
+            element={<StockSearch />}
+          />
+          <Route
+            path="/stock/stockHistory"
+            element={<StockHistory />}
           />
         </Routes>
       </div>

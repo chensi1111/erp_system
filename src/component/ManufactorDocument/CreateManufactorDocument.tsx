@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
   const [manufactor_id, setManufactor_id] = useState('');
   const [unified_number, setUnified_number] = useState('');
-  const [create_date, setCreate_date] = useState(dayjs().format('YYYY-MM-DD'));
+  const create_date = dayjs().format('YYYY/MM/DD')
   const [manufactor_name, setManufactor_name] = useState('');
   const [contact_person, setContact_person] = useState('');
   const [phone, setPhone] = useState('');
@@ -20,7 +20,7 @@ const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuc
   const handleCreate = async () => {
     setErrorCode('')
     try {
-      const response = await axios.post('/api/manufactor/create', {manufactor_id,unified_number,create_date,manufactor_name,contact_person,phone,email,tax_rate,discount,ticket_period,remark});
+      const response = await axios.post('/api/manufactor/create', {manufactor_id,unified_number,manufactor_name,contact_person,phone,email,tax_rate,discount,ticket_period,remark});
       if(response.data.code=='000') {
         console.log('Manufactor created successfully',response.data);
         toast.success('廠商新增成功');
@@ -33,43 +33,40 @@ const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuc
     }
   }
   return (
-    <div
-      className={style.wrapper}
-      onClick={() => onClose()}
-    >
+    <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
         <div className={style.title}>新增廠商</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商編號</div>
-              <input type="text" className={classNames(style.input,(errorCode=='101'||errorCode=='002') && style.error)} value={manufactor_id} onChange={(e)=>setManufactor_id(e.target.value)}/>
+              <input type="text" className={classNames(style.input,(errorCode=='101'||errorCode=='002') && style.error)} value={manufactor_id} onChange={(e)=>setManufactor_id(e.target.value)} maxLength={5}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>統一編號</div>
-              <input type="text" className={classNames(style.input,errorCode=='003' && style.error)} value={unified_number} onChange={(e)=>setUnified_number(e.target.value)}/>
+              <input type="text" className={classNames(style.input,errorCode=='003' && style.error)} value={unified_number} onChange={(e)=>setUnified_number(e.target.value)} maxLength={8}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔日期</div>
-              <input type="date" className={style.input} value={create_date} onChange={(e)=>setCreate_date(e.target.value)}/>
+              <input type="text" className={classNames(style.input,style.disable)} value={create_date} readOnly/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商名稱</div>
-              <input type="text" className={classNames(style.input,(errorCode=='102'||errorCode=='004') && style.error)} value={manufactor_name} onChange={(e)=>setManufactor_name(e.target.value)}/>
+              <input type="text" className={classNames(style.input,(errorCode=='102'||errorCode=='004') && style.error)} value={manufactor_name} onChange={(e)=>setManufactor_name(e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>聯絡人</div>
-              <input type="text" className={classNames(style.input,errorCode=='006' && style.error)} value={contact_person} onChange={(e)=>setContact_person(e.target.value)}/>
+              <input type="text" className={classNames(style.input,errorCode=='006' && style.error)} value={contact_person} onChange={(e)=>setContact_person(e.target.value)} maxLength={10}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>電話</div>
-              <input type="text" className={classNames(style.input,errorCode=='008' && style.error)} value={phone} onChange={(e)=>setPhone(e.target.value)}/>
+              <input type="text" className={classNames(style.input,errorCode=='008' && style.error)} value={phone} onChange={(e)=>setPhone(e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -95,7 +92,7 @@ const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuc
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>備註</div>
-              <textarea value={remark} onChange={(e)=>setRemark(e.target.value)} className={classNames(style.textarea,errorCode=='012' && style.error)}></textarea>
+              <textarea value={remark} onChange={(e)=>setRemark(e.target.value)} className={classNames(style.textarea,errorCode=='012' && style.error)} maxLength={100}></textarea>
             </div>
           </div>
         </div>

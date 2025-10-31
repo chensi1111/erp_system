@@ -1,39 +1,39 @@
-import style from "./TypeDocument.module.css";
+import style from "./ColorDocument.module.css";
 import { FaPlus } from "react-icons/fa6";
-import CreateTypeDocument from "../../../component/TypeDocument/CreateTypeDocument";
-import ShowTypeDocument from "../../../component/TypeDocument/ShowTypeDocument";
+import CreateColorDocument from "../../../component/ColorDocument/CreateColorDocument";
+import ShowColorDocument from "../../../component/ColorDocument/ShowColorDocument";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
 import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
-interface Type {
-  type_id: string;
-  type_name:  string;
+interface Color {
+  color_id: string;
+  color_name:  string;
 }
-interface TypeDetail {
-  type_id: string;
-  type_name:  string;
+interface ColorDetail {
+  color_id: string;
+  color_name:  string;
   create_date: string;
   remark: string;
 }
-function TypeDocument() {
+function ColorDocument() {
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
-  const [searchType, setSearchType] = useState('type_id');
+  const [searchType, setSearchType] = useState('color_id');
   const [filter, setFilter] = useState({
-    type_id: '',
-    type_name: '',
+    color_id: '',
+    color_name: '',
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [openCreate,setOpenCreate] = useState(false);
   const [openShow,setOpenShow] = useState(false);
-  const [data, setDate] = useState<Type[]>([]);
+  const [data, setDate] = useState<Color[]>([]);
   const [type, setType] = useState(false);
-  const [detail, setDetail] = useState<TypeDetail>(
+  const [detail, setDetail] = useState<ColorDetail>(
     {
-      type_id: "",
-      type_name:  "",
+      color_id: "",
+      color_name:  "",
       create_date: "",
       remark: "",
     }
@@ -41,7 +41,7 @@ function TypeDocument() {
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
-      const res = await axios.post('/api/type/list',{page,pageSize:10,filter,sort});
+      const res = await axios.post('/api/color/list',{page,pageSize:10,filter,sort});
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
     } catch (error) {
@@ -49,10 +49,10 @@ function TypeDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (type_id:string,type:boolean) => {
+  const getDetail = async (color_id:string,type:boolean) => {
     setType(type)
     try {
-      const res = await axios.post('/api/type/detail',{type_id});
+      const res = await axios.post('/api/color/detail',{color_id});
       if(res.data.code==='000'){
         setDetail(res.data.data);
         setOpenShow(true);
@@ -62,12 +62,12 @@ function TypeDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleDelete = async (type_id:string) => {
+  const handleDelete = async (color_id:string) => {
     try {
-      const res = await axios.post('/api/type/delete',{type_id});
+      const res = await axios.post('/api/color/delete',{color_id});
       if(res.data.code==='000'){
         toast.success('刪除成功');
-        const updateData = data.filter(item => item.type_id !== type_id);
+        const updateData = data.filter(item => item.color_id !== color_id);
         if(updateData.length ===0 && page>1){
           setPage(page-1);
         }
@@ -79,21 +79,21 @@ function TypeDocument() {
     }
   }
   const handleSetFilter = (value:string) => {
-    if(searchType==='type_id'){
+    if(searchType==='color_id'){
       setFilter({
-        type_id: value,
-        type_name: '',
+        color_id: value,
+        color_name: '',
       })
     }else{
       setFilter({
-        type_id: '',
-        type_name: value,
+        color_id: '',
+        color_name: value,
       })
     }
   }
   const handleSetSearchType = (value:string) => {
     setSearchType(value);
-    setFilter({ type_id: '', type_name: '' });
+    setFilter({ color_id: '', color_name: '' });
   }
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -112,55 +112,55 @@ function TypeDocument() {
   }, [page,sort]);
   return (
     <div className={style.container}>
-      {openCreate && <CreateTypeDocument 
+      {openCreate && <CreateColorDocument 
       onClose={() => setOpenCreate(false)} 
       onSuccess={() => {
         setOpenCreate(false);
         getList(); 
       }}/>}
-      {openShow && <ShowTypeDocument 
+      {openShow && <ShowColorDocument 
       onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
       <div className={style.topContainer}>
-        <div className={style.title}>類別基本資料</div>
-        <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>新增類別</div>
+        <div className={style.title}>顏色基本資料</div>
+        <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>新增顏色</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
-          <option value="type_id">類別編號</option>
-          <option value="type_name">類別名稱</option>
+          <option value="color_id">顏色編號</option>
+          <option value="color_name">顏色名稱</option>
         </select>
-        {searchType==='type_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.type_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='type_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.type_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='color_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.color_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='color_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.color_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
             <tr>
               <th>
-                <span>類別編號</span>
+                <span>顏色編號</span>
                 {sort === 'ASC' ? (
                   <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
                  <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
-              <th>類別名稱</th>
+              <th>顏色名稱</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
             {data.map((m) => (
-              <tr key={m.type_id}>
-                <td>{m.type_id}</td>
-                <td>{m.type_name}</td>
+              <tr key={m.color_id}>
+                <td>{m.color_id}</td>
+                <td>{m.color_name}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.type_id,false)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.color_id,false)}>
                     詳細
                   </button>
-                  <button className={style.editBtn} onClick={() => getDetail(m.type_id,true)}>
+                  <button className={style.editBtn} onClick={() => getDetail(m.color_id,true)}>
                     編輯
                   </button>
-                  <button className={style.deleteBtn} onClick={()=>handleDelete(m.type_id)}>
+                  <button className={style.deleteBtn} onClick={()=>handleDelete(m.color_id)}>
                     刪除
                   </button>
                 </td>
@@ -177,4 +177,4 @@ function TypeDocument() {
   )   
 }
 
-export default TypeDocument;
+export default ColorDocument;

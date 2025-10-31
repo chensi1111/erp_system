@@ -95,6 +95,9 @@ function SideNav() {
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/documents/brand')} className={classNames(currnetPath==='/documents/brand' && style.activeNav)}>
               <ListItemText primary="品牌對照資料增修"/>
             </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/documents/color')} className={classNames(currnetPath==='/documents/color' && style.activeNav)}>
+              <ListItemText primary="顏色對照資料增修"/>
+            </ListItemButton>
           </List>
         </Collapse>
         <ListItemButton  onClick={() => handleClick(2)}>
@@ -114,10 +117,10 @@ function SideNav() {
         </ListItemButton>
         <Collapse in={nav2Open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }}>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/manufactorRestock')} className={classNames(currnetPath==='/daily/manufactorRestock' && style.activeNav)}>
               <ListItemText primary="廠商進貨" />
             </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/productSale')} className={classNames(currnetPath==='/daily/productSale' && style.activeNav)}>
               <ListItemText primary="前台銷貨" />
             </ListItemButton>
           </List>
@@ -139,11 +142,11 @@ function SideNav() {
         </ListItemButton>
         <Collapse in={nav3Open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }}>
-              <ListItemText primary="庫存查詢(條碼)" />
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/stock/stockSearch')} className={classNames(currnetPath==='/stock/stockSearch' && style.activeNav)}>
+              <ListItemText primary="庫存查詢"/>
             </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
-              <ListItemText primary="庫存明細" />
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/stock/stockHistory')} className={classNames(currnetPath==='/stock/stockHistory' && style.activeNav)}>
+              <ListItemText primary="庫存記錄" />
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="庫存分類查詢" />

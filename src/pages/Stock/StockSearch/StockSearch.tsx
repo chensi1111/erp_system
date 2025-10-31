@@ -1,47 +1,62 @@
-import style from "./TypeDocument.module.css";
-import { FaPlus } from "react-icons/fa6";
-import CreateTypeDocument from "../../../component/TypeDocument/CreateTypeDocument";
-import ShowTypeDocument from "../../../component/TypeDocument/ShowTypeDocument";
+import style from "./StockSearch.module.css";
+import ShowStockSearch from "../../../component/StockSearch/ShowStockSearch";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
-interface Type {
-  type_id: string;
-  type_name:  string;
+import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
+interface Stock_qty {
+    size:string,
+    quantity:string,
+    safe_stock:string
+} 
+interface Stock {
+  product_id: string;
+  specification: string;
+  product_name:string;
+  stock_qty:Stock_qty[];
+  }
+interface StockDetail {
+  product_id: string;
+  product_name:  string;
+  specification: string;
+  stock_qty:Stock_qty[];
+  last_in_date:string;
+  last_out_date:string;
 }
-interface TypeDetail {
-  type_id: string;
-  type_name:  string;
-  create_date: string;
-  remark: string;
-}
-function TypeDocument() {
+function StockSearch() {
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
-  const [searchType, setSearchType] = useState('type_id');
+  const [searchType, setSearchType] = useState('product_id');
   const [filter, setFilter] = useState({
-    type_id: '',
-    type_name: '',
+    product_id: '',
+    product_name: '',
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [openCreate,setOpenCreate] = useState(false);
   const [openShow,setOpenShow] = useState(false);
-  const [data, setDate] = useState<Type[]>([]);
+  const [data, setDate] = useState<Stock[]>([]);
   const [type, setType] = useState(false);
-  const [detail, setDetail] = useState<TypeDetail>(
+  const [detail, setDetail] = useState<StockDetail>(
     {
-      type_id: "",
-      type_name:  "",
-      create_date: "",
-      remark: "",
+      product_id: "",
+      product_name:  "",
+      specification: "",
+      stock_qty:[],
+      last_in_date:"",
+      last_out_date:"",
     }
   );
+  const getTotalNumber = (list:any) => {
+    return list.reduce((total:any, item:any) => {
+        // 將 quantity 轉成數字，空字串或無效值算 0
+        const qty = parseInt(item.quantity, 10);
+        return total + (isNaN(qty) ? 0 : qty);
+    }, 0);
+    };
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
-      const res = await axios.post('/api/type/list',{page,pageSize:10,filter,sort});
+      const res = await axios.post('/api/stock/list',{page,pageSize:10,filter,sort});
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
     } catch (error) {
@@ -49,10 +64,10 @@ function TypeDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (type_id:string,type:boolean) => {
+  const getDetail = async (specification:string,type:boolean) => {
     setType(type)
     try {
-      const res = await axios.post('/api/type/detail',{type_id});
+      const res = await axios.post('/api/stock/detail',{specification});
       if(res.data.code==='000'){
         setDetail(res.data.data);
         setOpenShow(true);
@@ -62,38 +77,23 @@ function TypeDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleDelete = async (type_id:string) => {
-    try {
-      const res = await axios.post('/api/type/delete',{type_id});
-      if(res.data.code==='000'){
-        toast.success('刪除成功');
-        const updateData = data.filter(item => item.type_id !== type_id);
-        if(updateData.length ===0 && page>1){
-          setPage(page-1);
-        }
-        getList();
-      }
-    } catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-    }
-  }
+  
   const handleSetFilter = (value:string) => {
-    if(searchType==='type_id'){
+    if(searchType==='product_id'){
       setFilter({
-        type_id: value,
-        type_name: '',
+        product_id: value,
+        product_name: '',
       })
     }else{
       setFilter({
-        type_id: '',
-        type_name: value,
+        product_id: '',
+        product_name: value,
       })
     }
   }
   const handleSetSearchType = (value:string) => {
     setSearchType(value);
-    setFilter({ type_id: '', type_name: '' });
+    setFilter({ product_id: '', product_name: '' });
   }
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -110,58 +110,53 @@ function TypeDocument() {
   useEffect(() => {
    getList();
   }, [page,sort]);
+
   return (
     <div className={style.container}>
-      {openCreate && <CreateTypeDocument 
-      onClose={() => setOpenCreate(false)} 
-      onSuccess={() => {
-        setOpenCreate(false);
-        getList(); 
-      }}/>}
-      {openShow && <ShowTypeDocument 
+      {openShow && <ShowStockSearch 
       onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
       <div className={style.topContainer}>
-        <div className={style.title}>類別基本資料</div>
-        <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>新增類別</div>
+        <div className={style.title}>庫存查詢</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
-          <option value="type_id">類別編號</option>
-          <option value="type_name">類別名稱</option>
+          <option value="product_id">商品編號</option>
+          <option value="product_name">商品名稱</option>
         </select>
-        {searchType==='type_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.type_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='type_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.type_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='product_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='product_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
             <tr>
               <th>
-                <span>類別編號</span>
+                <span>商品編號</span>
                 {sort === 'ASC' ? (
                   <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
                  <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
-              <th>類別名稱</th>
+              <th>商品名稱</th>
+              <th>商品規格</th>
+              <th>庫存量</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
             {data.map((m) => (
-              <tr key={m.type_id}>
-                <td>{m.type_id}</td>
-                <td>{m.type_name}</td>
+              <tr key={m.specification}>
+                <td>{m.product_id}</td>
+                <td>{m.product_name}</td>
+                <td>{m.specification}</td>
+                <td>{getTotalNumber(m.stock_qty)}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.type_id,false)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.specification,false)}>
                     詳細
                   </button>
-                  <button className={style.editBtn} onClick={() => getDetail(m.type_id,true)}>
+                  <button className={style.editBtn} onClick={() => getDetail(m.specification,true)}>
                     編輯
-                  </button>
-                  <button className={style.deleteBtn} onClick={()=>handleDelete(m.type_id)}>
-                    刪除
                   </button>
                 </td>
               </tr>
@@ -177,4 +172,4 @@ function TypeDocument() {
   )   
 }
 
-export default TypeDocument;
+export default StockSearch;

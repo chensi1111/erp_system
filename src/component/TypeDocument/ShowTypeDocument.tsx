@@ -17,7 +17,7 @@ interface ShowTypeDocumentProps {
   type: boolean;
 }
 const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD');
+  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 const ShowTypeDocument=({ onClose,onSuccess, detail,type }: ShowTypeDocumentProps)=> {
@@ -41,33 +41,30 @@ const ShowTypeDocument=({ onClose,onSuccess, detail,type }: ShowTypeDocumentProp
   }
 
   return (
-    <div
-      className={style.wrapper}
-      onClick={() => onClose()}
-    >
+    <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
         <div className={style.title}>{title}</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別編號</div>
-              <input type="text" className={style.input} value={formData.type_id} readOnly onChange={(e) => handleChange("type_id", e.target.value)}/>
+              <input type="text" className={style.input} value={formData.type_id} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>建檔日期</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly onChange={(e) => handleChange("create_date", e.target.value)}/>
+              <div className={style.inputTitle}>建檔時間</div>
+              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別名稱</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.type_name} onChange={(e) => handleChange("type_name", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.type_name} onChange={(e) => handleChange("type_name", e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>備註</div>
-              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)}></textarea>
+              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)} maxLength={100}></textarea>
             </div>
           </div>
           {!isEditing && <div className={style.buttons}>

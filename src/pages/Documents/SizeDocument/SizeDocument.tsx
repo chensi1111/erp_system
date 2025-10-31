@@ -20,7 +20,7 @@ interface SizeDetail {
   remark: string;
 }
 function SizeDocument() {
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('ASC');
+  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
   const [searchType, setSearchType] = useState('size_id');
   const [filter, setFilter] = useState({
     size_id: '',

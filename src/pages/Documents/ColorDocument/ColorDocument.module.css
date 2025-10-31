@@ -73,11 +73,7 @@ table .icon{
 
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 20%;
-}
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 30%;
+  width: 50%;
 }
 
 .table th {
@@ -102,8 +98,7 @@ table .icon{
 
 .editBtn,
 .deleteBtn,
-.detailBtn,
-.addBtn {
+.detailBtn {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -136,12 +131,5 @@ table .icon{
 }
 .detailBtn:hover {
   background: rgb(10, 90, 170);
-}
-.addBtn {
-  background: rgb(231, 150, 0);
-  color: white;
-}
-.addBtn:hover {
-  background: rgb(209, 136, 0);
 }
 

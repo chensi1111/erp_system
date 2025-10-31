@@ -124,3 +124,7 @@
 .button.cancel:hover {
     background-color: #c62828;
 }
+.input.disable {
+    border: none !important;
+    pointer-events: none;
+}

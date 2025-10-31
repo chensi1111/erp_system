@@ -24,7 +24,7 @@ interface ShowManufactorDocumentProps {
   type: boolean;
 }
 const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD');
+  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 const ShowManufactorDocument=({ onClose,onSuccess, detail,type }: ShowManufactorDocumentProps)=> {
   const [isEditing, setIsEditing] = useState(type);
@@ -47,43 +47,40 @@ const ShowManufactorDocument=({ onClose,onSuccess, detail,type }: ShowManufactor
   }
 
   return (
-    <div
-      className={style.wrapper}
-      onClick={() => onClose()}
-    >
+    <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
         <div className={style.title}>{title}</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商編號</div>
-              <input type="text" className={style.input} value={formData.manufactor_id} readOnly onChange={(e) => handleChange("manufactor_id", e.target.value)}/>
+              <input type="text" className={style.input} value={formData.manufactor_id} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>統一編號</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.unified_number} onChange={(e) => handleChange("unified_number", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.unified_number} onChange={(e) => handleChange("unified_number", e.target.value)} maxLength={8}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>建檔日期</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly onChange={(e) => handleChange("create_date", e.target.value)}/>
+              <div className={style.inputTitle}>建檔時間</div>
+              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商名稱</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.manufactor_name} onChange={(e) => handleChange("manufactor_name", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.manufactor_name} onChange={(e) => handleChange("manufactor_name", e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>聯絡人</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.contact_person} onChange={(e) => handleChange("contact_person", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.contact_person} onChange={(e) => handleChange("contact_person", e.target.value)} maxLength={10}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>電話</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.phone} onChange={(e) => handleChange("phone", e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.phone} onChange={(e) => handleChange("phone", e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -109,7 +106,7 @@ const ShowManufactorDocument=({ onClose,onSuccess, detail,type }: ShowManufactor
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>備註</div>
-              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)}></textarea>
+              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)} maxLength={100}></textarea>
             </div>
           </div>
           {!isEditing && <div className={style.buttons}>

@@ -1,21 +1,21 @@
-import style from "./CreateTypeDocument.module.css";
+import style from "./CreateColorDocument.module.css";
 import { useState } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
 import axios from '../../api/axios'
 import { toast } from "react-toastify";
-const CreateTypeDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
-  const [type_id, setType_id] = useState('');
+const CreateColorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
+  const [color_id, setColor_id] = useState('');
   const create_date = dayjs().format('YYYY/MM/DD')
-  const [type_name, setType_name] = useState('');
+  const [color_name, setColor_name] = useState('');
   const [remark, setRemark] = useState('');
   const [errorCode,setErrorCode]=useState('');
   const handleCreate = async () => {
     setErrorCode('')
     try {
-      const response = await axios.post('/api/type/create', {type_id,type_name,remark});
+      const response = await axios.post('/api/color/create', {color_id,color_name,remark});
       if(response.data.code=='000') {
-        toast.success('類別新增成功');
+        toast.success('顏色新增成功');
         onSuccess();
       } 
     }catch (error) {
@@ -27,12 +27,12 @@ const CreateTypeDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
-        <div className={style.title}>新增類別</div>
+        <div className={style.title}>新增顏色</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>類別編號</div>
-              <input type="text" className={classNames(style.input,(errorCode=='101'||errorCode=='002') && style.error)} value={type_id} onChange={(e)=>setType_id(e.target.value)} maxLength={5}/>
+              <div className={style.inputTitle}>顏色編號</div>
+              <input type="text" className={classNames(style.input,(errorCode=='101'||errorCode=='002') && style.error)} value={color_id} onChange={(e)=>setColor_id(e.target.value)} maxLength={5}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔日期</div>
@@ -41,8 +41,8 @@ const CreateTypeDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>類別名稱</div>
-              <input type="text" className={classNames(style.input,(errorCode=='102'||errorCode=='004') && style.error)} value={type_name} onChange={(e)=>setType_name(e.target.value)} maxLength={20}/>
+              <div className={style.inputTitle}>顏色名稱</div>
+              <input type="text" className={classNames(style.input,(errorCode=='102'||errorCode=='004') && style.error)} value={color_name} onChange={(e)=>setColor_name(e.target.value)} maxLength={20}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -61,4 +61,4 @@ const CreateTypeDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
   );
 }
 
-export default CreateTypeDocument;
+export default CreateColorDocument;

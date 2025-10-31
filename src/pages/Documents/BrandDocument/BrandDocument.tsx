@@ -7,18 +7,18 @@ import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
 import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
-interface Type {
+interface Brand {
   brand_id: string;
   brand_name:  string;
 }
-interface TypeDetail {
+interface BrandDetail {
   brand_id: string;
   brand_name:  string;
   create_date: string;
   remark: string;
 }
-function TypeDocument() {
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('ASC');
+function BrandDocument() {
+  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
   const [searchType, setSearchType] = useState('brand_id');
   const [filter, setFilter] = useState({
     brand_id: '',
@@ -28,9 +28,9 @@ function TypeDocument() {
   const [totalPages, setTotalPages] = useState(1);
   const [openCreate,setOpenCreate] = useState(false);
   const [openShow,setOpenShow] = useState(false);
-  const [data, setDate] = useState<Type[]>([]);
+  const [data, setDate] = useState<Brand[]>([]);
   const [type, setType] = useState(false);
-  const [detail, setDetail] = useState<TypeDetail>(
+  const [detail, setDetail] = useState<BrandDetail>(
     {
       brand_id: "",
       brand_name:  "",
@@ -177,4 +177,4 @@ function TypeDocument() {
   )   
 }
 
-export default TypeDocument;
+export default BrandDocument;
