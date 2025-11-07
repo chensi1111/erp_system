@@ -27,7 +27,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
     setErrorCode('')
     const priceNum =Number(price)
     try {
-      const response = await axios.post('/api/product/create', {product_id,specification,product_name,manufactor,brand,size,color,product_type1,product_type2,product_type3,product_type4,price:priceNum,remark});
+      const response = await axios.post('/api/product/create', {product_id,specification,product_name,manufactor,brand,size,color,product_type1,product_type2,product_type3,product_type4,recommended_price:priceNum,remark});
       if(response.data.code=='000') {
         toast.success('商品新增成功');
         onSuccess();
@@ -71,7 +71,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
         setProductType2(data.product_type2)
         setProductType3(data.product_type3)
         setProductType4(data.product_type4)
-        setPrice(data.price)
+        setPrice(data.recommended_price)
         setRemark(data.remark)
       }
     } catch (error) {

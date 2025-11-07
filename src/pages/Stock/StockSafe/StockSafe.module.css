@@ -136,16 +136,4 @@ table .icon{
 .detailBtn:hover {
   background: rgb(10, 90, 170);
 }
-.restockType {
-  color: #4caf50;
-  font-weight: bold;
-}
-.saleType {
-  color: #e53935;
-  font-weight: bold;
-}
-.cancelType {
-  color: rgb(17, 115, 212);
-  font-weight: bold;
-}
 

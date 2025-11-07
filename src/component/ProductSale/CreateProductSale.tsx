@@ -29,7 +29,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
   const [product_type2,setProductType2] = useState('')
   const [product_type3,setProductType3] = useState('')
   const [product_type4,setProductType4] = useState('')
-  const [price,setPrice] = useState('')
+  const [recommended_price,setRecommendedPrice] = useState('')
   const [last_cost,setLastCost] = useState('')
   const [average_cost,setAverageCost] = useState('')
   const create_date = dayjs().format('YYYY/MM/DD')
@@ -63,7 +63,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
     setProductType2('')
     setProductType3('')
     setProductType4('')
-    setPrice('')
+    setRecommendedPrice('')
     setLastCost('')
     setAverageCost('')
     setSizeList([]);
@@ -94,7 +94,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
         setProductType2(info.product_type2)
         setProductType3(info.product_type3)
         setProductType4(info.product_type4)
-        setPrice(info.price)
+        setRecommendedPrice(info.recommended_price)
         setLastCost(info.last_cost)
         setAverageCost(info.average_cost)
         setRawSizeList(info.size_list)
@@ -121,7 +121,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
       specification,
       product_name,
       quantities,
-      price,
+      price:recommended_price,
       remark,
       total_quantity,
       size_list:rawSizeList
@@ -286,21 +286,21 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>售價</div>
-              <input type="text" className={classNames(style.input,!specification && style.disable)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
+              <input type="text" className={classNames(style.input,!specification && style.disable)} value={recommended_price} onChange={(e)=>setRecommendedPrice(e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最近進價</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={last_cost} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+last_cost} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>平均進價</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={average_cost} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+average_cost} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={Number(price)*total_quantity} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={Number(recommended_price)*total_quantity} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

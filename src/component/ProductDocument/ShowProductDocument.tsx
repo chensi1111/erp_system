@@ -19,7 +19,7 @@ interface ProductDetail {
   product_type2:string;
   product_type3:string;
   product_type4:string;
-  price:number;
+  recommended_price:number;
   last_cost:number;
   average_cost:number;
   remark: string;
@@ -230,15 +230,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建議售價</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.price} onChange={(e)=>handleChange('price',e.target.value)}/>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={isEditing ? formData.recommended_price: "$ "+formData.recommended_price} onChange={(e)=>handleChange('recommended_price',e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最新進價</div>
-              <input type="text" className={style.input} value={formData.last_cost||''} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+formData.last_cost||''} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>平均進價</div>
-              <input type="text" className={style.input} value={formData.average_cost||''} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+formData.average_cost||''} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

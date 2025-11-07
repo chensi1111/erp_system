@@ -1,38 +1,52 @@
-import style from "./ProductDocument.module.css";
-import { FaPlus } from "react-icons/fa6";
-import CreateProductDocument from "../../../component/ProductDocument/CreateProductDocument";
-import ShowProductDocument from "../../../component/ProductDocument/ShowProductDocument";
+import style from "./SaleCalculate.module.css";
+import ShowSaleCalculate from "../../../component/SaleCalculate/ShowSaleCalculate";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  TextField,
+} from "@mui/material";
 import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import {getProductInfoRelation} from "../../../store/productInfoRelationSlice"
-interface Product {
+interface Report {
   product_id: string;
-  product_name:  string;
-  specification:string
+  product_name: string;
+  specification:string;
+  total_quantity:string;
+  total_sales:string;
+  total_profit:string;
 }
-interface ProductDetail {
-  product_id: string;
-  product_name:  string;
-  specification: string;
-  create_date: string;
-  manufactor:string;
-  brand:string;
+interface ReportDetail {
+  product_id: string,
+  product_name: string,
+  specification: string,
+  manufactor:string,
+  brand:string,
+  size:string,
+  color:string,
+  product_type1:string,
+  product_type2:string,
+  product_type3:string,
+  product_type4:string,
+  total_quantity:string,
+  total_sales:string,
+  total_profit:string,
+  total_cost:string,
+  sizes:Sizes[],
+  size_list:string
+}
+interface Sizes {
   size:string;
-  color:string;
-  product_type1:string;
-  product_type2:string;
-  product_type3:string;
-  product_type4:string;
-  price:number;
-  remark: string;
-  last_cost:number;
-  average_cost:number;
+  total_quantity:string
 }
-function ProductDocument() {
+function SaleCalculate() {
   const dispatch = useDispatch()
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
   const [searchType, setSearchType] = useState('product_id');
@@ -43,17 +57,21 @@ function ProductDocument() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [openCreate,setOpenCreate] = useState(false);
-  const [specification,setSpecification] = useState('')
+  const [totalSale, setTotalSale] = useState('')
+  const [totalQuantity, setTotalQuantity] = useState('')
+  const [totalProfit, setTotalProfit] = useState('')
   const [openShow,setOpenShow] = useState(false);
-  const [data, setDate] = useState<Product[]>([]);
-  const [type, setType] = useState(false);
-  const [detail, setDetail] = useState<ProductDetail>(
+  const [data, setData] = useState<Report[]>([]);
+  const [rangeType, setRangeType] = useState("today"); // today | 7days | month | custom
+  const [customRange, setCustomRange] = useState({
+    start: "",
+    end: "",
+  });
+  const [detail, setDetail] = useState<ReportDetail>(
     {
       product_id: "",
       product_name:  "",
       specification: "",
-      create_date: "",
       manufactor:"",
       brand:"",
       size:"",
@@ -62,33 +80,33 @@ function ProductDocument() {
       product_type2:"",
       product_type3:"",
       product_type4:"",
-      price:0,
-      last_cost:0,
-      average_cost:0,
-      remark: "",
+      total_quantity:"",
+      total_sales:"",
+      total_profit:"",
+      total_cost:"",
+      sizes:[],
+      size_list:""
     }
   );
-  const handleCreateOpen = (specification:string) =>{
-    setSpecification(specification)
-    setOpenCreate(true)
-  }
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
-      const res = await axios.post('/api/product/list',{page,pageSize:10,filter,sort});
-      setDate(res.data.data.list);
+      const res = await axios.post('/api/report/list',{page,pageSize:10,filter,sort,rangeType,customRange});
+      setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
+      setTotalSale(res.data.data.summary.total_sales_amount);
+      setTotalProfit(res.data.data.summary.total_profit);
+      setTotalQuantity(res.data.data.summary.total_sales_volume);
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (specification:string,type:boolean) => {
-    setType(type)
+  const getDetail = async (specification:string) => {
     try {
-      const res = await axios.post('/api/product/detail',{specification});
+      const res = await axios.post('/api/report/detail',{specification,rangeType,customRange});
       if(res.data.code==='000'){
-        setDetail(res.data.data);
+        setDetail(res.data.data.list);
         setOpenShow(true);
       }
     } catch (error) {
@@ -96,22 +114,6 @@ function ProductDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleDelete = async (specification:string) => {
-    try {
-      const res = await axios.post('/api/product/delete',{specification});
-      if(res.data.code==='000'){
-        toast.success('刪除成功');
-        const updateData = data.filter(item => item.specification !== specification);
-        if(updateData.length ===0 && page>1){
-          setPage(page-1);
-        }
-        getList();
-      }
-    } catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-    }
-  }
   const handleSetFilter = (value:string) => {
     if(searchType==='product_id'){
       setFilter({
@@ -156,25 +158,21 @@ function ProductDocument() {
   }, [filter]);
 
   useEffect(() => {
+    setData([])
+    if(rangeType==='custom' && (!customRange.start || !customRange.end)){
+      return
+    }
    getList();
-  }, [page,sort]);
+  }, [page,sort,rangeType,customRange]);
   useEffect(() => {
     createProductInfos()
   },[])
   return (
     <div className={style.container}>
-      {openCreate && <CreateProductDocument
-      Specification={specification} 
-      onClose={() => setOpenCreate(false)} 
-      onSuccess={() => {
-        setOpenCreate(false);
-        getList(); 
-      }}/>}
-      {openShow && <ShowProductDocument 
-      onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
+      {openShow && <ShowSaleCalculate 
+      onClose={() => setOpenShow(false)} detail={detail} rangeType={rangeType} customRange={customRange} />}
       <div className={style.topContainer}>
-        <div className={style.title}>商品基本資料</div>
-        <div className={style.button} onClick={()=>handleCreateOpen('')}><FaPlus/>新增商品</div>
+        <div className={style.title}>商品銷售總表</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
@@ -186,6 +184,63 @@ function ProductDocument() {
         {searchType==='specification' && <input type="text" placeholder="搜尋關鍵字" value={filter.specification} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
         {searchType==='product_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
+      <div className={style.dateContainer}>
+          <Box display="flex" alignItems="center" gap={2}>
+      <FormControl size="small">
+        <InputLabel>日期範圍</InputLabel>
+        <Select
+          value={rangeType}
+          label="日期範圍"
+          onChange={(e) => setRangeType(e.target.value)}
+          sx={{ minWidth: 150,backgroundColor:"white" }}
+        >
+          <MenuItem value="today">今日</MenuItem>
+          <MenuItem value="thisWeek">本周</MenuItem>
+          <MenuItem value="thisMonth">本月</MenuItem>
+          <MenuItem value="custom">自訂範圍</MenuItem>
+        </Select>
+      </FormControl>
+
+      {rangeType === "custom" && (
+        <>
+          <TextField
+            size="small"
+            type="date"
+            value={customRange.start}
+            sx={{ backgroundColor:"white" }}
+            onChange={(e) => {
+              const newStart = e.target.value;
+              // 如果 end 比新的 start 早，就重置 end
+              setCustomRange((prev) => ({
+                start: newStart,
+                end: prev.end && prev.end <= newStart ? "" : prev.end,
+              }));
+            }}
+          />
+          <TextField
+            size="small"
+            type="date"
+            value={customRange.end}
+            sx={{ backgroundColor:"white" }}
+            onChange={(e) =>
+              setCustomRange({ ...customRange, end: e.target.value })
+            }
+            slotProps={{
+             htmlInput: {
+                 min: customRange.start ? new Date(new Date(customRange.start).getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+                 : undefined,
+              },
+           }}
+          />
+        </>
+      )}
+        </Box>
+        <div className={style.infoContainer}>
+          <div className={style.infoItem}><span>總銷量:</span>{totalQuantity}</div>
+          <div className={style.infoItem}><span>總銷售額:</span>$ {totalSale}</div>
+          <div className={style.infoItem}><span>毛利:</span>$ {totalProfit}</div>
+        </div>
+    </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
@@ -200,6 +255,9 @@ function ProductDocument() {
               </th>
               <th>商品規格</th>
               <th>商品名稱</th>
+              <th>總銷量</th>
+              <th>總銷售額</th>
+              <th>毛利</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -209,24 +267,18 @@ function ProductDocument() {
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
                 <td>{m.product_name}</td>
+                <td>{m.total_quantity}</td>
+                <td>$ {m.total_sales}</td>
+                <td>$ {m.total_profit}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.specification,false)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.specification)}>
                     詳細
-                  </button>
-                  <button className={style.editBtn} onClick={() => getDetail(m.specification,true)}>
-                    編輯
-                  </button>
-                  <button className={style.addBtn} onClick={() => handleCreateOpen(m.specification)}>
-                    增加規格
-                  </button>
-                  <button className={style.deleteBtn} onClick={()=>handleDelete(m.specification)}>
-                    刪除
                   </button>
                 </td>
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={3} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>
@@ -236,4 +288,4 @@ function ProductDocument() {
   )   
 }
 
-export default ProductDocument;
+export default SaleCalculate;

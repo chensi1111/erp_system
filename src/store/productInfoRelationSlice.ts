@@ -1,6 +1,4 @@
 import { createSlice} from "@reduxjs/toolkit";
-import type {PayloadAction} from "@reduxjs/toolkit";
-
 interface Manufactor {
   manufactor_id: string;
   manufactor_name: string;
@@ -46,16 +44,7 @@ const productInfoRelationSlice = createSlice({
   name: "productInfoRelation",
   initialState,
   reducers: {
-    getProductInfoRelation(
-      state,
-      action: PayloadAction<{
-        manufactorList: Manufactor[];
-        brandList: Brand[];
-        sizeList: Size[];
-        colorList: Color[];
-        typeList: Type[];
-      }>
-    ) {
+    getProductInfoRelation(state,action) {
       const { manufactorList, brandList, sizeList, colorList, typeList } = action.payload;
       state.manufactorList = manufactorList;
       state.brandList = brandList;

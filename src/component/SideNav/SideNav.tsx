@@ -11,10 +11,15 @@ import ListItemText from "@mui/material/ListItemText";
 import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate,useLocation } from "react-router-dom";
+import { useDispatch,useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import { getSafeStockCount } from "../../store/safeStcokSlice";
 import classNames from "classnames";
+import axios from '../../api/axios'
 function SideNav() {
+  const dispatch = useDispatch()
   const navigate = useNavigate();
   const location = useLocation();
   const currnetPath = location.pathname;
@@ -22,6 +27,7 @@ function SideNav() {
   const [nav2Open, setNav2Open] = useState(false);
   const [nav3Open, setNav3Open] = useState(false);
   const [nav4Open, setNav4Open] = useState(false);
+  const safeStock = useSelector((state: RootState) => state.safeStock);
   const handleClick = (nav:number) => {
     switch (nav) {
       case 1:
@@ -40,6 +46,17 @@ function SideNav() {
         break;
     }
   };
+  const getCount = async () => {
+    try {
+      const res = await axios.post('/api/stock/safe_count');
+      dispatch(getSafeStockCount(res.data.data.total));
+    } catch (error) {
+      console.log(error)
+  };
+}
+  useEffect(()=>{
+    getCount()
+  },[])
   return (
     <div className={style.container}>
       <div className={style.logoContainer}>
@@ -148,15 +165,16 @@ function SideNav() {
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/stock/stockHistory')} className={classNames(currnetPath==='/stock/stockHistory' && style.activeNav)}>
               <ListItemText primary="庫存記錄" />
             </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
-              <ListItemText primary="庫存分類查詢" />
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/stock/stockSafe')} className={classNames(currnetPath==='/stock/stockSafe' && style.activeNav)}>
+              <ListItemText primary="安全庫存" />
+              {safeStock.lowSafeStockCount > 0 && <span className={style.stockCount}>{safeStock.lowSafeStockCount}</span>}
             </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
+            {/* <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="庫存季別查詢" />
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="庫存調整作業" />
-            </ListItemButton>
+            </ListItemButton> */}
           </List>
         </Collapse>
         <ListItemButton  onClick={() => handleClick(4)}>
@@ -176,10 +194,13 @@ function SideNav() {
         </ListItemButton>
         <Collapse in={nav4Open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }}>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/saleCalculate')} className={classNames(currnetPath==='/report/saleCalculate' && style.activeNav)}>
               <ListItemText primary="商品銷售總表" />
             </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/saleRanking')} className={classNames(currnetPath==='/report/saleRanking' && style.activeNav)}>
+              <ListItemText primary="商品銷售排行" />
+            </ListItemButton>
+            {/* <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="商品銷售明細" />
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }}>
@@ -187,7 +208,7 @@ function SideNav() {
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="暢滯銷排行榜" />
-            </ListItemButton>
+            </ListItemButton> */}
           </List>
         </Collapse>
       </List>

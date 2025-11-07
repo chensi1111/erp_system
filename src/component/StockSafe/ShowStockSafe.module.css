@@ -30,7 +30,6 @@
     margin-bottom: 20px;
     text-align: center;
 }
-
 .singleInput {
     display: flex;
     align-items: center;
@@ -48,9 +47,21 @@
     width: 70px;
     white-space: nowrap;
 }
-
-.input,textarea {
-    border: 1px solid gray;
+.textarea {
+    flex: 1;
+    min-width: 0;
+    height: 80px;
+    padding: 3px 5px;
+    box-sizing: border-box;
+    resize: none;
+}
+.input,.textarea,.sizeInput {
+    border: none !important;
+    pointer-events: none;
+}
+.input.edit,.textarea.edit,.sizeInput.edit {
+    border: 1px solid gray !important;
+    pointer-events: initial;
 }
 .singleInput .input {
     flex: 1;
@@ -86,14 +97,7 @@
     padding: 3px 5px;
     box-sizing: border-box;
 }
-textarea {
-    flex: 1;
-    min-width: 0;
-    height: 80px;
-    padding: 3px 5px;
-    box-sizing: border-box;
-    resize: none;
-}
+
 .buttons{
     display: flex;
     justify-content: flex-end;
@@ -121,7 +125,18 @@ textarea {
 .button.cancel:hover {
     background-color: #c62828;
 }
-.input.disable {
-    border: none !important;
-    pointer-events: none;
+.inputContainerGroup{
+    display: flex;
+    width: calc(50% - 10px);
+    justify-content: space-between;
+    gap: 20px;
+}
+.stocks{
+    flex-wrap: wrap;
+}
+.subTitle{
+    margin-bottom: 15px;
+}
+.safeStock{
+    border: 2px solid red !important;
 }

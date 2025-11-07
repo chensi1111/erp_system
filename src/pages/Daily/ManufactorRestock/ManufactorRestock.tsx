@@ -10,6 +10,7 @@ import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
 import { Switch, FormControlLabel } from '@mui/material';
 import { useDispatch } from "react-redux";
 import { getProductInfoRelation } from "../../../store/productInfoRelationSlice";
+import { getSafeStockCount } from "../../../store/safeStcokSlice";
 interface Restock {
   restock_id: string;
   transaction:  string;
@@ -21,20 +22,20 @@ interface RestockDetail {
   product_id:string,
   specification:string,
   product_name:string,
-  manufactor_id:string,
-  brand_id:string,
-  size_id:string,
-  color_id:string,
+  manufactor:string,
+  brand:string,
+  size:string,
+  color:string,
   size_list:string,
   quantities:[{
     size:string,
     quantity:string
   }],
   price:string,
-  type1_id:string,
-  type2_id:string,
-  type3_id:string,
-  type4_id:string,
+  product_type1:string,
+  product_type2:string,
+  product_type3:string,
+  product_type4:string,
   remark: string,
 }
 function ManufactorRestock() {
@@ -51,7 +52,6 @@ function ManufactorRestock() {
   const [openCreate,setOpenCreate] = useState(false);
   const [openShow,setOpenShow] = useState(false);
   const [data, setDate] = useState<Restock[]>([]);
-  const [type, setType] = useState(false);
   const [detail, setDetail] = useState<RestockDetail>(
     {
       transaction:"",
@@ -60,20 +60,20 @@ function ManufactorRestock() {
       product_id:"",
       specification:"",
       product_name:"",
-      manufactor_id:"",
-      brand_id:"",
-      size_id:"",
-      color_id:"",
+      manufactor:"",
+      brand:"",
+      size:"",
+      color:"",
       size_list:"",
       quantities:[{
         size:"",
         quantity:""
       }],
       price:"",
-      type1_id:"",
-      type2_id:"",
-      type3_id:"",
-      type4_id:"",
+      product_type1:"",
+      product_type2:"",
+      product_type3:"",
+      product_type4:"",
       remark: "",
     }
   );
@@ -83,13 +83,14 @@ function ManufactorRestock() {
       const res = await axios.post('/api/restock/list',{page,pageSize:10,filter,sort,isToday});
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
+      const countRes = await axios.post('/api/stock/safe_count');
+      dispatch(getSafeStockCount(countRes.data.data.total));
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (restock_id:string,type:boolean) => {
-    setType(type)
+  const getDetail = async (restock_id:string) => {
     try {
       const res = await axios.post('/api/restock/detail',{restock_id});
       if(res.data.code==='000'){
@@ -105,7 +106,7 @@ function ManufactorRestock() {
     try {
       const res = await axios.post('/api/restock/delete',{restock_id});
       if(res.data.code==='000'){
-        toast.success('刪除成功');
+        toast.success('作廢成功');
         const updateData = data.filter(item => item.restock_id !== restock_id);
         if(updateData.length ===0 && page>1){
           setPage(page-1);
@@ -167,7 +168,7 @@ function ManufactorRestock() {
         getList(); 
       }}/>}
       {openShow && <ShowManufactorRestock 
-      onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
+      onClose={() => setOpenShow(false)} detail={detail} />}
       <div className={style.topContainer}>
         <div className={style.title}>廠商進貨</div>
         <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>開始進貨</div>
@@ -211,14 +212,11 @@ function ManufactorRestock() {
                 <td>{m.restock_id}</td>
                 <td>{m.transaction}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.restock_id,false)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.restock_id)}>
                     詳細
                   </button>
-                  <button className={style.editBtn} onClick={() => getDetail(m.restock_id,true)}>
-                    編輯
-                  </button>
                   <button className={style.deleteBtn} onClick={()=>handleDelete(m.restock_id)}>
-                    刪除
+                    作廢
                   </button>
                 </td>
               </tr>

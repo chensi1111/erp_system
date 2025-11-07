@@ -28,3 +28,14 @@
 .activeNav{
     background-color: rgb(231,241,251) !important;
 }   
+.stockCount{
+    background-color: rgb(200, 0, 0);
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+}

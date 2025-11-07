@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import ManufactorDocument from "./pages/Documents/ManufactorDocument/ManufactorDocument";
-import ProductDocument from "./pages/Documents/ProdductDocument/ProductDocument";
+import ProductDocument from "./pages/Documents/ProductDocument/ProductDocument";
 import BrandDocument from "./pages/Documents/BrandDocument/BrandDocument";
 import SizeDocument from "./pages/Documents/SizeDocument/SizeDocument";
 import TypeDocument from "./pages/Documents/TypeDocument/TypeDocument";
@@ -13,6 +13,9 @@ import ColorDocument from "./pages/Documents/ColorDocument/ColorDocument";
 import StockSearch from "./pages/Stock/StockSearch/StockSearch";
 import ProductSale from "./pages/Daily/ProductSale/ProductSale";
 import StockHistory from "./pages/Stock/StockHistory/StockHistory";
+import StockSafe from "./pages/Stock/StockSafe/StockSafe";
+import SaleCalculate from "./pages/Report/SaleCalculate/SaleCalculate";
+import SaleRanking from "./pages/Report/SaleRanking/SaleRanking";
 function App() {
   return (
     <BrowserRouter>
@@ -60,6 +63,18 @@ function App() {
           <Route
             path="/stock/stockHistory"
             element={<StockHistory />}
+          />
+          <Route
+            path="/stock/stockSafe"
+            element={<StockSafe />}
+          />
+          <Route
+            path="/report/saleCalculate"
+            element={<SaleCalculate />}
+          />
+          <Route
+            path="/report/saleRanking"
+            element={<SaleRanking />}
           />
         </Routes>
       </div>

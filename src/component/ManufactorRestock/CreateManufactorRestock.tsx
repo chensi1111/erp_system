@@ -225,11 +225,11 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" value={getProductFormat('size',manufactor_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('size',size_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" value={getProductFormat('color',manufactor_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('color',color_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>

@@ -33,7 +33,7 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
     if(Number(value)==0){
       return ''
     }
-    if(type==='銷貨'){
+    if(type==='銷貨'|| type ==='進貨作廢'){
       return `- ${value}`
     }else {
       return `+ ${value}`

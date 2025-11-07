@@ -1,9 +1,6 @@
 import style from "./ShowManufactorRestock.module.css";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import { useState } from "react";
-import axios from "../../api/axios";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 interface RestockDetail {
@@ -13,40 +10,36 @@ interface RestockDetail {
   product_id:string,
   specification:string,
   product_name:string,
-  manufactor_id:string,
-  brand_id:string,
-  size_id:string,
-  color_id:string,
+  manufactor:string,
+  brand:string,
+  size:string,
+  color:string,
   size_list:string,
   quantities:[{
     size:string,
     quantity:string
   }],
   price:string,
-  type1_id:string,
-  type2_id:string,
-  type3_id:string,
-  type4_id:string,
+  product_type1:string,
+  product_type2:string,
+  product_type3:string,
+  product_type4:string,
   remark: string,
 }
 interface ShowManufactorRestockProps {
   onClose: () => void;
-  onSuccess: () => void;
   detail: RestockDetail;
-  type: boolean;
 }
 const formattedDate = (dateString: string) => {
   return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 
-const ShowManufactorRestock=({ onClose,onSuccess, detail,type }: ShowManufactorRestockProps)=> {
+const ShowManufactorRestock=({ onClose, detail }: ShowManufactorRestockProps)=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
-  const [isEditing, setIsEditing] = useState(type);
-  const [formData, setFormData] = useState<RestockDetail>(detail);
   const title=detail.restock_id;
   const list =detail.size_list.split(',').slice(0, 10)
-  const totalQuantity = formData.quantities.reduce((sum, item) => {
+  const totalQuantity = detail.quantities.reduce((sum, item) => {
     const qty = parseInt(item.quantity);
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
@@ -66,27 +59,6 @@ const ShowManufactorRestock=({ onClose,onSuccess, detail,type }: ShowManufactorR
       return '';
   }
 };
-  const handleChange = (key: keyof RestockDetail, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
-  const handleSave = async () => {
-    try {
-      const response = await axios.post('/api/restock/update', {
-        restock_id:formData.restock_id,
-        transaction:formData.transaction,
-        price:formData.price,
-        quantities:JSON.stringify(formData.quantities),
-        remark:formData.remark
-      });
-      if(response.data.code=='000') {
-        onSuccess()
-        toast.success('更新成功');
-      } 
-    }catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-    }
-  }
 
   return (
     <div className={style.wrapper}>
@@ -96,74 +68,74 @@ const ShowManufactorRestock=({ onClose,onSuccess, detail,type }: ShowManufactorR
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>進貨單號</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formData.restock_id}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.restock_id}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-                <select className={classNames(style.select,isEditing && style.edit,!isEditing && style.hideSelect)} value={formData.transaction}  onChange={(e) => handleChange("transaction", e.target.value)}>  
+                <select className={classNames(style.select,style.hideSelect)} value={detail.transaction} tabIndex={-1}>  
                   <option value="買斷">買斷</option>
                   <option value="寄賣">寄賣</option>
                 </select>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>進貨日期</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(formData.create_date)}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.create_date)}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品型號</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formData.product_id}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.product_id}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品規格</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formData.specification}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.specification}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品名稱</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formData.product_name}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.product_name}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商</div>
-              <input type="text" value={getProductFormat('manufactor',formData.manufactor_id)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('manufactor',detail.manufactor)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>品牌</div>
-              <input type="text" value={getProductFormat('brand',formData.brand_id)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('brand',detail.brand)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" value={getProductFormat('size',formData.size_id)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('size',detail.size)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" value={getProductFormat('color',formData.color_id)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('color',detail.color)} className={style.input} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別1</div>
-              <input type="text" value={getProductFormat('type',formData.type1_id)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type1)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別2</div>
-              <input type="text" value={getProductFormat('type',formData.type2_id)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type2)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別3</div>
-              <input type="text" value={getProductFormat('type',formData.type3_id)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type3)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別4</div>
-              <input type="text" value={getProductFormat('type',formData.type4_id)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type4)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -184,14 +156,9 @@ const ShowManufactorRestock=({ onClose,onSuccess, detail,type }: ShowManufactorR
                      {Array.from({ length: 10 }).map((_, index) => (
                       <td key={index} className={classNames(!list[index] && style.hideInput)}>
                         <input type="text"
-                          className={classNames(style.input,isEditing && style.edit)} 
-                          value={formData.quantities[index].quantity}
-                          onChange={(e) => {
-                            const newQuantities = [...formData.quantities];
-                            newQuantities[index].quantity = e.target.value;
-                            handleChange("quantities", newQuantities)
-                          }}
-                          maxLength={3}
+                          className={classNames(style.input)} 
+                          value={detail.quantities[index].quantity}
+                          readOnly tabIndex={-1}
                         />
                       </td>
                     ))}
@@ -203,27 +170,22 @@ const ShowManufactorRestock=({ onClose,onSuccess, detail,type }: ShowManufactorR
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>進價</div>
-              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={formData.price} onChange={(e) => handleChange("price", e.target.value)}/>
+              <input type="text" className={classNames(style.input)} value={"$ "+detail.price} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
-              <input type="text" className={style.input} value={Number(formData.price)*totalQuantity} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+Number(detail.price)*totalQuantity} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>備註</div>
-              <textarea value={formData.remark} onChange={(e) => handleChange("remark", e.target.value)} className={classNames(style.textarea,isEditing && style.edit)} maxLength={100}></textarea>
+              <textarea value={detail.remark} className={classNames(style.textarea)} readOnly tabIndex={-1}></textarea>
             </div>
           </div>
-          {!isEditing && <div className={style.buttons}>
+          <div className={style.buttons}>
             <div className={classNames(style.button,style.cancel)} onClick={()=>onClose()}>關閉</div>
-            <div className={style.button} onClick={() => setIsEditing(true)}>編輯</div>
-          </div>}
-          {isEditing && <div className={style.buttons}>
-            <div className={classNames(style.button,style.cancel)} onClick={()=>setIsEditing(false)}>取消</div>
-            <div className={style.button} onClick={() => handleSave()}>完成</div>
-          </div>}
+          </div>
         </div>
       </div>
     </div>
