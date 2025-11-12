@@ -4,7 +4,9 @@ import classNames from "classnames";
 import { useState } from "react";
 interface Stock_qty {
     size:string,
-    quantity:string,
+    all_quantity:string,
+    available_quantity:string,
+    reserved_quantity:string,
     safe_stock:string
 } 
 interface StockDetail {
@@ -80,16 +82,37 @@ const ShowStockSafe=({ onClose, detail }: ShowStockSafeProps)=> {
           <div className={classNames(style.multipleInput,style.stocks)}>
             {formData.stock_qty.filter(item => item.size && item.size.trim() !== "").map((item) => (
                 <div key={item.size} className={style.inputContainerGroup}>
+                <div className={style.inputTitle}>{item.size}</div>
                 <div className={style.inputContainer}>
-                    <div className={style.inputTitle}>{item.size}</div>
+                  <div className={style.inputTitle}>總庫存</div>
+                      <input
+                          type="text"
+                          className={style.input}
+                          value={item.all_quantity}
+                          readOnly
+                          tabIndex={-1}
+                      />
+                </div>
+                 <div className={style.inputContainer}>
+                    <div className={style.inputTitle}>可售</div>
                         <input
                             type="text"
-                            className={classNames(style.input,!checkStockSafe(item.quantity,item.safe_stock) && style.safeStock)}
-                            value={item.quantity}
+                            className={classNames(style.input,!checkStockSafe(item.available_quantity,item.safe_stock) && style.safeStock)}
+                            value={item.available_quantity}
                             readOnly
                             tabIndex={-1}
-                            />
-                        </div>
+                        />
+                    </div>
+                     <div className={style.inputContainer}>
+                    <div className={style.inputTitle}>預留</div>
+                        <input
+                            type="text"
+                            className={style.input}
+                            value={item.reserved_quantity}
+                            readOnly
+                            tabIndex={-1}
+                        />
+                    </div>
                     <div className={style.inputContainer}>
                     <div className={style.inputTitle}>安全庫存</div>
                         <input

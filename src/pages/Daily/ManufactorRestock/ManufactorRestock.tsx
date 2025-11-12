@@ -4,6 +4,7 @@ import CreateManufactorRestock from "../../../component/ManufactorRestock/Create
 import ShowManufactorRestock from "../../../component/ManufactorRestock/ShowManufactorRestock";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
+import dayjs from "dayjs";
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
 import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
@@ -14,6 +15,7 @@ import { getSafeStockCount } from "../../../store/safeStcokSlice";
 interface Restock {
   restock_id: string;
   transaction:  string;
+  create_date:string
 }
 interface RestockDetail {
   transaction:string,
@@ -29,7 +31,7 @@ interface RestockDetail {
   size_list:string,
   quantities:[{
     size:string,
-    quantity:string
+    available_quantity:string
   }],
   price:string,
   product_type1:string,
@@ -67,7 +69,7 @@ function ManufactorRestock() {
       size_list:"",
       quantities:[{
         size:"",
-        quantity:""
+        available_quantity:""
       }],
       price:"",
       product_type1:"",
@@ -106,7 +108,7 @@ function ManufactorRestock() {
     try {
       const res = await axios.post('/api/restock/delete',{restock_id});
       if(res.data.code==='000'){
-        toast.success('作廢成功');
+        toast.success('取消成功');
         const updateData = data.filter(item => item.restock_id !== restock_id);
         if(updateData.length ===0 && page>1){
           setPage(page-1);
@@ -140,6 +142,9 @@ function ManufactorRestock() {
     if(response.data.code=='000') {
       dispatch(getProductInfoRelation(response.data.data))
     }
+  }
+  const formattedDate = (dateString: string) => {
+    return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
   }
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -203,6 +208,7 @@ function ManufactorRestock() {
                 )}
               </th>
               <th>交易類型</th>
+              <th>時間</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -211,18 +217,19 @@ function ManufactorRestock() {
               <tr key={m.restock_id}>
                 <td>{m.restock_id}</td>
                 <td>{m.transaction}</td>
+                <td>{formattedDate(m.create_date)}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.restock_id)}>
                     詳細
                   </button>
                   <button className={style.deleteBtn} onClick={()=>handleDelete(m.restock_id)}>
-                    作廢
+                    取消
                   </button>
                 </td>
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={3} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={4} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>

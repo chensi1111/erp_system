@@ -103,10 +103,9 @@ function StockHistory() {
     setFilter({ change_number: '', product_name: '',change_type:"" });
   }
   const formattedQuantity = (type:string,value:number|string) => {
-    if(Number(value)==0){
-      return value
-    }
-    if(type==='銷貨'|| type ==='進貨作廢'){
+    if(type==='訂貨'||type==='訂貨取消'){
+      return ''
+    }else if(type==='銷貨'|| type ==='進貨取消'){
       return `- ${value}`
     }else {
       return `+ ${value}`
@@ -164,11 +163,11 @@ function StockHistory() {
             </tr>
           </thead>
           <tbody>
-            {data.map((m) => (
-              <tr key={m.change_number}>
+            {data.map((m,index) => (
+              <tr key={index}>
                 <td>{m.change_number}</td>
                 <td>{m.product_name}</td>
-                <td className={classNames(m.change_type==='進貨' && style.restockType,m.change_type==='銷貨' && style.saleType,(m.change_type==='銷貨作廢'||m.change_type==='進貨作廢') && style.cancelType)}>{m.change_type}</td>
+                <td className={classNames(m.change_type==='進貨' && style.restockType,m.change_type==='銷貨' && style.saleType,m.change_type==='訂貨' && style.orderType,(m.change_type==='銷貨取消'||m.change_type==='進貨取消'||m.change_type==='訂貨取消') && style.cancelType)}>{m.change_type}</td>
                 <td>{formattedQuantity(m.change_type,m.total_quantity)}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.change_number)}>

@@ -1,11 +1,12 @@
-import style from "./ShowProductSale.module.css";
+import style from "./ShowProductOrder.module.css";
 import dayjs from "dayjs";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-interface SaleDetail {
-  transaction:string,
-  sale_id:string,
+import axios from "../../api/axios"
+import { toast } from "react-toastify";
+interface OrderDetail {
+  order_id:string,
   create_date:string,
   product_id:string,
   specification:string,
@@ -19,26 +20,26 @@ interface SaleDetail {
     size:string,
     quantity:string
   }],
-  total_quantity:number,
-  price:number,
-  handing_fee:number,
-  average_cost:number,
+  price:string,
+  prepaid_price:string,
+  remaining_price:string,
   product_type1:string,
   product_type2:string,
   product_type3:string,
   product_type4:string,
   remark: string,
 }
-interface ShowProductSaleProps {
+interface ShowProductOrderProps {
   onClose: () => void;
-  detail: SaleDetail;
+  detail: OrderDetail;
+  onSuccess: () => void;
 }
 const formattedDate = (dateString: string) => {
   return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
-const ShowProductSale=({ onClose, detail }: ShowProductSaleProps)=> {
+const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
-  const title=detail.sale_id;
+  const title=detail.order_id;
   const list =detail.size_list.split(',').slice(0, 10)
   const totalQuantity = detail.quantities.reduce((sum, item) => {
     const qty = parseInt(item.quantity);
@@ -60,9 +61,19 @@ const ShowProductSale=({ onClose, detail }: ShowProductSaleProps)=> {
       return '';
   }
 };
-const calculateProfit =()=>{
-    return ((Number(detail.price) - Number(detail.average_cost))*Number(detail.total_quantity)) - Number(detail.handing_fee)
+  const handleComplete = async() =>{
+    try {
+      const response = await axios.post('/api/order/complete', {order_id:detail.order_id});
+      if(response.data.code=='000') {
+        onSuccess()
+        toast.success('取貨成功');
+      } 
+    }catch (error) {
+      const err = error as any;
+      toast.error(err.response?.data?.msg || "伺服器錯誤");
+    }
   }
+
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
@@ -70,20 +81,17 @@ const calculateProfit =()=>{
         <div className={style.allInputs}>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>銷貨單號</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.sale_id}/>
+              <div className={style.inputTitle}>訂貨單號</div>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.order_id}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-                <select className={classNames(style.select,style.hideSelect)} value={detail.transaction} tabIndex={-1}>  
-                  <option value="現場">現場</option>
-                  <option value="網路">網路</option>
-                </select>
+               <input type="text" className={style.input} readOnly tabIndex={-1} value={'訂貨'}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>銷貨時間</div>
+              <div className={style.inputTitle}>訂貨時間</div>
               <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.create_date)}/>
             </div>
           </div>
@@ -173,27 +181,21 @@ const calculateProfit =()=>{
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>售價</div>
-              <input type="text" className={style.input} value={"$ "+detail.price} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input)} value={"$ "+detail.price} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
               <input type="text" className={style.input} value={"$ "+Number(detail.price)*totalQuantity} readOnly tabIndex={-1}/>
             </div>
           </div>
-          {detail.transaction ==='網路' && <div className={style.singleInput}>
-            <div className={style.inputContainer}>
-              <div className={style.inputTitle}>手續費</div>
-              <input type="text" className={style.input} value={"$ "+detail.handing_fee} readOnly tabIndex={-1}/>
-            </div>
-          </div>}
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>平均成本</div>
-              <input type="text" className={style.input} value={"$ "+detail.average_cost} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>預付訂金</div>
+              <input type="text" className={style.input} value={"$ "+detail.prepaid_price} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>預計獲利</div>
-              <input type="text" className={style.input} value={"$ "+calculateProfit()} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>剩餘金額</div>
+              <input type="text" className={style.input} value={"$ "+detail.remaining_price} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -203,6 +205,7 @@ const calculateProfit =()=>{
             </div>
           </div>
           <div className={style.buttons}>
+            <div className={classNames(style.button)} onClick={()=>handleComplete()}>取貨</div>
             <div className={classNames(style.button,style.cancel)} onClick={()=>onClose()}>關閉</div>
           </div>
         </div>
@@ -211,4 +214,4 @@ const calculateProfit =()=>{
   );
 }
 
-export default ShowProductSale;
+export default ShowProductOrder;

@@ -43,7 +43,7 @@
     width: 100%;
 }
 
-.singleInput .inputTitle {
+.inputTitle {
     width: 70px;
     white-space: nowrap;
 }
@@ -85,11 +85,6 @@
     min-width: 0;
 }
 
-.multipleInput .inputTitle {
-    width: 70px;
-    white-space: nowrap;
-}
-
 .multipleInput .input {
     flex: 1;
     min-width: 0;
@@ -127,8 +122,8 @@
 }
 .inputContainerGroup{
     display: flex;
-    width: calc(33% - 10px);
     justify-content: space-between;
+    width: calc(50% - 10px);
     gap: 20px;
 }
 .stocks{
@@ -136,4 +131,13 @@
 }
 .subTitle{
     margin-bottom: 15px;
+}
+.multipleInput.stocks .inputTitle{
+    min-width:50px ;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+}
+.stocks .input{
+    width: 100px;
 }

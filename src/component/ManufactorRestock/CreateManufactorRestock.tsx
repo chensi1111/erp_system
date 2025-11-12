@@ -22,8 +22,8 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
   const [sizeList, setSizeList] = useState<string[]>([]);
   const [color_id,setColorId] = useState('')
   const [rawSizeList, setRawSizeList] = useState('')
-  const [quantities, setQuantities] = useState<{ size: string; quantity: string,safe_stock:string }[]>(
-    Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "",safe_stock:"" }))
+  const [quantities, setQuantities] = useState<{ size: string; all_quantity: string,available_quantity:string,reserved_quantity:String,safe_stock:string }[]>(
+    Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity: "",reserved_quantity: "",safe_stock:"" }))
   );
   const [product_type1,setProductType1] = useState('')
   const [product_type2,setProductType2] = useState('')
@@ -102,7 +102,7 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
  
   }
   const total_quantity = quantities.reduce((sum, item) => {
-    const qty = parseInt(item.quantity);
+    const qty = parseInt(item.all_quantity);
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
   const handleCreate = async () => {
@@ -169,7 +169,7 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
 
   },[product_id])
   useEffect(() => {
-    setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "",safe_stock:"" })));
+    setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity:"",reserved_quantity:"",safe_stock:"" })));
   }, [sizeList]);
   return (
     <div className={style.wrapper}>
@@ -268,10 +268,11 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
                      {Array.from({ length: 10 }).map((_, index) => (
                       <td key={index} className={classNames(!sizeList[index] && style.hideInput)}>
                         <input type="text" 
-                          value={quantities[index].quantity}
+                          value={quantities[index].all_quantity}
                           onChange={(e) => {
                             const newQuantities = [...quantities];
-                            newQuantities[index].quantity = e.target.value;
+                            newQuantities[index].all_quantity = e.target.value;
+                            newQuantities[index].available_quantity = e.target.value;
                             setQuantities(newQuantities);
                           }}
                           maxLength={3}

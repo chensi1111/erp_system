@@ -16,22 +16,6 @@
   font-size: 24px;
   font-weight: bold;
 }
-.button {
-  width: 150px;
-  height: 40px;
-  background-color: rgb(17, 115, 212);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 5px;
-  cursor: pointer;
-  letter-spacing: 2px;
-  gap: 5px;
-}
-.button:hover {
-  background-color: rgb(10, 90, 170);
-}
 .searchSelect{
   padding: 5px;
 }
@@ -70,20 +54,30 @@ table .icon{
   font-size: 20px;
   transform: translateY(4px);
 }
-
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 25%;
+  width: 15%;
 }
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 25%;
+  width: 20%;
 }
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 25%;
+  width: 20%;
 }
-
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 12%;
+}
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 12%;
+}
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 12%;
+}
 .table th {
   background: #f5f5f5;
   padding: 10px;
@@ -104,8 +98,6 @@ table .icon{
   gap: 10px;
 }
 
-.editBtn,
-.deleteBtn,
 .detailBtn {
   display: flex;
   align-items: center;
@@ -118,26 +110,30 @@ table .icon{
   transition: 0.2s;
 }
 
-.editBtn {
-  background: #4caf50;
-  color: white;
-}
-.editBtn:hover {
-  background: #43a047;
-}
-
-.deleteBtn {
-  background: #e53935;
-  color: white;
-}
-.deleteBtn:hover {
-  background: #c62828;
-}
 .detailBtn {
   background: rgb(17, 115, 212);
   color: white;
 }
 .detailBtn:hover {
   background: rgb(10, 90, 170);
+}
+
+.dateContainer {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.infoContainer{
+  display: flex;
+  gap: 20px;
+}
+.infoItem {
+  font-size: 20px;
+}
+.infoItem span{
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 5px;
 }
 

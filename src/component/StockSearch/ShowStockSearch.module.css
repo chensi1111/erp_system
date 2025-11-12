@@ -127,7 +127,6 @@
 }
 .inputContainerGroup{
     display: flex;
-    width: calc(50% - 10px);
     justify-content: space-between;
     gap: 20px;
 }
@@ -136,4 +135,13 @@
 }
 .subTitle{
     margin-bottom: 15px;
+}
+.multipleInput.stocks .inputTitle{
+    min-width:50px ;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+}
+.stocks .input{
+    width: 100px;
 }

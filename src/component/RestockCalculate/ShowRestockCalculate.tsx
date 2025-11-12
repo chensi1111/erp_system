@@ -1,4 +1,4 @@
-import style from "./ShowSaleCalculate.module.css";
+import style from "./ShowRestockCalculate.module.css";
 import classNames from "classnames";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -6,22 +6,22 @@ interface Info {
   manufactor:string,
   manufactor_name:string,
   total_quantity:string,
-  total_price:string
+  total_restock:string
 }
 interface Detail {
-  sale_id:string,
+  restock_id:string,
   create_date:string,
   total_quantity:string,
   total_price:string
 }
-interface ShowSaleCalculateProps {
+interface ShowRestockCalculateProps {
   onClose: () => void;
   detail: Detail[];
   manufactorInfo:Info;
   selectedDate:Dayjs
 }
 
-const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSaleCalculateProps)=> {
+const ShowRestockCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowRestockCalculateProps)=> {
   const formattedDate = (dateString: string) => {
     return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
   }
@@ -41,12 +41,12 @@ const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSa
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>總銷貨量</div>
+              <div className={style.inputTitle}>總進貨量</div>
               <input type="text" className={style.input} value={manufactorInfo.total_quantity} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>總銷貨額</div>
-              <input type="text" className={style.input} value={"$ "+manufactorInfo.total_price} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>總進貨額</div>
+              <input type="text" className={style.input} value={"$ "+manufactorInfo.total_restock} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -59,16 +59,16 @@ const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSa
             <table className={style.table}>
               <thead>
                <tr>
-                 <th>銷貨單號</th>
-                 <th>銷貨時間</th>
-                 <th>銷貨數量</th>
-                 <th>總銷貨額</th>
+                 <th>進貨單號</th>
+                 <th>進貨時間</th>
+                 <th>進貨數量</th>
+                 <th>總進貨額</th>
                 </tr>
               </thead>
               <tbody className={style.tbody}>
                 {detail.map((m) => (
-                 <tr key={m.sale_id}>
-                   <td>{m.sale_id}</td>
+                 <tr key={m.restock_id}>
+                   <td>{m.restock_id}</td>
                    <td>{formattedDate(m.create_date)}</td>
                    <td>{m.total_quantity}</td>
                     <td>{"$ "+m.total_price}</td>
@@ -89,4 +89,4 @@ const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSa
   );
 }
 
-export default ShowSaleCalculate;
+export default ShowRestockCalculate;

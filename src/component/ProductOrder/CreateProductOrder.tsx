@@ -1,4 +1,4 @@
-import style from "./CreateProductSale.module.css";
+import style from "./CreateProductOrder.module.css";
 import { useState,useRef,useEffect } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
@@ -9,28 +9,31 @@ import type { RootState } from "../../store/store";
 interface specificationList{
   specification:""
 }
-const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
+const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const [product_id, setProduct_id] = useState('');
   const [product_name, setProduct_name] = useState('');
   const [specification, setSpecification] = useState('')
   const [specificationList, setSpecificationList] =useState<specificationList[]>([])
-  const [transaction, setTransaction] = useState('現場')
+  const transaction='現場'
   const [manufactor_id,setManufactorId] = useState('')
   const [brand_id,setBrandId] = useState('')
   const [size_id,setSizeId] = useState('')
   const [sizeList, setSizeList] = useState<string[]>([]);
   const [rawSizeList, setRawSizeList] = useState('')
   const [color_id,setColorId] = useState('')
-  const [quantities, setQuantities] = useState<{ size: string; quantity: string }[]>(
-    Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "" }))
+  const [quantities, setQuantities] = useState<{ size: string; quantity: string,safe_stock:string }[]>(
+    Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "",safe_stock:"" }))
   );
   const [product_type1,setProductType1] = useState('')
   const [product_type2,setProductType2] = useState('')
   const [product_type3,setProductType3] = useState('')
   const [product_type4,setProductType4] = useState('')
   const [recommended_price,setRecommendedPrice] = useState('')
-  const [handing_fee,setHandingFee] = useState(0)
+  const [prepaid_price,setPrepaidPrice] = useState('')
+  const remaining_price = () => {
+    return (Number(recommended_price)*total_quantity) - Number(prepaid_price)
+  }
   const [last_cost,setLastCost] = useState('')
   const [average_cost,setAverageCost] = useState('')
   const create_date = dayjs().format('YYYY/MM/DD')
@@ -67,9 +70,9 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
     setRecommendedPrice('')
     setLastCost('')
     setAverageCost('')
-    setSizeList([]);
+    setSizeList([])
     setRawSizeList('')
-    setHandingFee(0)
+    setPrepaidPrice('')
   }
   const getSpecification = async() => {
     try {
@@ -116,6 +119,10 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
   const handleCreate = async () => {
+    if(remaining_price() <0){
+      toast.error('剩餘金額不可為負');
+      return 
+    }
     setErrorCode('')
     const data = {
       transaction,
@@ -127,12 +134,13 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
       remark,
       total_quantity,
       size_list:rawSizeList,
-      handing_fee
+      prepaid_price,
+      remaining_price:remaining_price()
     }
     try {
-      const response = await axios.post('/api/sale/create', {...data});
+      const response = await axios.post('/api/order/create', {...data});
       if(response.data.code=='000') {
-        toast.success('進貨成功');
+        toast.success('訂貨成功');
         onSuccess();
       } 
     }catch (error) {
@@ -140,9 +148,6 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
       toast.error(err.response?.data?.msg || "伺服器錯誤");
       setErrorCode(err.response?.data?.code);
     }
-  }
-  const calculateProfit =()=>{
-    return ((Number(recommended_price) - Number(average_cost))*Number(total_quantity)) - Number(handing_fee)
   }
    useEffect(() => {
     if(!specification) return
@@ -175,23 +180,20 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
 
   },[product_id])
   useEffect(() => {
-    setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "" })));
+    setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "",safe_stock:"" })));
   }, [sizeList]);
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
-        <div className={style.title}>新增銷貨</div>
+        <div className={style.title}>新增訂貨</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-                <select className={style.select} value={transaction} onChange={(e)=>setTransaction(e.target.value)}>  
-                  <option value="現場">現場</option>
-                  <option value="網路">網路</option>
-                </select>
+                <input type="text" className={classNames(style.input,style.disable)} value={transaction} readOnly/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>銷貨日期</div>
+              <div className={style.inputTitle}>訂貨日期</div>
               <input type="text" className={classNames(style.input,style.disable)} value={create_date} readOnly/>
             </div>
           </div>
@@ -309,16 +311,14 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
               <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+Number(recommended_price)*total_quantity} readOnly tabIndex={-1}/>
             </div>
           </div>
-          {transaction ==='網路' && <div className={style.singleInput}>
+          <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>手續費</div>
-              <input type="text" className={classNames(style.input,!specification && style.disable)} value={handing_fee} onChange={(e)=>setHandingFee(Number(e.target.value))}/>
+              <div className={style.inputTitle}>預付訂金</div>
+              <input type="text" className={classNames(style.input,!specification && style.disable)} value={prepaid_price} onChange={(e)=>setPrepaidPrice(e.target.value)}/>
             </div>
-          </div>}
-          <div className={style.singleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>預計獲利</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+calculateProfit()} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>剩餘金額</div>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+remaining_price()} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -337,4 +337,4 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
   );
 }
 
-export default CreateProductSale;
+export default CreateProductOrder;

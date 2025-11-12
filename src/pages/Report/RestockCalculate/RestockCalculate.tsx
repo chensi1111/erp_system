@@ -1,5 +1,5 @@
-import style from "./SaleCalculate.module.css";
-import ShowSaleCalculate from "../../../component/SaleCalculate/ShowSaleCalculate";
+import style from "./RestockCalculate.module.css";
+import ShowRestockCalculate from "../../../component/RestockCalculate/ShowRestockCalculate";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
@@ -14,7 +14,7 @@ interface Report {
   manufactor:string,
   manufactor_name:string,
   total_quantity:string,
-  total_price:string
+  total_restock:string
 }
 interface Detail {
   restock_id:string,
@@ -23,7 +23,7 @@ interface Detail {
   total_price:string
 }
 
-function SaleCalculate() {
+function RestockCalculate() {
   dayjs.locale('zh-tw');
   const currentYear = dayjs();
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
@@ -34,7 +34,7 @@ function SaleCalculate() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalSale, setTotalSale] = useState('')
+  const [totalRestock, setTotalRestock] = useState('')
   const [totalQuantity, setTotalQuantity] = useState('')
   const [openShow,setOpenShow] = useState(false);
   const [data, setData] = useState<Report[]>([]);
@@ -44,25 +44,25 @@ function SaleCalculate() {
     manufactor:"",
     manufactor_name:"",
     total_quantity:"",
-    total_price:"",
+    total_restock:"",
   })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
-      const res = await axios.post('/api/report/sale_list',{page,pageSize:10,filter,sort,selectedDate:selectedDate?.format("YYYY-MM")});
+      const res = await axios.post('/api/report/restock_list',{page,pageSize:10,filter,sort,selectedDate:selectedDate?.format("YYYY-MM")});
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalSale(res.data.data.summary.total_sale_amount);
-      setTotalQuantity(res.data.data.summary.total_sale_volume);
+      setTotalRestock(res.data.data.summary.total_restock_amount);
+      setTotalQuantity(res.data.data.summary.total_restock_volume);
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
   const getDetail = async (info:any) => {
-    const {manufactor,manufactor_name,total_quantity,total_price} =info
+    const {manufactor,manufactor_name,total_quantity,total_restock} =info
     try {
-      const res = await axios.post('/api/report/sale_detail',{manufactor});
+      const res = await axios.post('/api/report/restock_detail',{manufactor});
       if(res.data.code==='000'){
         setDetail(res.data.data.list);
         setOpenShow(true);
@@ -70,7 +70,7 @@ function SaleCalculate() {
           manufactor,
           manufactor_name,
           total_quantity,
-          total_price,
+          total_restock,
         })
       }
     } catch (error) {
@@ -113,10 +113,10 @@ function SaleCalculate() {
   }, [page,sort,selectedDate]);
   return (
     <div className={style.container}>
-      {openShow && <ShowSaleCalculate 
+      {openShow && <ShowRestockCalculate 
       onClose={() => setOpenShow(false)} detail={detail} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
       <div className={style.topContainer}>
-        <div className={style.title}>廠商銷貨總表</div>
+        <div className={style.title}>廠商進貨總表</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
@@ -144,8 +144,8 @@ function SaleCalculate() {
       />
     </LocalizationProvider>
         <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總銷貨量:</span>{totalQuantity}</div>
-          <div className={style.infoItem}><span>總銷貨額:</span>$ {totalSale}</div>
+          <div className={style.infoItem}><span>總進貨量:</span>{totalQuantity}</div>
+          <div className={style.infoItem}><span>總進貨額:</span>$ {totalRestock}</div>
         </div>
     </div>
        <div className={style.tableContainer}>
@@ -161,8 +161,8 @@ function SaleCalculate() {
                 )}
               </th>
               <th>廠商名稱</th>
-              <th>總銷貨量</th>
-              <th>總銷貨額</th>
+              <th>總進貨量</th>
+              <th>總進貨額</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -172,7 +172,7 @@ function SaleCalculate() {
                 <td>{m.manufactor}</td>
                 <td>{m.manufactor_name}</td>
                 <td>{m.total_quantity}</td>
-                <td>{"$ "+m.total_price}</td>
+                <td>{"$ "+m.total_restock}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m)}>
                     詳細
@@ -191,4 +191,4 @@ function SaleCalculate() {
   )   
 }
 
-export default SaleCalculate;
+export default RestockCalculate;

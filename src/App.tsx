@@ -14,8 +14,11 @@ import StockSearch from "./pages/Stock/StockSearch/StockSearch";
 import ProductSale from "./pages/Daily/ProductSale/ProductSale";
 import StockHistory from "./pages/Stock/StockHistory/StockHistory";
 import StockSafe from "./pages/Stock/StockSafe/StockSafe";
-import SaleCalculate from "./pages/Report/SaleCalculate/SaleCalculate";
+import ProductSaleCalculate from "./pages/Report/ProductSaleCalculate/ProdurctSaleCalculate";
 import SaleRanking from "./pages/Report/SaleRanking/SaleRanking";
+import ProductOrder from "./pages/Daily/ProductOrder/ProductOrder";
+import RestockCalculate from "./pages/Report/RestockCalculate/RestockCalculate";
+import SaleCalculate from "./pages/Report/SaleCalculate/SaleCalculate";
 function App() {
   return (
     <BrowserRouter>
@@ -69,12 +72,24 @@ function App() {
             element={<StockSafe />}
           />
           <Route
-            path="/report/saleCalculate"
-            element={<SaleCalculate />}
+            path="/report/productSaleCalculate"
+            element={<ProductSaleCalculate />}
           />
           <Route
             path="/report/saleRanking"
             element={<SaleRanking />}
+          />
+          <Route
+            path="/daily/productOrder"
+            element={<ProductOrder />}
+          />
+          <Route
+            path="/report/restockCalculate"
+            element={<RestockCalculate />}
+          />
+          <Route
+            path="/report/saleCalculate"
+            element={<SaleCalculate />}
           />
         </Routes>
       </div>

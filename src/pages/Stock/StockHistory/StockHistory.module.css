@@ -148,4 +148,8 @@ table .icon{
   color: rgb(17, 115, 212);
   font-weight: bold;
 }
+.orderType {
+  color: purple;
+  font-weight: bold;
+}
 

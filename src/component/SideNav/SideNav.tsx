@@ -140,6 +140,9 @@ function SideNav() {
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/productSale')} className={classNames(currnetPath==='/daily/productSale' && style.activeNav)}>
               <ListItemText primary="前台銷貨" />
             </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/productOrder')} className={classNames(currnetPath==='/daily/productOrder' && style.activeNav)}>
+              <ListItemText primary="前台訂貨" />
+            </ListItemButton>
           </List>
         </Collapse>
         <ListItemButton  onClick={() => handleClick(3)}>
@@ -194,11 +197,17 @@ function SideNav() {
         </ListItemButton>
         <Collapse in={nav4Open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/saleCalculate')} className={classNames(currnetPath==='/report/saleCalculate' && style.activeNav)}>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/productSaleCalculate')} className={classNames(currnetPath==='/report/productSaleCalculate' && style.activeNav)}>
               <ListItemText primary="商品銷售總表" />
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/saleRanking')} className={classNames(currnetPath==='/report/saleRanking' && style.activeNav)}>
               <ListItemText primary="商品銷售排行" />
+            </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/restockCalculate')} className={classNames(currnetPath==='/report/restockCalculate' && style.activeNav)}>
+              <ListItemText primary="廠商進貨總表" />
+            </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/report/saleCalculate')} className={classNames(currnetPath==='/report/saleCalculate' && style.activeNav)}>
+              <ListItemText primary="廠商銷貨總表" />
             </ListItemButton>
             {/* <ListItemButton sx={{ pl: 4 }}>
               <ListItemText primary="商品銷售明細" />

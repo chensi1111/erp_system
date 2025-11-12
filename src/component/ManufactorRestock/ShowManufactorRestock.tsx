@@ -17,7 +17,7 @@ interface RestockDetail {
   size_list:string,
   quantities:[{
     size:string,
-    quantity:string
+    available_quantity:string
   }],
   price:string,
   product_type1:string,
@@ -40,7 +40,7 @@ const ShowManufactorRestock=({ onClose, detail }: ShowManufactorRestockProps)=> 
   const title=detail.restock_id;
   const list =detail.size_list.split(',').slice(0, 10)
   const totalQuantity = detail.quantities.reduce((sum, item) => {
-    const qty = parseInt(item.quantity);
+    const qty = parseInt(item.available_quantity);
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
   const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
@@ -157,7 +157,7 @@ const ShowManufactorRestock=({ onClose, detail }: ShowManufactorRestockProps)=> 
                       <td key={index} className={classNames(!list[index] && style.hideInput)}>
                         <input type="text"
                           className={classNames(style.input)} 
-                          value={detail.quantities[index].quantity}
+                          value={detail.quantities[index].available_quantity}
                           readOnly tabIndex={-1}
                         />
                       </td>

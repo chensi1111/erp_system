@@ -49,7 +49,7 @@ function StockSearch() {
   const getTotalNumber = (list:any) => {
     return list.reduce((total:any, item:any) => {
         // 將 quantity 轉成數字，空字串或無效值算 0
-        const qty = parseInt(item.quantity, 10);
+        const qty = parseInt(item.all_quantity, 10);
         return total + (isNaN(qty) ? 0 : qty);
     }, 0);
     };

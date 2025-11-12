@@ -55,11 +55,18 @@
     box-sizing: border-box;
     resize: none;
 }
-.input,.textarea,.sizeInput {
+.select {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 3px 5px;
+  box-sizing: border-box;
+}
+.input,.textarea,.sizeInput,.select {
     border: none !important;
     pointer-events: none;
 }
-.input.edit,.textarea.edit,.sizeInput.edit {
+.input.edit,.textarea.edit,.sizeInput.edit,.select.edit {
     border: 1px solid gray !important;
     pointer-events: initial;
 }
@@ -125,26 +132,37 @@
 .button.cancel:hover {
     background-color: #c62828;
 }
-.inputContainerGroup{
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
+.singleInput table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; 
 }
-.stocks{
-    flex-wrap: wrap;
+
+.singleInput th,
+.singleInput td {
+  padding: 4px;
+  text-align: center;
+  overflow: hidden; 
+  white-space: nowrap; 
+  text-overflow: ellipsis; 
+  font-weight: initial;
 }
-.subTitle{
-    margin-bottom: 15px;
+.singleInput td{
+    padding: 2px 8px;
 }
-.multipleInput.stocks .inputTitle{
-    min-width:50px ;
-    width: fit-content;
-    display: flex;
-    align-items: center;
+.singleInput table input {
+  border: 1px solid gray;
+  width: 100%; 
+  box-sizing: border-box; 
+  padding: 4px;
 }
-.stocks .input{
-    width: 100px;
+.hideInput{
+    opacity: 0;
+    pointer-events: none;
 }
-.safeStock{
-    border: 2px solid red !important;
+.hideSelect{
+  appearance: none;        /* 標準屬性 */
+  -webkit-appearance: none; /* Chrome / Safari */
+  -moz-appearance: none;    /* Firefox */
 }
+
