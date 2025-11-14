@@ -1,0 +1,19 @@
+.chartContainer{
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+.chart{
+    width: calc(50% - 60px);
+    height: fit-content;
+    background-color: white;
+    padding: 15px;
+    border-radius: 20px;
+}
+.chartTitle{
+    text-align: center;
+    font-size: 18px;
+}
+.year{
+    text-align: center;
+}

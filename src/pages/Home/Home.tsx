@@ -6,6 +6,7 @@ import { useState,useEffect } from "react";
 import { useSelector,useDispatch } from "react-redux";
 import type { RootState } from "../../store/store";
 import { getSafeStockCount } from "../../store/safeStcokSlice";
+import SalesProfitChart from "../../component/DashBoard/salesProfitChart";
 function Home() {
   const dispatch = useDispatch()
   const safeStock = useSelector((state: RootState) => state.safeStock);
@@ -90,6 +91,15 @@ function Home() {
         <div className={style.kpiBox}>
           <div className={style.boxTitle}>網路手續</div>
           <div className={style.item}>
+            <div className={style.itemTitle}>數量</div>
+            <div className={style.detailBox}>
+              <div className={style.detail}>{thisMonth.sale.fee_count}</div>
+              <div className={classNames(style.detail,style.lastMonth,Number(calculateDifferent(thisMonth.sale.fee_count,lastMonth.sale.fee_count)) > 0 && style.add)}>
+                {calculateDifferent(thisMonth.sale.fee_count,lastMonth.sale.fee_count)+' %'}
+              </div>
+            </div>
+          </div>
+          <div className={style.item}>
             <div className={style.itemTitle}>金額</div>
             <div className={style.detailBox}>
               <div className={style.detail}>{'$ '+thisMonth.sale.total_fee}</div>
@@ -151,6 +161,7 @@ function Home() {
           </div>
         </div>
       </div>}
+      <SalesProfitChart></SalesProfitChart>
     </div>
   );
 }

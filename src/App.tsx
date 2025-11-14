@@ -3,6 +3,7 @@ import SideNav from "./component/SideNav/SideNav";
 import { ToastContainer } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home/Home";
+import ScrollUp from "./component/ScrollUp";
 import ManufactorDocument from "./pages/Documents/ManufactorDocument/ManufactorDocument";
 import ProductDocument from "./pages/Documents/ProductDocument/ProductDocument";
 import BrandDocument from "./pages/Documents/BrandDocument/BrandDocument";
@@ -22,6 +23,7 @@ import SaleCalculate from "./pages/Report/SaleCalculate/SaleCalculate";
 function App() {
   return (
     <BrowserRouter>
+    <ScrollUp/>
     <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
       <div className="app">
         <SideNav />

@@ -206,12 +206,12 @@ function SaleRanking() {
           </tbody>
         </table>
       </div>
-      <div className={style.pieContainer}>
+      {data.length !=0 && <div className={style.pieContainer}>
         <ProductSalesPieChart data={data}/>
         <BrandSalesPieChart data={data}/>
         <ColorSalesPieChart data={data}/>
         <TypeSalesPieChart data={data}/>
-      </div>
+      </div>}
     </div>
   )   
 }

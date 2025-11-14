@@ -11,6 +11,7 @@ interface specificationList{
 }
 const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
+  const [isCreate, setIsCreate] =useState(false)
   const [product_id, setProduct_id] = useState('');
   const [product_name, setProduct_name] = useState('');
   const [specification, setSpecification] = useState('')
@@ -119,10 +120,12 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
   const handleCreate = async () => {
+    if(isCreate) return
     if(remaining_price() <0){
       toast.error('剩餘金額不可為負');
       return 
     }
+    setIsCreate(true)
     setErrorCode('')
     const data = {
       transaction,
@@ -147,6 +150,8 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
       setErrorCode(err.response?.data?.code);
+    }finally{
+      setIsCreate(false)
     }
   }
    useEffect(() => {
