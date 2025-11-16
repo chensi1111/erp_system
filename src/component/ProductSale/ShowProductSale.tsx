@@ -160,7 +160,7 @@ const calculateProfit =()=>{
                       <td key={index} className={classNames(!list[index] && style.hideInput)}>
                         <input type="text"
                           className={classNames(style.input)} 
-                          value={detail.quantities[index].quantity}
+                          value={detail.quantities[index]?.quantity}
                           readOnly tabIndex={-1}
                         />
                       </td>
