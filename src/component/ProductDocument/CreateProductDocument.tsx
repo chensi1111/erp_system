@@ -21,13 +21,15 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
   const [product_type3, setProductType3] = useState('');
   const [product_type4, setProductType4] = useState('');
   const [price, setPrice] = useState('');
+  const [purchase, setPurchase] = useState('');
   const [remark, setRemark] = useState('');
   const [errorCode,setErrorCode]=useState('');
   const handleCreate = async () => {
     setErrorCode('')
     const priceNum =Number(price)
+    const purchaseNum =Number(purchase)
     try {
-      const response = await axios.post('/api/product/create', {product_id,specification,product_name,manufactor,brand,size,color,product_type1,product_type2,product_type3,product_type4,recommended_price:priceNum,remark});
+      const response = await axios.post('/api/product/create', {product_id,specification,product_name,manufactor,brand,size,color,product_type1,product_type2,product_type3,product_type4,recommended_price:priceNum,purchase_price:purchaseNum,remark});
       if(response.data.code=='000') {
         toast.success('商品新增成功');
         onSuccess();
@@ -241,7 +243,11 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
               <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type4)}></input>
             </div>
           </div>
-          <div className={style.singleInput}>
+          <div className={style.multipleInput}>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>進價</div>
+              <input type="text" className={classNames(style.input)} value={purchase} onChange={(e)=>setPurchase(e.target.value)}/>
+            </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建議售價</div>
               <input type="text" className={classNames(style.input)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
