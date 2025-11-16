@@ -28,6 +28,7 @@ interface ProductDetail {
   product_type3:string;
   product_type4:string;
   recommended_price:number;
+  purchase_price:number;
   remark: string;
   last_cost:number;
   average_cost:number;
@@ -63,6 +64,7 @@ function ProductDocument() {
       product_type3:"",
       product_type4:"",
       recommended_price:0,
+      purchase_price:0,
       last_cost:0,
       average_cost:0,
       remark: "",

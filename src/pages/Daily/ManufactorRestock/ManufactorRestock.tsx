@@ -14,8 +14,8 @@ import { getProductInfoRelation } from "../../../store/productInfoRelationSlice"
 import { getSafeStockCount } from "../../../store/safeStcokSlice";
 interface Restock {
   restock_id: string;
-  transaction:  string;
-  create_date:string
+  product_id:  string;
+  specification:string;
 }
 interface RestockDetail {
   transaction:string,
@@ -47,7 +47,8 @@ function ManufactorRestock() {
   const [searchType, setSearchType] = useState('restock_id');
   const [filter, setFilter] = useState({
     restock_id: '',
-    transaction: '',
+    product_id: '',
+    specification:''
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -124,18 +125,26 @@ function ManufactorRestock() {
     if(searchType==='restock_id'){
       setFilter({
         restock_id: value,
-        transaction: '',
+        product_id: '',
+        specification:''
       })
-    }else{
+    }else if(searchType==='product_id'){
       setFilter({
         restock_id: '',
-        transaction: value,
+        product_id: value,
+        specification:''
+      })
+    }else{
+       setFilter({
+        restock_id: '',
+        product_id: '',
+        specification:value
       })
     }
   }
   const handleSetSearchType = (value:string) => {
     setSearchType(value);
-    setFilter({ restock_id: '', transaction: '' });
+    setFilter({ restock_id: '', product_id: '',specification:'' });
   }
   const createProductInfos=async()=>{
     const response = await axios.post('/api/product/info');
@@ -181,10 +190,12 @@ function ManufactorRestock() {
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
           <option value="restock_id">進貨單號</option>
-          <option value="transaction">交易類型</option>
+          <option value="product_id">商品型號</option>
+          <option value="specification">商品規格</option>
         </select>
         {searchType==='restock_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.restock_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='transaction' && <input type="text" placeholder="搜尋關鍵字" value={filter.transaction} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='product_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType==='specification' && <input type="text" placeholder="搜尋關鍵字" value={filter.specification} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
        <FormControlLabel
         control={
@@ -207,8 +218,8 @@ function ManufactorRestock() {
                  <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
-              <th>交易類型</th>
-              <th>時間</th>
+              <th>商品型號</th>
+              <th>商品規格</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -216,8 +227,8 @@ function ManufactorRestock() {
             {data.map((m) => (
               <tr key={m.restock_id}>
                 <td>{m.restock_id}</td>
-                <td>{m.transaction}</td>
-                <td>{formattedDate(m.create_date)}</td>
+                <td>{m.product_id}</td>
+                <td>{m.specification}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.restock_id)}>
                     詳細

@@ -20,6 +20,7 @@ interface ProductDetail {
   product_type3:string;
   product_type4:string;
   recommended_price:number;
+  purchase_price:number;
   last_cost:number;
   average_cost:number;
   remark: string;
@@ -229,9 +230,15 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
+              <div className={style.inputTitle}>進價</div>
+              <input type="text" className={classNames(style.input,isEditing && style.edit)} value={isEditing ? formData.purchase_price: "$ "+formData.purchase_price} onChange={(e)=>handleChange('purchase_price',e.target.value)}/>
+            </div>
+            <div className={style.inputContainer}>
               <div className={style.inputTitle}>建議售價</div>
               <input type="text" className={classNames(style.input,isEditing && style.edit)} value={isEditing ? formData.recommended_price: "$ "+formData.recommended_price} onChange={(e)=>handleChange('recommended_price',e.target.value)}/>
             </div>
+          </div>
+          <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最新進價</div>
               <input type="text" className={style.input} value={"$ "+formData.last_cost||''} readOnly tabIndex={-1}/>

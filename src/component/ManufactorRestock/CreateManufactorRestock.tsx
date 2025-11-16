@@ -90,6 +90,7 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
         setProductType2(info.product_type2)
         setProductType3(info.product_type3)
         setProductType4(info.product_type4)
+        setPrice(info.purchase_price)
         setRawSizeList(info.size_list)
         if (info.size_list) {
           const list = info.size_list.split(',').slice(0, 10); // 最多10個
