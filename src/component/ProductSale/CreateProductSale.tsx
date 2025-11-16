@@ -120,12 +120,13 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
     if(isCreate) return 
     setIsCreate(true)
     setErrorCode('')
+    const filteredQuantities = quantities.filter(q => q.size.trim() !== "")
     const data = {
       transaction,
       product_id,
       specification,
       product_name,
-      quantities,
+      quantities:filteredQuantities,
       price:recommended_price,
       remark,
       total_quantity,

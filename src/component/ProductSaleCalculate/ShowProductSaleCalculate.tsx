@@ -154,7 +154,7 @@ const ShowSaleCalculate=({ onClose, detail,rangeType,customRange }: ShowSaleCalc
                       <td key={index} className={classNames(!list[index] && style.hideInput)}>
                         <input type="text"
                           className={classNames(style.input)} 
-                          value={detail.sizes[index].total_quantity}
+                          value={detail.sizes[index]?.total_quantity}
                           readOnly tabIndex={-1}
                         />
                       </td>
