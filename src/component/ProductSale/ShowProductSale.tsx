@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 interface SaleDetail {
   transaction:string,
-  sale_id:string,
+  order_no:string,
   create_date:string,
   product_id:string,
   specification:string,
@@ -28,17 +28,23 @@ interface SaleDetail {
   product_type3:string,
   product_type4:string,
   remark: string,
+  date:string,
+  pay:string,
+  type:string
 }
 interface ShowProductSaleProps {
   onClose: () => void;
   detail: SaleDetail;
 }
 const formattedDate = (dateString: string) => {
+  return dayjs(dateString).format('YYYY/MM/DD');
+}
+const formattedTime = (dateString: string) => {
   return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 const ShowProductSale=({ onClose, detail }: ShowProductSaleProps)=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
-  const title=detail.sale_id;
+  const title=detail.order_no;
   const list =detail.size_list.split(',').slice(0, 10)
   const totalQuantity = detail.quantities.reduce((sum, item) => {
     const qty = parseInt(item.quantity);
@@ -71,20 +77,31 @@ const calculateProfit =()=>{
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>銷貨單號</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.sale_id}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.order_no}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>交易方式</div>
-                <select className={classNames(style.select,style.hideSelect)} value={detail.transaction} tabIndex={-1}>  
-                  <option value="現場">現場</option>
-                  <option value="網路">網路</option>
-                </select>
+              <div className={style.inputTitle}>交易途徑</div>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.transaction}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>付款方式</div>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.pay}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>交易狀態</div>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.type}/>
+            </div>
+          </div>
+          <div className={style.multipleInput}>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>建檔時間</div>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedTime(detail.create_date)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>銷貨時間</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.create_date)}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.date)}/>
             </div>
           </div>
           <div className={style.singleInput}>

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import productInfoRelationSlice from './productInfoRelationSlice';
 import safeStockSlice from './safeStcokSlice'
+import restockListSlice from './restockList'
 
 export const store = configureStore({
   reducer: {
     productInfoRelation: productInfoRelationSlice,
-    safeStock: safeStockSlice
+    safeStock: safeStockSlice,
+    restockList:restockListSlice
   },
 });
 

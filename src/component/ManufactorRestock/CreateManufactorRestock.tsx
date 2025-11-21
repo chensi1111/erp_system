@@ -1,22 +1,22 @@
 import style from "./CreateManufactorRestock.module.css";
 import { useState,useRef,useEffect } from "react";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import axios from '../../api/axios'
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
 import type { RootState } from "../../store/store";
-interface specificationList{
-  specification:""
+import { addNewProduct } from "../../store/restockList"
+interface productIdList{
+  product_id:""
 }
-const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
+const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
+  const dispatch = useDispatch()
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
-  const [isCreate, setIsCreate] = useState(false)
-  const [product_id, setProduct_id] = useState('');
-  const [product_name, setProduct_name] = useState('');
+  const restockList = useSelector((state: RootState) =>state.restockList)
+  const [product_id, setProductId] = useState('');
+  const [product_name, setProductName] = useState('');
   const [specification, setSpecification] = useState('')
-  const [specificationList, setSpecificationList] =useState<specificationList[]>([])
-  const [transaction, setTransaction] = useState('買斷')
+  const [productIdList, setProductIdList] =useState<productIdList[]>([])
   const [manufactor_id,setManufactorId] = useState('')
   const [brand_id,setBrandId] = useState('')
   const [size_id,setSizeId] = useState('')
@@ -31,9 +31,6 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
   const [product_type3,setProductType3] = useState('')
   const [product_type4,setProductType4] = useState('')
   const [price,setPrice] = useState('')
-  const create_date = dayjs().format('YYYY/MM/DD')
-  const [remark, setRemark] = useState('');
-  const [errorCode,setErrorCode]=useState('');
   const productIdDebounceRef = useRef<number | null>(null);
   const specificationDebounceRef = useRef<number | null>(null);
   const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
@@ -53,7 +50,7 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
   }
 };
   const clearProductInfo = () =>{
-    setProduct_name('')
+    setProductName('')
     setManufactorId('')
     setBrandId('')
     setSizeId('')
@@ -63,25 +60,26 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
     setProductType3('')
     setProductType4('')
     setRawSizeList('')
-    setSizeList([]);
+    setSizeList([])
+    setPrice('')
   }
-  const getSpecification = async() => {
+  const getProductId = async() => {
     try {
-      const response = await axios.post('/api/restock/specification',{product_id})
+      const response = await axios.post('/api/restock/specification',{specification})
       if(response.data.code==='000'){
-        setSpecificationList(response.data.data)
+        setProductIdList(response.data.data)
       }
     } catch (error) {
       toast.error('無此商品型號')
-      setSpecificationList([])
+      setProductIdList([])
     }
   }
   const getProductInfo = async() => {
     try {
-      const response = await axios.post('/api/restock/productInfo',{specification})
+      const response = await axios.post('/api/restock/productInfo',{specification,product_id})
       if(response.data.code==='000'){
         const info = response.data.data
-        setProduct_name(info.product_name)
+        setProductName(info.product_name)
         setManufactorId(info.manufactor)
         setBrandId(info.brand)
         setSizeId(info.size)
@@ -108,110 +106,95 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
   const handleCreate = async () => {
-    if(isCreate) return
-    setIsCreate(true)
-    setErrorCode('')
     const data = {
-      transaction,
       product_id,
       specification,
-      product_name,
-      manufactor_id,
-      brand_id,
-      size_id,
-      size_list:rawSizeList,
-      color_id,
       quantities,
-      total_quantity,
       price,
-      remark,
-      product_type1,
-      product_type2,
-      product_type3,
-      product_type4
+      total_price:Number(price) * total_quantity,
+      total_quantity,
+      product_name,
+      manufactor:getProductFormat('manufactor',manufactor_id),
+      brand:getProductFormat('brand',brand_id),
+      size:getProductFormat('size',size_id),
+      color:getProductFormat('color',color_id),
+      type1:getProductFormat('type',product_type1)||'',
+      type2:getProductFormat('type',product_type2)||'',
+      type3:getProductFormat('type',product_type3)||'',
+      type4:getProductFormat('type',product_type4)||'',
+      sizeList:rawSizeList
     }
-    try {
-      const response = await axios.post('/api/restock/create', {...data});
-      if(response.data.code=='000') {
-        toast.success('進貨成功');
-        onSuccess();
-      } 
-    }catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-      setErrorCode(err.response?.data?.code);
-    }finally{
-      setIsCreate(false)
-    }
+    dispatch(addNewProduct(data))
+    onClose()
   }
-   useEffect(() => {
-    if(!specification) return
+  useEffect(() => {
+    if(!specification) {
+      clearProductInfo()
+      setProductId('')
+      return
+    }
     if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
 
     specificationDebounceRef.current = setTimeout(() => {
-      getProductInfo();
+      setProductId('')
+      clearProductInfo()
+      getProductId();
     }, 1000);
 
     return () => {
       if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
     };
   }, [specification]);
-  useEffect(() => {
-    clearProductInfo()
-    setSpecification('')
-    if(!product_id){
-      setSpecificationList([])
-      return
-    } 
+   useEffect(() => {
+    if(!specification||!product_id) return
     if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
 
     productIdDebounceRef.current = setTimeout(() => {
-      getSpecification();
+      getProductInfo();
     }, 1000);
 
     return () => {
       if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
     };
-
-  },[product_id])
+  }, [product_id]);
   useEffect(() => {
     setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity:"",reserved_quantity:"",safe_stock:"" })));
   }, [sizeList]);
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
-        <div className={style.title}>新增進貨</div>
+        <div className={style.title}>新增商品</div>
         <div className={style.allInputs}>
-          <div className={style.multipleInput}>
+          <div className={style.singleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>交易方式</div>
-                <select className={style.select} value={transaction} onChange={(e)=>setTransaction(e.target.value)}>  
-                  <option value="買斷">買斷</option>
-                  <option value="寄賣">寄賣</option>
-                </select>
-            </div>
-            <div className={style.inputContainer}>
-              <div className={style.inputTitle}>進貨日期</div>
-              <input type="text" className={classNames(style.input,style.disable)} value={create_date} readOnly/>
+              <div className={style.inputTitle}>商品規格</div>
+                <input
+                list="specification"
+                className={style.input}
+                value={specification}
+                onChange={(e)=>setSpecification(e.target.value)}
+                />
+                <datalist id="specification">
+                  {restockList.productList.map((item) => (
+                    <option key={item.specification} value={item.specification} />
+                 ))}
+              </datalist>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品型號</div>
-              <input type="text" className={style.input} value={product_id} onChange={(e)=>setProduct_id(e.target.value)}/>
-            </div>
-          </div>
-          <div className={style.singleInput}>
-            <div className={style.inputContainer}>
-              <div className={style.inputTitle}>商品規格</div>
-              <select className={classNames(style.select,specificationList.length==0 && style.disable)} value={specification} onChange={(e)=>setSpecification(e.target.value)}>
-                <option value={''}></option>
-                {specificationList.map((item) => (
-                  <option key={item.specification} value={item.specification}>
-                    {item.specification}
-                  </option>
-                ))}
-              </select>
+                <input
+                list="product_id"
+                className={classNames(style.input,!specification && style.disable)}
+                value={product_id}
+                onChange={(e)=>setProductId(e.target.value)}
+                />
+                <datalist id="product_id">
+                  {productIdList.map((item) => (
+                    <option key={item.product_id} value={item.product_id} />
+                 ))}
+              </datalist>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -293,17 +276,11 @@ const CreateManufactorRestock=({onClose,onSuccess,}: {onClose: () => void;onSucc
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>進價</div>
-              <input type="text" className={classNames(style.input,!specification && style.disable)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
+              <input type="text" className={classNames(style.input,!product_id && style.disable)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
               <input type="text" className={classNames(style.input,style.readOnly)} value={Number(price)*total_quantity} readOnly tabIndex={-1}/>
-            </div>
-          </div>
-          <div className={style.singleInput}>
-            <div className={style.inputContainer}>
-              <div className={style.inputTitle}>備註</div>
-              <textarea value={remark} onChange={(e)=>setRemark(e.target.value)} className={classNames(style.textarea,errorCode=='012' && style.error,!specification && style.disable)}></textarea>
             </div>
           </div>
         </div>

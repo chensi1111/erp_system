@@ -136,7 +136,7 @@ function SaleCalculate() {
           setSelectedDate(newValue);
         }}
         maxDate={currentYear}
-        openTo="year"
+        openTo="month"
         views={['year', 'month']}
         yearsOrder="desc"
         format="YYYY/MM"

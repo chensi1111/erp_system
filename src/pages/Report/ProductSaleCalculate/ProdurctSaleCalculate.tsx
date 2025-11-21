@@ -87,17 +87,23 @@ function SaleCalculate() {
       size_list:""
     }
   );
+  const [summary, setSummary] = useState({
+    total_cost:"",
+    total_handling_fee:"",
+    total_order_quantity:"",
+    total_paid_quantity:"",
+    total_pickup_quantity:"",
+    total_paid:"",
+    total_prepaid:"",
+    total_remaining:""
+  })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
       const res = await axios.post('/api/report/list',{page,pageSize:10,filter,sort,rangeType,customRange});
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalSale(res.data.data.summary.total_sales_amount);
-      setTotalProfit(res.data.data.summary.total_profit);
-      setTotalQuantity(res.data.data.summary.total_sales_volume);
-      setTotalCost(res.data.data.summary.total_cost)
-      setTotalFee(res.data.data.summary.total_fee)
+      setSummary(res.data.data.summary)
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
@@ -228,11 +234,14 @@ function SaleCalculate() {
       )}
         </Box>
         <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總銷量:</span>{totalQuantity}</div>
-          <div className={style.infoItem}><span>總銷售額:</span>$ {totalSale}</div>
-          <div className={style.infoItem}><span>總成本:</span>$ {totalCost}</div>
-          <div className={style.infoItem}><span>網路手續:</span>$ {totalFee}</div>
-          <div className={style.infoItem}><span>淨利:</span>$ {Number(totalProfit) - Number(totalFee)}</div>
+          <div className={style.infoItem}><span>總金額:</span>$ {Number(summary.total_paid) + Number(summary.total_remaining)}</div>
+          <div className={style.infoItem}><span>總銷量:</span>{Number(summary.total_paid_quantity) + Number(summary.total_pickup_quantity)}</div>
+          <div className={style.infoItem}><span>總訂貨量:</span>{summary.total_order_quantity}</div>
+          <div className={style.infoItem}><span>總訂金:</span>$ {summary.total_prepaid}</div>
+          <div className={style.infoItem}><span>總尾款:</span>$ {summary.total_remaining}</div>
+          <div className={style.infoItem}><span>總成本:</span>$ {summary.total_cost}</div>
+          <div className={style.infoItem}><span>網路手續:</span>$ {summary.total_handling_fee||0}</div>
+          <div className={style.infoItem}><span>淨利:</span></div>
         </div>
     </div>
        <div className={style.tableContainer}>
@@ -248,9 +257,12 @@ function SaleCalculate() {
                 )}
               </th>
               <th>商品規格</th>
-              <th>商品名稱</th>
-              <th>總銷量</th>
-              <th>總銷售額</th>
+              <th>銷售量</th>
+              <th>訂貨量</th>
+              <th>總金額</th>
+              <th>總訂金</th>
+              <th>總尾款</th>
+              <th>總銷售</th>
               <th>毛利</th>
               <th>操作</th>
             </tr>
@@ -260,10 +272,13 @@ function SaleCalculate() {
               <tr key={m.specification}>
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
-                <td>{m.product_name}</td>
                 <td>{m.total_quantity}</td>
-                <td>$ {m.total_sales}</td>
-                <td>$ {m.total_profit}</td>
+                <td>{m.order_quantity}</td>
+                <td>{m.total_amount}</td>
+                <td>$ {m.prepaid_amount}</td>
+                <td>$ {m.remaining_amount}</td>
+                <td>$ {m.paid_amount}</td>
+                <td>$ {Number(m.total_amount) - Number(m.total_cost)}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.specification)}>
                     詳細
@@ -272,7 +287,7 @@ function SaleCalculate() {
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={10} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>

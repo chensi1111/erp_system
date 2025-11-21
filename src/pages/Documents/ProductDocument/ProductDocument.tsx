@@ -85,10 +85,10 @@ function ProductDocument() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (specification:string,type:boolean) => {
+  const getDetail = async (specification:string,product_id:string,type:boolean) => {
     setType(type)
     try {
-      const res = await axios.post('/api/product/detail',{specification});
+      const res = await axios.post('/api/product/detail',{specification,product_id});
       if(res.data.code==='000'){
         setDetail(res.data.data);
         setOpenShow(true);
@@ -212,10 +212,10 @@ function ProductDocument() {
                 <td>{m.specification}</td>
                 <td>{m.product_name}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.specification,false)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.specification,m.product_id,false)}>
                     詳細
                   </button>
-                  <button className={style.editBtn} onClick={() => getDetail(m.specification,true)}>
+                  <button className={style.editBtn} onClick={() => getDetail(m.specification,m.product_id,true)}>
                     編輯
                   </button>
                   <button className={style.addBtn} onClick={() => handleCreateOpen(m.specification)}>

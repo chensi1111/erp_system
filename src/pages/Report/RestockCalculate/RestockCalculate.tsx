@@ -14,13 +14,14 @@ interface Report {
   manufactor:string,
   manufactor_name:string,
   total_quantity:string,
-  total_restock:string
+  total_price:string
 }
 interface Detail {
   restock_id:string,
   create_date:string,
   total_quantity:string,
-  total_price:string
+  total_price:string,
+  date:string
 }
 
 function RestockCalculate() {
@@ -30,7 +31,6 @@ function RestockCalculate() {
   const [searchType, setSearchType] = useState('manufactor');
   const [filter, setFilter] = useState({
     manufactor: '',
-    manufactor_name: '',
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -44,7 +44,7 @@ function RestockCalculate() {
     manufactor:"",
     manufactor_name:"",
     total_quantity:"",
-    total_restock:"",
+    total_price:"",
   })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
@@ -60,7 +60,7 @@ function RestockCalculate() {
     }
   };
   const getDetail = async (info:any) => {
-    const {manufactor,manufactor_name,total_quantity,total_restock} =info
+    const {manufactor,manufactor_name,total_quantity,total_price} =info
     try {
       const res = await axios.post('/api/report/restock_detail',{manufactor});
       if(res.data.code==='000'){
@@ -70,7 +70,7 @@ function RestockCalculate() {
           manufactor,
           manufactor_name,
           total_quantity,
-          total_restock,
+          total_price,
         })
       }
     } catch (error) {
@@ -82,18 +82,12 @@ function RestockCalculate() {
     if(searchType==='manufactor'){
       setFilter({
         manufactor: value,
-        manufactor_name: '',
-      })
-    }else{
-      setFilter({
-        manufactor: '',
-        manufactor_name: value,
       })
     }
   }
   const handleSetSearchType = (value:string) => {
     setSearchType(value);
-    setFilter({ manufactor: '', manufactor_name: '' });
+    setFilter({ manufactor: '' });
   }
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -121,10 +115,8 @@ function RestockCalculate() {
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
           <option value="manufactor">廠商編號</option>
-          <option value="manufactor_name">廠商名稱</option>
         </select>
         {searchType==='manufactor' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='manufactor_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
       <div className={style.dateContainer}>
     <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
@@ -136,7 +128,7 @@ function RestockCalculate() {
           setSelectedDate(newValue);
         }}
         maxDate={currentYear}
-        openTo="year"
+        openTo="month"
         views={['year', 'month']}
         yearsOrder="desc"
         format="YYYY/MM"
@@ -172,7 +164,7 @@ function RestockCalculate() {
                 <td>{m.manufactor}</td>
                 <td>{m.manufactor_name}</td>
                 <td>{m.total_quantity}</td>
-                <td>{"$ "+m.total_restock}</td>
+                <td>{"$ "+m.total_price}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m)}>
                     詳細
