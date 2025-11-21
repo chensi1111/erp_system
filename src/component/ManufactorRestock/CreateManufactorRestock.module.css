@@ -9,7 +9,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 800px;
+  width: 750px;
   height: fit-content;
   border: 2px solid black;
   border-radius: 10px;
@@ -44,11 +44,6 @@
   width: 100%;
 }
 
-.singleInput .inputTitle {
-  width: 70px;
-  white-space: nowrap;
-}
-
 .input,
 textarea {
   border: 1px solid gray;
@@ -75,7 +70,7 @@ textarea {
   min-width: 0;
 }
 
-.multipleInput .inputTitle {
+.inputTitle {
   width: 70px;
   white-space: nowrap;
 }
@@ -138,32 +133,32 @@ textarea {
 .singleInput table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; 
+  table-layout: fixed;
 }
 
 .singleInput th,
 .singleInput td {
   padding: 4px;
   text-align: center;
-  overflow: hidden; 
-  white-space: nowrap; 
-  text-overflow: ellipsis; 
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-weight: initial;
 }
-.singleInput td{
-    padding: 2px 8px;
+.singleInput td {
+  padding: 2px 8px;
 }
 .singleInput table input {
   border: 1px solid gray;
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
   padding: 4px;
 }
-.hideInput{
-    opacity: 0;
-    pointer-events: none;
+.hideInput {
+  opacity: 0;
+  pointer-events: none;
 }
 .disable {
-    border: none !important;
-    pointer-events: none;
+  border: none !important;
+  pointer-events: none;
 }

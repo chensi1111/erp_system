@@ -6,7 +6,7 @@ import type { RootState } from "../../store/store";
 import axios from "../../api/axios"
 import { toast } from "react-toastify";
 interface OrderDetail {
-  order_id:string,
+  order_no:string,
   create_date:string,
   product_id:string,
   specification:string,
@@ -28,6 +28,12 @@ interface OrderDetail {
   product_type3:string,
   product_type4:string,
   remark: string,
+  date:string,
+  transaction:string,
+  pay:string,
+  type:string,
+  amount:number,
+  paid_date:string
 }
 interface ShowProductOrderProps {
   onClose: () => void;
@@ -35,11 +41,28 @@ interface ShowProductOrderProps {
   onSuccess: () => void;
 }
 const formattedDate = (dateString: string) => {
+  return dayjs(dateString).format('YYYY/MM/DD');
+}
+const formattedTime = (dateString: string) => {
   return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
+}
+const getPrepaidPrice = (detail:OrderDetail) =>{
+  if(detail.type==='訂貨'){
+    return detail.amount;
+  }else{
+    return Number(detail.price) - Number(detail.amount);
+  }
+}
+const getRemainingPrice = (detail:OrderDetail) =>{
+  if(detail.type==='收貨'){
+    return detail.amount;
+  }else{
+    return Number(detail.price) - Number(detail.amount);
+  }
 }
 const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
-  const title=detail.order_id;
+  const title=detail.order_no;
   const list =detail.size_list.split(',').slice(0, 10)
   const totalQuantity = detail.quantities.reduce((sum, item) => {
     const qty = parseInt(item.quantity);
@@ -63,7 +86,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
 };
   const handleComplete = async() =>{
     try {
-      const response = await axios.post('/api/order/complete', {order_id:detail.order_id});
+      const response = await axios.post('/api/sale/order_complete', {order_no:detail.order_no});
       if(response.data.code=='000') {
         onSuccess()
         toast.success('取貨成功');
@@ -82,17 +105,31 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>訂貨單號</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.order_id}/>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.order_no}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>交易方式</div>
-               <input type="text" className={style.input} readOnly tabIndex={-1} value={'訂貨'}/>
+              <div className={style.inputTitle}>交易途徑</div>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.transaction}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>訂貨時間</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.create_date)}/>
+              <div className={style.inputTitle}>付款方式</div>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.pay}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>交易狀態</div>
+               <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.type}/>
+            </div>
+          </div>
+          <div className={style.multipleInput}>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>建檔時間</div>
+               <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedTime(detail.paid_date)}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>{detail.type==='訂貨' ?'訂貨日期':'收貨日期'}</div>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.date)}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -190,12 +227,12 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>預付訂金</div>
-              <input type="text" className={style.input} value={"$ "+detail.prepaid_price} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>{detail.type ==='訂貨' ? '預付訂金' : '已付訂金'}</div>
+              <input type="text" className={style.input} value={"$ "+getPrepaidPrice(detail)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>剩餘金額</div>
-              <input type="text" className={style.input} value={"$ "+detail.remaining_price} readOnly tabIndex={-1}/>
+              <div className={style.inputTitle}>{detail.type ==='訂貨' ? '剩餘尾款' : '結清尾款'}</div>
+              <input type="text" className={style.input} value={"$ "+getRemainingPrice(detail)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -205,7 +242,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
             </div>
           </div>
           <div className={style.buttons}>
-            <div className={classNames(style.button)} onClick={()=>handleComplete()}>取貨</div>
+            {detail.type ==='訂貨' && <div className={classNames(style.button)} onClick={()=>handleComplete()}>取貨</div>}
             <div className={classNames(style.button,style.cancel)} onClick={()=>onClose()}>關閉</div>
           </div>
         </div>

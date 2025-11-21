@@ -17,6 +17,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
   const [specification, setSpecification] = useState('')
   const [specificationList, setSpecificationList] =useState<specificationList[]>([])
   const [transaction, setTransaction] = useState('現場')
+  const [pay, setPay] = useState('現金')
   const [manufactor_id,setManufactorId] = useState('')
   const [brand_id,setBrandId] = useState('')
   const [size_id,setSizeId] = useState('')
@@ -34,7 +35,7 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
   const [handing_fee,setHandingFee] = useState(0)
   const [last_cost,setLastCost] = useState('')
   const [average_cost,setAverageCost] = useState('')
-  const create_date = dayjs().format('YYYY/MM/DD')
+  const [date,setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [remark, setRemark] = useState('');
   const [errorCode,setErrorCode]=useState('');
   const productIdDebounceRef = useRef<number | null>(null);
@@ -131,7 +132,11 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
       remark,
       total_quantity,
       size_list:rawSizeList,
-      handing_fee
+      handing_fee,
+      date,
+      isComplete:true,
+      type:'sale',
+      pay
     }
     try {
       const response = await axios.post('/api/sale/create', {...data});
@@ -197,8 +202,16 @@ const CreateProductSale=({onClose,onSuccess,}: {onClose: () => void;onSuccess: (
                 </select>
             </div>
             <div className={style.inputContainer}>
+              <div className={style.inputTitle}>付款方式</div>
+                <select className={style.select} value={pay} onChange={(e)=>setPay(e.target.value)}>  
+                  {transaction === '現場' &&<option value="現金">現金</option>}
+                  <option value="刷卡">刷卡</option>
+                  {transaction === '現場' &&<option value="現金券">現金券</option>}
+                </select>
+            </div>
+            <div className={style.inputContainer}>
               <div className={style.inputTitle}>銷貨日期</div>
-              <input type="text" className={classNames(style.input,style.disable)} value={create_date} readOnly/>
+              <input type="date" className={classNames(style.input)} value={date} onChange={(e)=>setDate(e.target.value)}/>
             </div>
           </div>
           <div className={style.singleInput}>

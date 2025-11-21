@@ -64,9 +64,9 @@ function StockHistory() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (change_number:string) => {
+  const getDetail = async (change_number:string,change_type:string) => {
     try {
-      const res = await axios.post('/api/stock/history_detail',{change_number});
+      const res = await axios.post('/api/stock/history_detail',{change_number,change_type});
       if(res.data.code==='000'){
         setDetail(res.data.data);
         setOpenShow(true);
@@ -105,7 +105,7 @@ function StockHistory() {
   const formattedQuantity = (type:string,value:number|string) => {
     if(type==='訂貨'||type==='訂貨取消'){
       return ''
-    }else if(type==='銷貨'|| type ==='進貨取消'){
+    }else if(type==='銷貨'|| type ==='進貨取消' || type==='收貨'){
       return `- ${value}`
     }else {
       return `+ ${value}`
@@ -156,6 +156,8 @@ function StockHistory() {
                  <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
+              <th>商品型號</th>
+              <th>商品規格</th>
               <th>商品名稱</th>
               <th>類型</th>
               <th>變更量</th>
@@ -163,21 +165,23 @@ function StockHistory() {
             </tr>
           </thead>
           <tbody>
-            {data.map((m,index) => (
-              <tr key={index}>
+            {data.map((m) => (
+              <tr key={`${m.change_number}-${m.change_type}`}>
                 <td>{m.change_number}</td>
+                <td>{m.product_id}</td>
+                <td>{m.specification}</td>
                 <td>{m.product_name}</td>
-                <td className={classNames(m.change_type==='進貨' && style.restockType,m.change_type==='銷貨' && style.saleType,m.change_type==='訂貨' && style.orderType,(m.change_type==='銷貨取消'||m.change_type==='進貨取消'||m.change_type==='訂貨取消') && style.cancelType)}>{m.change_type}</td>
+                <td className={classNames(m.change_type==='進貨' && style.restockType,m.change_type==='銷貨' && style.saleType,(m.change_type==='訂貨'||m.change_type==='收貨') && style.orderType,(m.change_type==='銷貨取消'||m.change_type==='進貨取消'||m.change_type==='訂貨取消'||m.change_type==='收貨取消') && style.cancelType)}>{m.change_type}</td>
                 <td>{formattedQuantity(m.change_type,m.total_quantity)}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.change_number)}>
+                  <button className={style.detailBtn} onClick={() => getDetail(m.change_number,m.change_type)}>
                     詳細
                   </button>
                 </td>
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={5} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>

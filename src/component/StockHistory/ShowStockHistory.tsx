@@ -37,14 +37,14 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
     if(!Number(value)||type==='訂貨'|| type ==='訂貨取消'){
       return ''
     }
-    if(type==='銷貨'|| type ==='進貨取消'){
+    if(type==='銷貨'|| type ==='進貨取消' || type==='收貨'){
       return `- ${value}`
     }else {
       return `+ ${value}`
     }
   }
   const formattedAvailableQuantity = (type:string,value:number|string) => {
-    if(!Number(value)){
+    if(!Number(value) || type==='收貨'){
       return ''
     }
     if(type==='訂貨'||type==='銷貨'||type==='進貨取消'){
@@ -54,10 +54,10 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
     }
   }
   const formattedRemainingQuantity = (type:string,value:number|string) => {
-    if(!Number(value)|| (type!=='訂貨' && type!=='訂貨取消')){
+    if(!Number(value)|| (type!=='訂貨' && type!=='訂貨取消' && type!=='收貨' && type!=='收貨取消')){
       return ''
     }
-    if(type==='訂貨'){
+    if(type==='訂貨'||type==='收貨取消'){
       return `+ ${value}`
     }else {
       return `- ${value}`
@@ -122,6 +122,16 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>剩餘金額</div>
+              <input type="text" className={style.input} value={"$ "+detail.remaining_price} readOnly tabIndex={-1}/>
+            </div>
+          </div>}
+          {( detail.change_type ==='收貨' || detail.change_type ==='收貨取消') && <div className={style.multipleInput}>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>已付訂金</div>
+              <input type="text" className={style.input} value={"$ "+detail.prepaid_price} readOnly tabIndex={-1}/>
+            </div>
+            <div className={style.inputContainer}>
+              <div className={style.inputTitle}>尾款金額</div>
               <input type="text" className={style.input} value={"$ "+detail.remaining_price} readOnly tabIndex={-1}/>
             </div>
           </div>}
