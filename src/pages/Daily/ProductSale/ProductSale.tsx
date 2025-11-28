@@ -1,9 +1,12 @@
 import style from "./ProductSale.module.css";
 import { FaPlus } from "react-icons/fa6";
-import CreateProductSale from "../../../component/ProductSale/CreateProductSale";
-import ShowProductSale from "../../../component/ProductSale/ShowProductSale";
-import CreateProductOrder from "../../../component/ProductOrder/CreateProductOrder";
-import ShowProductOrder from "../../../component/ProductOrder/ShowProductOrder";
+import { formattedDate } from "../../../utils/formattedTime";
+import { SaleTypeMap } from "../../../utils/map";
+import CreateProductSale from "../../../component/ProductOperation/ProductSale/CreateProductSale";
+import ShowProductSale from "../../../component/ProductOperation/ProductSale/ShowProductSale";
+import CreateProductOrder from "../../../component/ProductOperation/ProductOrder/CreateProductOrder";
+import ShowProductOrder from "../../../component/ProductOperation/ProductOrder/ShowProductOrder";
+import ShowOrderList from "../../../component/ProductOperation/ProductOrder/ShowOrderList";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import dayjs, { Dayjs } from "dayjs";
@@ -27,26 +30,34 @@ interface Sale {
   total_quantity:number;
   price:number;
   average_cost:number;
-  date:string,
+  paid_date:string,
   handing_fee:number;
   quantities:[{
     size:string,
     quantity:string
   }];
-  type:string,
+  type:number,
   amount:number;
 }
 interface Summary {
-  total_quantity:number;
-  total_paid:number;
-  total_profit:number;
-  total_cost:number;
-  total_handing_fee:number;
-  total_prepaid:number;
-  total_remaining:number;
+  total_prepaid_qty:string,
+  total_prepaid:string,
+  total_refund_prepaid_qty:string,
+  total_refund_prepaid:string,
+  total_remaining_qty:string,
+  total_remaining:string,
+  total_sale_qty:string,
+  total_paid:string,
+  total_return_qty:string,
+  total_return:string,
+  total_handing_fee:string,
+  net_cost:string,
+  end_of_day_balance:string,
+  net_gross_profit:string,
+  net_gross_profit_percentage:string,
 }
 interface SaleDetail {
-  transaction:string,
+  transaction:number,
   order_no:string,
   create_date:string,
   product_id:string,
@@ -63,13 +74,13 @@ interface SaleDetail {
   }],
   total_quantity:number,
   price:number,
-  handing_fee:number,
   average_cost:number,
   product_type1:string,
   product_type2:string,
   product_type3:string,
   product_type4:string,
   remark: string,
+  paid_at:string
 }
 function ProductSale() {
   const dispatch = useDispatch()
@@ -86,49 +97,60 @@ function ProductSale() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [type,setType] = useState(0);
   const [openCreate,setOpenCreate] = useState(false);
   const [openOrder,setOpenOrder] = useState(false);
   const [openShow,setOpenShow] = useState(false);
   const [openShowOrder,setOpenShowOrder] = useState(false);
+  const [openOrderList,setOpenOrderList] = useState(false)
   const [data, setDate] = useState<Sale[]>([]);
   const [summary,setSummary] = useState<Summary>({
-    total_quantity:0,
-    total_paid:0,
-    total_profit:0,
-    total_cost:0,
-    total_handing_fee:0,
-    total_prepaid:0,
-    total_remaining:0,
+    total_prepaid_qty:'0',
+    total_prepaid:'0',
+    total_refund_prepaid_qty:'0',
+    total_refund_prepaid:'0',
+    total_remaining_qty:'0',
+    total_remaining:'0',
+    total_sale_qty:'0',
+    total_paid:'0',
+    total_return_qty:'0',
+    total_return:'0',
+    total_handing_fee:'0',
+    net_cost:'0',
+    end_of_day_balance:'0',
+    net_gross_profit:'0',
+    net_gross_profit_percentage:'0',
   });
-  const [detail, setDetail] = useState<SaleDetail>(
-    {
-      transaction:"",
-      order_no:"",
-      create_date:"",
-      product_id:"",
-      specification:"",
-      product_name:"",
-      manufactor:"",
-      brand:"",
-      size:"",
-      color:"",
-      size_list:"",
-      quantities:[{
-        size:"",
-        quantity:""
-      }],
-      total_quantity:0,
-      price:0,
-      handing_fee:0,
-      average_cost:0,
-      product_type1:"",
-      product_type2:"",
-      product_type3:"",
-      product_type4:"",
-      remark: "",
-    }
-  );
+  const [detail, setDetail] = useState<SaleDetail>({
+    transaction:0,
+    order_no:'',
+    create_date:'',
+    product_id:'',
+    specification:'',
+    product_name:'',
+    manufactor:'',
+    brand:'',
+    size:'',
+    color:'',
+    size_list:'',
+    quantities:[{
+      size:'',
+      quantity:''
+    }],
+    total_quantity:0,
+    price:0,
+    average_cost:0,
+    product_type1:'',
+    product_type2:'',
+    product_type3:'',
+    product_type4:'',
+    remark: '',
+    paid_at:''
+  });
   const debounceRef = useRef<number | null>(null);
+  const checkToday = (dateString: string) => {
+    return dayjs(dateString).isSame(dayjs(), 'day');
+  }
   const getList = async () => {
     try {
       const res = await axios.post('/api/sale/list',{page,pageSize:10,filter,sort,showOneDay,selectedDate});
@@ -143,15 +165,23 @@ function ProductSale() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
+  const handleCreate =(type:number) =>{
+    setType(type);
+    setOpenCreate(true);
+  }
+  const handleOrder =(type:number) =>{
+    setType(type);
+    setOpenOrder(true);
+  }
   
-  const getDetail = async (order_no:string,type:string) => {
+  const getDetail = async (order_no:string,type:number) => {
     try {
       const res = await axios.post('/api/sale/detail',{order_no,type});
       if(res.data.code==='000'){
         setDetail(res.data.data);
-        if(type==='銷貨'){
+        if(type===0||type===1){
           setOpenShow(true);
-        }else if(type==='訂貨'||type==='收貨'){
+        }else if(type===2||type===3){
           setOpenShowOrder(true);
         }
       }
@@ -160,8 +190,8 @@ function ProductSale() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleDelete = async (order_no:string,type:string) => {
-    if(type==='銷貨'){
+  const handleDelete = async (order_no:string,type:number) => {
+    if(type===0){
       try {
       const res = await axios.post('/api/sale/delete',{order_no});
       if(res.data.code==='000'){
@@ -176,9 +206,9 @@ function ProductSale() {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
-    }else if(type==='訂貨'){
+    }else if(type===2){
       try {
-      const res = await axios.post('/api/sale/delete_order',{order_no});
+      const res = await axios.post('/api/sale/delete_order',{order_no,type:5});
       if(res.data.code==='000'){
         toast.success('取消成功');
         const updateData = data.filter(item => item.order_no !== order_no);
@@ -191,7 +221,7 @@ function ProductSale() {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
-    }else if(type==='收貨'){
+    }else if(type===3){
       try {
       const res = await axios.post('/api/sale/delete_pickup',{order_no});
       if(res.data.code==='000'){
@@ -239,9 +269,6 @@ function ProductSale() {
       dispatch(getProductInfoRelation(response.data.data))
     }
   }
-  const formattedDate = (dateString: string) => {
-    return dayjs(dateString).format('YYYY/MM/DD');
-  }
   const formattedQuantity = (quantities: any[]) => {
   return (
     <div className={style.sizeBadges}>
@@ -256,6 +283,24 @@ function ProductSale() {
     </div>
   );
 };
+  const getProfit = (data:any) => {
+    if(data.type ===0 || data.type === 3){
+      return `$ ${(data.price - data.average_cost) * data.total_quantity}`
+    }else if (data.type === 1){
+      return `$ -${((data.price - data.average_cost) * data.total_quantity)}`
+    }else{
+      return ""
+    }
+  }
+  const getPrepaid = (data:any) => {
+    if(data.type === 2){
+      return `$ ${data.amount}`
+    }else if(data.type === 4){
+      return `$ -${data.amount}`
+    }else{
+      ''
+    }
+  }
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -281,13 +326,16 @@ function ProductSale() {
       onSuccess={() => {
         setOpenCreate(false);
         getList(); 
-      }}/>}
+      }}
+      type={type}
+      />}
       {openOrder && <CreateProductOrder 
       onClose={() => setOpenOrder(false)} 
       onSuccess={() => {
         setOpenOrder(false);
         getList(); 
-      }}/>}
+      }}
+      type={type}/>}
       {openShow && <ShowProductSale 
       onClose={() => setOpenShow(false)} detail={detail} />}
       {openShowOrder && <ShowProductOrder 
@@ -297,14 +345,23 @@ function ProductSale() {
         setOpenShowOrder(false);
         getList(); 
       }} />}
+      {openOrderList && <ShowOrderList 
+      onClose={() => setOpenOrderList(false)} 
+      onSuccess={() => {
+        setOpenOrderList(false);
+        getList(); 
+      }} />}
       <div className={style.topContainer}>
-        <div className={style.title}>前台銷貨</div>
+        <div className={style.title}>前台作業</div>
         <div className={style.buttons}>
-          <div className={style.button} onClick={()=>setOpenOrder(true)}><FaPlus/>新增訂貨</div>
-          <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>新增銷貨</div>
+          <div className={classNames(style.button,style.order)} onClick={()=>setOpenOrderList(true)} ><FaPlus/>顯示訂貨</div>
+          <div className={style.button} onClick={()=>handleOrder(2)}><FaPlus/>新增訂貨</div>
+          <div className={style.button} onClick={()=>handleCreate(0)}><FaPlus/>新增銷貨</div>
+          <div className={classNames(style.button,style.refund)} onClick={()=>handleCreate(1)}><FaPlus/>新增退貨</div>
         </div>
       </div>
-      <div className={style.searchContainer}>
+      <div className={style.allSearch}>
+        <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
           <option value="order_no">單號</option>
           <option value="product_id">商品型號</option>
@@ -314,13 +371,12 @@ function ProductSale() {
         {searchType==='product_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
         {searchType==='specification' && <input type="text" placeholder="搜尋關鍵字" value={filter.specification} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
-      <div className={style.infoContainer}>
-        <div className={style.timeContainer}>
+      <div className={style.timeContainer}>
         <FormControlLabel
           control={
           <Switch checked={showOneDay} onChange={(e) => setShowOneDay(e.target.checked)}/>
         }
-        label={showOneDay ? '顯示單日' : '顯示全部'}
+        label={showOneDay ? '顯示單日' : '顯示整月'}
       />
        {showOneDay && <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
         <DatePicker
@@ -334,18 +390,64 @@ function ProductSale() {
           yearsOrder="desc"
         />
       </LocalizationProvider>}
+      {!showOneDay && <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
+        <DatePicker
+        label="選擇年月"
+        value={selectedDate}
+        onChange={(newValue) => {
+          if(!newValue) return
+          setSelectedDate(newValue);
+        }}
+        maxDate={currentYear}
+        openTo="month"
+        views={['year', 'month']}
+        yearsOrder="desc"
+        format="YYYY/MM"
+      />
+      </LocalizationProvider>}
         </div>
-      <div className={style.infos}>
-        <div className={style.info}>總筆數 : <span>{total}</span></div>
-        <div className={style.info}>總金額 : <span>$ {Number(summary.total_paid) + Number(summary.total_prepaid) + Number(summary.total_remaining)}</span></div>
-        <div className={style.info}>總成本 : <span>$ {summary.total_cost}</span></div>
-        <div className={style.info}>網路手續 : <span>$ {summary.total_handing_fee}</span></div>
-        <div className={style.info}>銷售 : <span>$ {summary.total_paid}</span></div>
-        <div className={style.info}>訂金 : <span>$ {summary.total_prepaid}</span></div>
-        <div className={style.info}>尾款 : <span>$ {summary.total_remaining}</span></div>
-        <div className={style.info}>毛利 : <span>$ {summary.total_profit}</span></div>
-        <div className={style.info}>淨利 : <span>$ {Number(summary.total_profit) - Number(summary.total_handing_fee)}</span></div>
       </div>
+      <div className={style.infos}>
+        <div className={style.info}>
+          <div className={style.infoTitle}>總筆數</div>
+          <div className={style.infoValue}>{total}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>銷貨數 / 額</div>
+          <div className={style.infoValue}>{summary.total_sale_qty} / $ {summary.total_paid}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>退貨數 / 額</div>
+          <div className={style.infoValue}>{summary.total_return_qty} / $ {summary.total_return}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>訂貨數 / 額</div>
+          <div className={style.infoValue}>{summary.total_prepaid_qty} / $ {summary.total_prepaid}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>退訂數 / 額</div>
+          <div className={style.infoValue}>{summary.total_refund_prepaid_qty} / $ {summary.total_refund_prepaid}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>取貨數 / 額</div>
+          <div className={style.infoValue}>{summary.total_remaining_qty} / $ {summary.total_remaining}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>總成本</div>
+          <div className={style.infoValue}>$ {summary.net_cost}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>結餘</div>
+          <div className={style.infoValue}>$ {summary.end_of_day_balance}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>毛利</div>
+          <div className={style.infoValue}>$ {summary.net_gross_profit}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>毛利率</div>
+          <div className={style.infoValue}>{(summary.net_gross_profit_percentage)}%</div>
+        </div>
       </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
@@ -366,7 +468,7 @@ function ProductSale() {
               <th>總金額</th>
               <th>訂金</th>
               <th>尾款</th>
-              <th>淨利</th>
+              <th>毛利</th>
               <th>日期</th>
               <th>操作</th>
             </tr>
@@ -374,28 +476,24 @@ function ProductSale() {
           <tbody>
             {data.map((m) => (
               <tr key={`${m.order_no}-${m.type}`}>
-                <td className={classNames(m.type !=='銷貨' && style.order)}>{m.order_no}</td>
-                <td>{m.type}</td>
+                <td>{m.order_no}</td>
+                <td className={classNames(m.type===0 && style.saleType,(m.type===2||m.type===3) && style.orderType,(m.type===1||m.type===4) && style.refundType)}>{SaleTypeMap[m.type]}</td>
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
                 <td>{m.total_quantity}<br/>{formattedQuantity(m.quantities)}</td>
                 <td>$ {m.price*m.total_quantity}</td>
-                <td>{m.type==='訂貨' ? "$ " + m.amount : ""}</td>
-                <td>{m.type==='收貨' ? "$ " + m.amount : ""}</td>
-                <td>{m.type==='銷貨'
-                    ? "$ " + (((m.price - m.average_cost) * m.total_quantity) - (m.handing_fee || 0))
-                    : ""
-                  }
-                </td>    
-                <td>{formattedDate(m.date)}</td>                
+                <td>{getPrepaid(m)}</td>
+                <td>{m.type===3 ? "$ " + m.amount : ""}</td>
+                <td>{getProfit(m)}</td>    
+                <td>{formattedDate(m.paid_date)}</td>                
                 <td>
                   <div className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.order_no,m.type)}>
                     詳細
                   </button>
-                  <button className={style.deleteBtn} onClick={()=>handleDelete(m.order_no,m.type)}>
+                  {checkToday(m.paid_date) && m.type!==4 && <button className={style.deleteBtn} onClick={()=>handleDelete(m.order_no,m.type)}>
                     取消
-                  </button>
+                  </button>}
                   </div>
                 </td>
               </tr>

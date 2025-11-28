@@ -13,15 +13,25 @@ import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
 interface Report {
   manufactor:string,
   manufactor_name:string,
-  total_quantity:string,
-  total_price:string
+  total_in_quantity: string,
+  total_in_price: string,
+  total_return_quantity: string,
+  total_return_price: string
 }
 interface Detail {
   restock_id:string,
   create_date:string,
-  total_quantity:string,
-  total_price:string,
+  total_in_quantity:string,
+  total_in_price:string,
+  total_return_quantity:string,
+  total_return_price:string,
   date:string
+}
+interface Summary {
+  total_in_quantity: string,
+  total_in_price: string,
+  total_return_quantity: string,
+  total_return_price: string
 }
 
 function RestockCalculate() {
@@ -34,8 +44,12 @@ function RestockCalculate() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalRestock, setTotalRestock] = useState('')
-  const [totalQuantity, setTotalQuantity] = useState('')
+  const [summary,setSummary] = useState<Summary>({
+    total_in_quantity: '0',
+    total_in_price: '0',
+    total_return_quantity: '0',
+    total_return_price: '0'
+  });
   const [openShow,setOpenShow] = useState(false);
   const [data, setData] = useState<Report[]>([]);
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
@@ -43,8 +57,10 @@ function RestockCalculate() {
   const [manufactorInfo,setManufactorInfo] = useState({
     manufactor:"",
     manufactor_name:"",
-    total_quantity:"",
-    total_price:"",
+    total_in_quantity:"",
+    total_in_price:"",
+    total_return_quantity:"",
+    total_return_price:""
   })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
@@ -52,15 +68,14 @@ function RestockCalculate() {
       const res = await axios.post('/api/report/restock_list',{page,pageSize:10,filter,sort,selectedDate:selectedDate?.format("YYYY-MM")});
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalRestock(res.data.data.summary.total_restock_amount);
-      setTotalQuantity(res.data.data.summary.total_restock_volume);
+      setSummary(res.data.data.summary);
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
   const getDetail = async (info:any) => {
-    const {manufactor,manufactor_name,total_quantity,total_price} =info
+    const {manufactor,manufactor_name,total_in_price,total_in_quantity,total_return_quantity,total_return_price} =info
     try {
       const res = await axios.post('/api/report/restock_detail',{manufactor});
       if(res.data.code==='000'){
@@ -69,8 +84,10 @@ function RestockCalculate() {
         setManufactorInfo({
           manufactor,
           manufactor_name,
-          total_quantity,
-          total_price,
+          total_in_quantity,
+          total_in_price,
+          total_return_quantity,
+          total_return_price
         })
       }
     } catch (error) {
@@ -110,7 +127,7 @@ function RestockCalculate() {
       {openShow && <ShowRestockCalculate 
       onClose={() => setOpenShow(false)} detail={detail} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
       <div className={style.topContainer}>
-        <div className={style.title}>廠商進貨總表</div>
+        <div className={style.title}>廠商進退貨總表</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
@@ -136,8 +153,10 @@ function RestockCalculate() {
       />
     </LocalizationProvider>
         <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總進貨量:</span>{totalQuantity}</div>
-          <div className={style.infoItem}><span>總進貨額:</span>$ {totalRestock}</div>
+          <div className={style.infoItem}><span>總進貨量:</span>{summary.total_in_quantity}</div>
+          <div className={style.infoItem}><span>總進貨額:</span>$ {summary.total_in_price}</div>
+          <div className={style.infoItem}><span>總退貨量:</span>{summary.total_return_quantity}</div>
+          <div className={style.infoItem}><span>總退貨額:</span>$ {summary.total_return_price}</div>
         </div>
     </div>
        <div className={style.tableContainer}>
@@ -155,6 +174,8 @@ function RestockCalculate() {
               <th>廠商名稱</th>
               <th>總進貨量</th>
               <th>總進貨額</th>
+              <th>總退貨量</th>
+              <th>總退貨額</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -163,8 +184,10 @@ function RestockCalculate() {
               <tr key={m.manufactor}>
                 <td>{m.manufactor}</td>
                 <td>{m.manufactor_name}</td>
-                <td>{m.total_quantity}</td>
-                <td>{"$ "+m.total_price}</td>
+                <td>{m.total_in_quantity}</td>
+                <td>{"$ "+m.total_in_price}</td>
+                <td>{m.total_return_quantity}</td>
+                <td>{"$ "+m.total_return_price}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m)}>
                     詳細

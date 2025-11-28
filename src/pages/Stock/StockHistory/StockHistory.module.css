@@ -157,15 +157,19 @@ table .icon{
   font-weight: bold;
 }
 .saleType {
-  color: #e53935;
+  color: rgb(17, 115, 212);
   font-weight: bold;
 }
-.cancelType {
-  color: rgb(17, 115, 212);
+.refundType {
+  color: #e53935;
   font-weight: bold;
 }
 .orderType {
   color: purple;
+  font-weight: bold;
+}
+.cancelType {
+  color:brown;
   font-weight: bold;
 }
 

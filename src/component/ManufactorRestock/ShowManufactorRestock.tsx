@@ -115,7 +115,7 @@ const ShowManufactorRestock=({ onClose, detail }: ShowManufactorRestockProps)=> 
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>進價</div>
+              <div className={style.inputTitle}>價格</div>
               <input type="text" className={classNames(style.input)} value={"$ "+detail.price} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>

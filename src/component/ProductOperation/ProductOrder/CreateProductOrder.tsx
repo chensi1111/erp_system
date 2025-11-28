@@ -2,78 +2,99 @@ import style from "./CreateProductOrder.module.css";
 import { useState,useRef,useEffect } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import axios from '../../api/axios'
+import axios from '../../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
+import type { RootState } from "../../../store/store";
+import { TransactionTypeMap } from "../../../utils/map";
+import { getProductFormat } from "../../../utils/productInfoMap";
 interface specificationList{
   specification:""
 }
-const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
+interface productInfo{
+  product_name:string,
+  manufactor:string,
+  brand:string,
+  size:string,
+  color:string,
+  product_type1:string,
+  product_type2:string,
+  product_type3:string,
+  product_type4:string,
+  recommended_price:string,
+  last_cost:number,
+  cumulative_cost:number,
+  cumulative_in_quantity:number,
+  size_list:string,
+  stock_qty:{size:string,available_quantity:number}[]
+}
+const CreateProductOrder=({onClose,onSuccess,type}: {onClose: () => void;onSuccess: () => void;type:number})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const [isCreate, setIsCreate] =useState(false)
   const [product_id, setProduct_id] = useState('');
-  const [product_name, setProduct_name] = useState('');
   const [specification, setSpecification] = useState('')
   const [specificationList, setSpecificationList] =useState<specificationList[]>([])
-  const transaction='現場'
-  const [pay, setPay] = useState('現金')
-  const [manufactor_id,setManufactorId] = useState('')
-  const [brand_id,setBrandId] = useState('')
-  const [size_id,setSizeId] = useState('')
+  const [info, setInfo] = useState<productInfo>({
+    product_name: "",
+    manufactor: "",
+    brand: "",
+    size: "",
+    color: "",
+    product_type1: "",
+    product_type2: "",
+    product_type3: "",
+    product_type4: "",
+    recommended_price: "",
+    last_cost: 0,
+    cumulative_cost: 0,
+    cumulative_in_quantity: 0,
+    size_list: "",
+    stock_qty: []
+   });
+  const transaction=0
+  const [pay, setPay] = useState(0)
   const [sizeList, setSizeList] = useState<string[]>([]);
-  const [rawSizeList, setRawSizeList] = useState('')
-  const [color_id,setColorId] = useState('')
   const [quantities, setQuantities] = useState<{ size: string; quantity: string,safe_stock:string }[]>(
     Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "",safe_stock:"" }))
   );
-  const [product_type1,setProductType1] = useState('')
-  const [product_type2,setProductType2] = useState('')
-  const [product_type3,setProductType3] = useState('')
-  const [product_type4,setProductType4] = useState('')
-  const [recommended_price,setRecommendedPrice] = useState('')
   const [prepaid_price,setPrepaidPrice] = useState('')
   const remaining_price = () => {
-    return (Number(recommended_price)*total_quantity) - Number(prepaid_price)
+    return (Number(info.recommended_price)*total_quantity) - Number(prepaid_price)
   }
-  const [last_cost,setLastCost] = useState('')
-  const [average_cost,setAverageCost] = useState('')
   const [date,setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [remark, setRemark] = useState('');
   const [errorCode,setErrorCode]=useState('');
   const productIdDebounceRef = useRef<number | null>(null);
   const specificationDebounceRef = useRef<number | null>(null);
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
+const setRecommendedPrice = (price: string) => {
+  setInfo(prev => ({
+    ...prev,
+    recommended_price: price
+  }));
 };
+const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
+  if(total_quantity===0) return 0;
+  return (cumulative_cost/total_quantity).toFixed(2);
+}
   const clearProductInfo = () =>{
-    setProduct_name('')
-    setManufactorId('')
-    setBrandId('')
-    setSizeId('')
-    setColorId('')
-    setProductType1('')
-    setProductType2('')
-    setProductType3('')
-    setProductType4('')
-    setRecommendedPrice('')
-    setLastCost('')
-    setAverageCost('')
+    setInfo({
+      product_name: "",
+      manufactor: "",
+      brand: "",
+      size: "",
+      color: "",
+      product_type1: "",
+      product_type2: "",
+      product_type3: "",
+      product_type4: "",
+      recommended_price: "",
+      last_cost: 0,
+      cumulative_cost: 0,
+      cumulative_in_quantity: 0,
+      size_list: "",
+      stock_qty: []
+    })
     setSizeList([])
-    setRawSizeList('')
     setPrepaidPrice('')
   }
   const getSpecification = async() => {
@@ -92,19 +113,7 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
       const response = await axios.post('/api/sale/productInfo',{specification})
       if(response.data.code==='000'){
         const info = response.data.data
-        setProduct_name(info.product_name)
-        setManufactorId(info.manufactor)
-        setBrandId(info.brand)
-        setSizeId(info.size)
-        setColorId(info.color)
-        setProductType1(info.product_type1)
-        setProductType2(info.product_type2)
-        setProductType3(info.product_type3)
-        setProductType4(info.product_type4)
-        setRecommendedPrice(info.recommended_price)
-        setLastCost(info.last_cost)
-        setAverageCost(info.average_cost)
-        setRawSizeList(info.size_list)
+        setInfo(info)
         if (info.size_list) {
           const list = info.size_list.split(',').slice(0, 10); // 最多10個
           setSizeList(list);
@@ -132,16 +141,16 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
       transaction,
       product_id,
       specification,
-      product_name,
+      product_name:info.product_name,
       quantities,
-      price:recommended_price,
+      price:info.recommended_price,
       remark,
       total_quantity,
-      size_list:rawSizeList,
+      size_list:info.size_list,
       prepaid_price,
       remaining_price:remaining_price(),
       date,
-      type:'order',
+      type,
       pay
     }
     try {
@@ -199,13 +208,13 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-                <input type="text" className={classNames(style.input,style.disable)} value={transaction} readOnly/>
+                <input type="text" className={classNames(style.input,style.disable)} value={TransactionTypeMap[transaction]} readOnly/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>付款方式</div>
-                <select className={style.select} value={pay} onChange={(e)=>setPay(e.target.value)}>  
-                  <option value="現金">現金</option>
-                  <option value="現金券">現金券</option>
+                <select className={style.select} value={pay} onChange={(e)=>setPay(Number(e.target.value))}>  
+                  <option value="0">現金</option>
+                  <option value="2">現金券</option>
                 </select>
             </div>
             <div className={style.inputContainer}>
@@ -235,43 +244,43 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品名稱</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1} value={product_name}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1} value={info.product_name}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商</div>
-              <input type="text" value={getProductFormat('manufactor',manufactor_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('manufactor',info.manufactor,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>品牌</div>
-              <input type="text" value={getProductFormat('brand',brand_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('brand',info.brand,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" value={getProductFormat('size',size_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('size',info.size,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" value={getProductFormat('color',color_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('color',info.color,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別1</div>
-              <input type="text" value={getProductFormat('type',product_type1)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',info.product_type1,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別2</div>
-              <input type="text" value={getProductFormat('type',product_type2)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',info.product_type2,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別3</div>
-              <input type="text" value={getProductFormat('type',product_type3)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',info.product_type3,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別4</div>
-              <input type="text" value={getProductFormat('type',product_type4)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',info.product_type4,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
           </div>
           {sizeList.length!==0 && <div className={style.singleInput}>
@@ -293,12 +302,14 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
                       <td key={index} className={classNames(!sizeList[index] && style.hideInput)}>
                         <input type="text" 
                           value={quantities[index].quantity}
+                          placeholder={'餘 '+(info?.stock_qty[index]?.available_quantity || '0')}
                           onChange={(e) => {
                             const newQuantities = [...quantities];
                             newQuantities[index].quantity = e.target.value;
                             setQuantities(newQuantities);
                           }}
                           maxLength={3}
+                          className={style.sizeInput}
                         />
                       </td>
                     ))}
@@ -310,21 +321,21 @@ const CreateProductOrder=({onClose,onSuccess,}: {onClose: () => void;onSuccess: 
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>售價</div>
-              <input type="text" className={classNames(style.input,!specification && style.disable)} value={recommended_price} onChange={(e)=>setRecommendedPrice(e.target.value)}/>
+              <input type="text" className={classNames(style.input,!specification && style.disable)} value={info.recommended_price} onChange={(e)=>setRecommendedPrice(e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最近進價</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+last_cost} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+info.last_cost} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>平均進價</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+average_cost} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+getAverageCost(info.cumulative_cost,info.cumulative_in_quantity)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+Number(recommended_price)*total_quantity} readOnly tabIndex={-1}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} value={"$ "+Number(info.recommended_price)*total_quantity} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>

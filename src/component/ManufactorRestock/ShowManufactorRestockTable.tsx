@@ -1,21 +1,14 @@
 import style from "./ShowManufactorRestockTable.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+import { formattedDate,formattedTime } from "../../utils/formattedTime";
+import { getProductFormat } from "../../utils/productInfoMap";
+import { RestockTypeMap } from "../../utils/map";
 const ShowManufactorRestockTable=({onClose,detail}: {onClose: () => void,detail:any})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const restock = detail.restock
   const items =detail.items
-  const formattedDate = (dateString: string) => {
-    return dayjs(dateString).format('YYYY/MM/DD');
-  }
-  const formattedTime = (dateString: string) => {
-    return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
-  }
-  const getProductFormat = ( id: string) => {
-    return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-  };
   const formattedQuantity = (quantities: any[]) => {
   return (
     <div className={style.sizeBadges}>
@@ -41,12 +34,12 @@ const getTotalPrice = () => {
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
-        <div className={style.title}>{restock.restock_id}</div>
+        <div className={style.title}>{`${restock.type===0 ? '進貨單': '退貨單'} ${restock.restock_id}`}</div>
         <div className={style.allInputs}>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-              <input type="text" className={classNames(style.input,style.disable)} value={restock.transaction} tabIndex={-1} readOnly/>
+              <input type="text" className={classNames(style.input,style.disable)} value={RestockTypeMap[restock.transaction]} tabIndex={-1} readOnly/>
             </div>
           </div>
           <div className={style.multipleInput}>
@@ -62,7 +55,7 @@ const getTotalPrice = () => {
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>廠商</div>
                 <input className={classNames(style.input,style.disable)} value={restock.manufactor} tabIndex={-1} readOnly/>
-              <input type="text" disabled className={style.selectName} value={getProductFormat(restock.manufactor)} tabIndex={-1} readOnly></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',restock.manufactor,productInfoRelation)} tabIndex={-1} readOnly></input>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>

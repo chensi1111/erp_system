@@ -1,9 +1,9 @@
 import style from "./ShowBrandDocument.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+import { formattedTime } from "../../utils/formattedTime";
 interface BrandDetail {
   brand_id: string;
   brand_name:  string;
@@ -15,9 +15,6 @@ interface ShowBrandDocumentProps {
   onSuccess: () => void;
   detail: BrandDetail;
   type: boolean;
-}
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 const ShowBrandDocument=({ onClose,onSuccess, detail,type }: ShowBrandDocumentProps)=> {
@@ -52,7 +49,7 @@ const ShowBrandDocument=({ onClose,onSuccess, detail,type }: ShowBrandDocumentPr
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔日期</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

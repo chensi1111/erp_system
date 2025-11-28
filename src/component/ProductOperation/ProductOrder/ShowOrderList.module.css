@@ -9,7 +9,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 800px;
+  width: 1200px;
   height: fit-content;
   border: 2px solid black;
   border-radius: 10px;
@@ -22,78 +22,6 @@
   padding: 20px 10px 10px;
   background-color: rgb(240, 240, 240);
   border-radius: 10px;
-}
-
-.title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.singleInput {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.singleInput .inputContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.inputTitle {
-  width: 70px;
-  white-space: nowrap;
-}
-.textarea {
-  flex: 1;
-  min-width: 0;
-  height: 80px;
-  padding: 3px 5px;
-  box-sizing: border-box;
-  resize: none;
-}
-.input,
-.textarea {
-  border: none !important;
-  pointer-events: none;
-}
-.input.edit,
-.textarea.edit {
-  border: 1px solid gray !important;
-  pointer-events: initial;
-}
-.singleInput .input {
-  flex: 1;
-  min-width: 0;
-  height: 24px;
-  padding: 3px 5px;
-  box-sizing: border-box;
-}
-
-.multipleInput {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.multipleInput .inputContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.multipleInput .input {
-  flex: 1;
-  min-width: 0;
-  height: 24px;
-  padding: 3px 5px;
-  box-sizing: border-box;
 }
 
 .buttons {
@@ -121,34 +49,12 @@
 .button.cancel:hover {
   background-color: #c62828;
 }
-.singleInput th,
-.singleInput td {
-  padding: 4px;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-weight: initial;
-}
-.singleInput td {
-  padding: 2px 8px;
-}
-.singleInput table input {
-  border: 1px solid gray;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px;
-}
-.hideInput {
-  opacity: 0;
-  pointer-events: none;
-}
 .tableContainer {
   border: 2px solid #ddd;
   border-radius: 10px;
   margin-bottom: 20px;
   max-height: calc(10 * 40px + 45px);
-  overflow-y: auto;
+  font-size: 14px;
 }
 .table {
   width: 100%;
@@ -161,13 +67,19 @@ table th{
   top: 0;
   z-index: 2;
 }
+table .icon {
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+  transform: translateY(4px);
+}
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 25%;
+  width: 14%;
 }
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 25%;
+  width: 14%;
 }
 .table th:nth-child(3),
 .table td:nth-child(3) {
@@ -175,7 +87,27 @@ table th{
 }
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 15%;
+  width: 10%;
+}
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 10%;
+}
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 12%;
+}
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 7%;
+}
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 7%;
+}
+.table th:nth-child(9),
+.table td:nth-child(9) {
+  width: 7%;
 }
 
 .table th {
@@ -192,10 +124,38 @@ table th{
 .table tr:hover td {
   background-color: rgb(250, 250, 250);
 }
-.type{
-  font-weight: bold;
-  color:rgb(17, 115, 212)
+.actions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
-.type.return{
-  color: rgb(229, 57, 53)
+.tableButton{
+  background-color: rgb(17, 115, 212);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: white;
+}
+.tableButton.cancel {
+  background-color: #e53935;
+}
+.sizeBadges {
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: #e9e9e9;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #333;
 }

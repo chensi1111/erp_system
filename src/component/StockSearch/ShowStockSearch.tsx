@@ -1,9 +1,9 @@
 import style from "./ShowStockSearch.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+import { formattedTime } from "../../utils/formattedTime";
 interface Stock_qty {
     size:string,
     all_quantity:string,
@@ -24,12 +24,6 @@ interface ShowStockSearchProps {
   onSuccess: () => void;
   detail: StockDetail;
   type: boolean;
-}
-const formattedDate = (dateString: string) => {
-   if (!dateString){
-      return ''
-   }
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 const ShowStockSearch=({ onClose,onSuccess, detail,type }: ShowStockSearchProps)=> {
@@ -82,11 +76,11 @@ const ShowStockSearch=({ onClose,onSuccess, detail,type }: ShowStockSearchProps)
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最後進貨</div>
-              <input type="text" className={style.input} value={formattedDate(formData.last_in_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.last_in_date)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最後出貨</div>
-              <input type="text" className={style.input} value={formattedDate(formData.last_out_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.last_out_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

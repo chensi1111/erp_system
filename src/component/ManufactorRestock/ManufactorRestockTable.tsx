@@ -9,12 +9,13 @@ import type { RootState } from "../../store/store";
 import CreateManufactorRestock from "./CreateManufactorRestock";
 import ShowManufactorRestock from "./ShowManufactorRestock";
 import { getProductList,getManufactor,clearProducts,deleteProduct } from "../../store/restockList"
-const ManufactorRestockTable=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
+import { getProductFormat } from "../../utils/productInfoMap";
+const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onSuccess: () => void;type:number})=> {
   const dispatch = useDispatch()
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const restockList = useSelector((state: RootState) => state.restockList);
   const [isCreate, setIsCreate] = useState(false)
-  const [transaction, setTransaction] = useState('買斷')
+  const [transaction, setTransaction] = useState(0)
   const [manufactor,setManufactor] = useState('')
   const [openCreate,setOpenCreate] = useState(false)
   const [openShow,setOpenShow] = useState(false)
@@ -23,9 +24,6 @@ const ManufactorRestockTable=({onClose,onSuccess,}: {onClose: () => void;onSucce
   const [date,setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [remark, setRemark] = useState('');
   const [errorCode,setErrorCode]=useState('');
-  const getProductFormat = ( id: string) => {
-    return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-};
   const addOne = async() => {
     try {
       const response = await axios.post('/api/restock/productList', {manufactor});
@@ -48,7 +46,8 @@ const ManufactorRestockTable=({onClose,onSuccess,}: {onClose: () => void;onSucce
       manufactor,
       date,
       remark,
-      productList:restockList.list
+      productList:restockList.list,
+      type
     }
     try {
       const response = await axios.post('/api/restock/create', {...data});
@@ -90,18 +89,18 @@ const ManufactorRestockTable=({onClose,onSuccess,}: {onClose: () => void;onSucce
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>
-        <div className={style.title}>新增進貨</div>
+        <div className={style.title}>{type=== 0 ?'新增進貨':'新增退貨'}</div>
         <div className={style.allInputs}>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易方式</div>
-                <select className={style.select} value={transaction} onChange={(e)=>setTransaction(e.target.value)}>  
-                  <option value="買斷">買斷</option>
-                  <option value="寄賣">寄賣</option>
+                <select className={style.select} value={transaction} onChange={(e)=>setTransaction(Number(e.target.value))}>  
+                  <option value="0">買斷</option>
+                  <option value="1">寄賣</option>
                 </select>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>進貨日期</div>
+              <div className={style.inputTitle}>{type=== 0 ?'進貨日期':'退貨日期'}</div>
               <input type="date" className={classNames(style.input)} value={date} onChange={(e)=>setDate(e.target.value)}/>
             </div>
           </div>
@@ -119,7 +118,7 @@ const ManufactorRestockTable=({onClose,onSuccess,}: {onClose: () => void;onSucce
                     <option key={item.manufactor_id} value={item.manufactor_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat(manufactor)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',manufactor,productInfoRelation)}></input>
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>

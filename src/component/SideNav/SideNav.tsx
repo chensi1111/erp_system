@@ -135,13 +135,10 @@ function SideNav() {
         <Collapse in={nav2Open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/manufactorRestock')} className={classNames(currnetPath==='/daily/manufactorRestock' && style.activeNav)}>
-              <ListItemText primary="廠商進貨" />
+              <ListItemText primary="廠商進退貨" />
             </ListItemButton>
             <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/productSale')} className={classNames(currnetPath==='/daily/productSale' && style.activeNav)}>
-              <ListItemText primary="前台銷貨" />
-            </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }} onClick={()=>navigate('/daily/productOrder')} className={classNames(currnetPath==='/daily/productOrder' && style.activeNav)}>
-              <ListItemText primary="前台訂貨" />
+              <ListItemText primary="前台作業" />
             </ListItemButton>
           </List>
         </Collapse>

@@ -6,6 +6,7 @@ import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
 import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
 import classNames from "classnames";
+import { HistoryTypeMap } from "../../../utils/map";
 interface Quantities {
     size:string,
     quantity:string,
@@ -15,7 +16,7 @@ interface Stock {
   product_id: string;
   specification: string;
   product_name:string;
-  change_type:string,
+  change_type:number,
   change_number:string,
   total_quantity:number
   }
@@ -23,19 +24,35 @@ interface StockDetail {
   product_id: string;
   specification: string;
   product_name:string;
-  change_type:string,
+  change_type:number,
   change_number:string,
   total_quantity:number,
   create_date:string,
   quantities:Quantities[];
 }
+const ChangeTypeClassMap: Record<number, string> = {
+  10: "restockType",
+  0: "saleType",
+  4: "orderType",
+  6: "orderType",
+  2: "refundType",
+  8: "refundType",
+  12: "refundType",
+  1: "cancelType",
+  3: "cancelType",
+  5: "cancelType",
+  7: "cancelType",
+  9: "cancelType",
+  11: "cancelType",
+  13: "cancelType",
+};
 function StockHistory() {
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
   const [searchType, setSearchType] = useState('change_number');
   const [filter, setFilter] = useState({
     change_number: '',
     product_name: '',
-    change_type:""
+    change_type:0
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -46,7 +63,7 @@ function StockHistory() {
       product_id: '',
       specification: '',
       product_name:'',
-      change_type:'',
+      change_type:0,
       change_number:'',
       total_quantity:0,
       create_date:'',
@@ -64,7 +81,7 @@ function StockHistory() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (change_number:string,change_type:string) => {
+  const getDetail = async (change_number:string,change_type:number) => {
     try {
       const res = await axios.post('/api/stock/history_detail',{change_number,change_type});
       if(res.data.code==='000'){
@@ -82,30 +99,30 @@ function StockHistory() {
       setFilter({
         change_number: value,
         product_name: '',
-        change_type:""
+        change_type:0
       })
     }else if(searchType==='product_name'){
       setFilter({
         change_number: '',
         product_name: value,
-        change_type:""
+        change_type:0
       })
     }else {
       setFilter({
         change_number: '',
         product_name: '',
-        change_type:value
+        change_type:Number(value)
       })
     }
   }
   const handleSetSearchType = (value:string) => {
     setSearchType(value);
-    setFilter({ change_number: '', product_name: '',change_type:"" });
+    setFilter({ change_number: '', product_name: '',change_type:0 });
   }
-  const formattedQuantity = (type:string,value:number|string) => {
-    if(type==='訂貨'||type==='訂貨取消'){
+  const formattedQuantity = (type:number,value:number|string) => {
+    if(type===4||type===5||type===8){
       return ''
-    }else if(type==='銷貨'|| type ==='進貨取消' || type==='收貨'){
+    }else if(type===0|| type ===11 || type===6 || type===12){
       return `- ${value}`
     }else {
       return `+ ${value}`
@@ -171,7 +188,7 @@ function StockHistory() {
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
                 <td>{m.product_name}</td>
-                <td className={classNames(m.change_type==='進貨' && style.restockType,m.change_type==='銷貨' && style.saleType,(m.change_type==='訂貨'||m.change_type==='收貨') && style.orderType,(m.change_type==='銷貨取消'||m.change_type==='進貨取消'||m.change_type==='訂貨取消'||m.change_type==='收貨取消') && style.cancelType)}>{m.change_type}</td>
+                <td className={style[ChangeTypeClassMap[m.change_type]]}>{HistoryTypeMap[m.change_type]}</td>
                 <td>{formattedQuantity(m.change_type,m.total_quantity)}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m.change_number,m.change_type)}>

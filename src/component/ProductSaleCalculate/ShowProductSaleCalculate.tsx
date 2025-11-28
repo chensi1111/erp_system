@@ -2,6 +2,7 @@ import style from "./ShowProductSaleCalculate.module.css";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+import { getProductFormat } from "../../utils/productInfoMap";
 interface ReportDetail {
   product_id: string,
   product_name: string,
@@ -56,22 +57,7 @@ const ShowSaleCalculate=({ onClose, detail,rangeType,customRange }: ShowSaleCalc
     if(!detail.total_profit || !detail.total_sales) return 0
     return ((Number(detail.total_profit) / Number(detail.total_sales)) * 100).toFixed(2) + "%"
   }
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
-};
+
   return (
     <div className={style.wrapper}>
       <div className={style.container}>
@@ -96,37 +82,37 @@ const ShowSaleCalculate=({ onClose, detail,rangeType,customRange }: ShowSaleCalc
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商</div>
-              <input type="text" className={style.input} value={getProductFormat('manufactor',detail.manufactor)} readOnly tabIndex={-1} />
+              <input type="text" className={style.input} value={getProductFormat('manufactor',detail.manufactor,productInfoRelation)} readOnly tabIndex={-1} />
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>品牌</div>
-              <input type="text" className={style.input}  value={getProductFormat('brand',detail.brand)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input}  value={getProductFormat('brand',detail.brand,productInfoRelation)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" className={style.input} value={getProductFormat('size',detail.size)} readOnly tabIndex={-1} />
+              <input type="text" className={style.input} value={getProductFormat('size',detail.size,productInfoRelation)} readOnly tabIndex={-1} />
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" className={style.input}  value={getProductFormat('color',detail.color)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input}  value={getProductFormat('color',detail.color,productInfoRelation)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別1</div>
-              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type1)} readOnly tabIndex={-1}></input>
+              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type1,productInfoRelation)} readOnly tabIndex={-1}></input>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別2</div>
-              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type2)} readOnly tabIndex={-1}></input>
+              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type2,productInfoRelation)} readOnly tabIndex={-1}></input>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別3</div>
-              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type3)} readOnly tabIndex={-1}></input>
+              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type3,productInfoRelation)} readOnly tabIndex={-1}></input>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別4</div>
-              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type4)} readOnly tabIndex={-1}></input>
+              <input type="text" className={style.input} value={getProductFormat('type',detail.product_type4,productInfoRelation)} readOnly tabIndex={-1}></input>
             </div>
           </div>
           <div className={style.singleInput}>

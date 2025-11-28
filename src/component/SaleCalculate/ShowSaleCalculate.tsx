@@ -1,6 +1,7 @@
 import style from "./ShowSaleCalculate.module.css";
 import classNames from "classnames";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
+import { formattedTime } from "../../utils/formattedTime";
 
 interface Info {
   manufactor:string,
@@ -22,9 +23,6 @@ interface ShowSaleCalculateProps {
 }
 
 const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSaleCalculateProps)=> {
-  const formattedDate = (dateString: string) => {
-    return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
-  }
   return (
     <div className={style.wrapper}>
       <div className={style.container}>
@@ -69,7 +67,7 @@ const ShowSaleCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowSa
                 {detail.map((m) => (
                  <tr key={m.sale_id}>
                    <td>{m.sale_id}</td>
-                   <td>{formattedDate(m.create_date)}</td>
+                   <td>{formattedTime(m.create_date)}</td>
                    <td>{m.total_quantity}</td>
                     <td>{"$ "+m.total_price}</td>
                  </tr>

@@ -6,6 +6,7 @@ import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+import { getProductFormat } from "../../utils/productInfoMap";
 const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => void;onSuccess: () => void;Specification:string})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const [product_id, setProduct_id] = useState('');
@@ -40,23 +41,6 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
       setErrorCode(err.response?.data?.code);
     }
   }
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
-};
-
   const getProductInfo = async() =>{
     try {
       const res = await axios.post('/api/product/detail',{specification:Specification});
@@ -125,7 +109,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.manufactor_id} value={item.manufactor_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',manufactor)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',manufactor,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>品牌</div>
@@ -141,7 +125,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.brand_id} value={item.brand_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('brand',brand)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('brand',brand,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>尺碼</div>
@@ -157,7 +141,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.size_id} value={item.size_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('size',size)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('size',size,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>顏色</div>
@@ -173,7 +157,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.color_id} value={item.color_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('color',color)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('color',color,productInfoRelation)}></input>
           </div>
           <div className={style.typeContainer}>
             <div className={style.selectContainer}>
@@ -190,7 +174,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type1)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type1,productInfoRelation)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別2</div>
@@ -206,7 +190,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type2)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type2,productInfoRelation)}></input>
             </div>
           </div>
           <div className={style.typeContainer}>
@@ -224,7 +208,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type3)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type3,productInfoRelation)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別4</div>
@@ -240,7 +224,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type4)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',product_type4,productInfoRelation)}></input>
             </div>
           </div>
           <div className={style.multipleInput}>

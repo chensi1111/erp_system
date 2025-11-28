@@ -1,6 +1,7 @@
 import style from "./ShowStockHistory.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
+import { formattedTime } from "../../utils/formattedTime";
+import { HistoryTypeMap } from "../../utils/map";
 interface Quantities {
     size:string,
     available_quantity:string,
@@ -11,7 +12,7 @@ interface StockDetail {
   product_id: string;
   specification: string;
   product_name:string;
-  change_type:string,
+  change_type:number,
   change_number:string,
   total_quantity:number,
   price:number,
@@ -24,45 +25,47 @@ interface ShowStockHistoryProps {
   onClose: () => void;
   detail: StockDetail;
 }
-const formattedDate = (dateString: string) => {
-   if (!dateString){
-      return ''
-   }
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
-}
-  
+
 const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
   const title=detail.change_number;
-  const formattedAllQuantity = (type:string,value:number|string) => {
-    if(!Number(value)||type==='訂貨'|| type ==='訂貨取消'){
-      return ''
-    }
-    if(type==='銷貨'|| type ==='進貨取消' || type==='收貨'){
-      return `- ${value}`
-    }else {
-      return `+ ${value}`
-    }
-  }
-  const formattedAvailableQuantity = (type:string,value:number|string) => {
-    if(!Number(value) || type==='收貨'){
-      return ''
-    }
-    if(type==='訂貨'||type==='銷貨'||type==='進貨取消'){
-      return `- ${value}`
-    }else if(type==='訂貨取消'||type==='銷貨取消'||type==='進貨'){
-      return `+ ${value}`
-    }
-  }
-  const formattedRemainingQuantity = (type:string,value:number|string) => {
-    if(!Number(value)|| (type!=='訂貨' && type!=='訂貨取消' && type!=='收貨' && type!=='收貨取消')){
-      return ''
-    }
-    if(type==='訂貨'||type==='收貨取消'){
-      return `+ ${value}`
-    }else {
-      return `- ${value}`
-    }
-  }
+  const InventoryChangeRules = {
+  all: {
+    0: -1, 3: -1, 6: -1, 11: -1, 12: -1,
+    1: +1, 2: +1, 7: +1, 10: +1, 13: +1,
+    4: 0, 5: 0, 8: 0, 9: 0,
+  },
+  available: {
+    0: -1, 3: -1, 4: -1, 9: -1, 11: -1, 12: -1,
+    1: +1, 2: +1, 5: +1, 8: +1, 10: +1, 13: +1,
+    6: 0, 7: 0, 
+  },
+  reserved: {
+    4: +1, 7: +1, 9: +1,
+    5: -1, 6: -1, 8: -1,
+    // 其他都是 0
+  },
+  } as const
+  const formatChange = (
+    ruleMap: Record<number, number>,
+    type: number,
+    value: number | string
+  ) => {
+    const num = Number(value);
+    if (!num) return '';
+
+    const sign = ruleMap[type] ?? 0;
+    if (sign === 0) return '';
+
+    return `${sign === 1 ? '+' : '-'} ${value}`;
+  };
+  const formattedAllQuantity = (type: number, value: number | string) =>
+    formatChange(InventoryChangeRules.all, type, value);
+
+  const formattedAvailableQuantity = (type: number, value: number | string) =>
+    formatChange(InventoryChangeRules.available, type, value);
+
+  const formattedRemainingQuantity = (type: number, value: number | string) =>
+    formatChange(InventoryChangeRules.reserved, type, value);
 
   return (
     <div className={style.wrapper}>
@@ -76,7 +79,7 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建立時間</div>
-              <input type="text" className={style.input} value={formattedDate(detail.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(detail.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
@@ -98,7 +101,7 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>變更類型</div>
-              <input type="text" className={style.input} value={detail.change_type} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={HistoryTypeMap[detail.change_type]} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>變更總量</div>
@@ -115,7 +118,7 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
               <input type="text" className={style.input} value={"$ "+(detail.price*detail.total_quantity)} readOnly tabIndex={-1}/>
             </div>
           </div>
-          {(detail.change_type ==='訂貨'||detail.change_type ==='訂貨取消') && <div className={style.multipleInput}>
+          {(detail.change_type ===4||detail.change_type ===5) && <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>預付訂金</div>
               <input type="text" className={style.input} value={"$ "+detail.prepaid_price} readOnly tabIndex={-1}/>
@@ -125,7 +128,7 @@ const ShowStockHistory=({ onClose, detail }: ShowStockHistoryProps)=> {
               <input type="text" className={style.input} value={"$ "+detail.remaining_price} readOnly tabIndex={-1}/>
             </div>
           </div>}
-          {( detail.change_type ==='收貨' || detail.change_type ==='收貨取消') && <div className={style.multipleInput}>
+          {( detail.change_type ===6 || detail.change_type ===7) && <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>已付訂金</div>
               <input type="text" className={style.input} value={"$ "+detail.prepaid_price} readOnly tabIndex={-1}/>

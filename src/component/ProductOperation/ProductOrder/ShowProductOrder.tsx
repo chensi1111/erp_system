@@ -1,10 +1,12 @@
 import style from "./ShowProductOrder.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
-import axios from "../../api/axios"
+import type { RootState } from "../../../store/store";
+import axios from "../../../api/axios"
 import { toast } from "react-toastify";
+import { formattedDate,formattedTime } from "../../../utils/formattedTime";
+import { getProductFormat } from "../../../utils/productInfoMap";
+import { SaleTypeMap,PayTypeMap,TransactionTypeMap } from "../../../utils/map";
 interface OrderDetail {
   order_no:string,
   create_date:string,
@@ -29,35 +31,31 @@ interface OrderDetail {
   product_type4:string,
   remark: string,
   date:string,
-  transaction:string,
-  pay:string,
-  type:string,
+  transaction:number,
+  pay:number,
+  type:number,
   amount:number,
-  paid_date:string
+  paid_at:string,
+  total_quantity:number
 }
 interface ShowProductOrderProps {
   onClose: () => void;
   detail: OrderDetail;
   onSuccess: () => void;
 }
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD');
-}
-const formattedTime = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
-}
+
 const getPrepaidPrice = (detail:OrderDetail) =>{
-  if(detail.type==='訂貨'){
+  if(detail.type===2){
     return detail.amount;
   }else{
-    return Number(detail.price) - Number(detail.amount);
+    return (Number(detail.price)*detail.total_quantity) - Number(detail.amount);
   }
 }
 const getRemainingPrice = (detail:OrderDetail) =>{
-  if(detail.type==='收貨'){
+  if(detail.type===3){
     return detail.amount;
   }else{
-    return Number(detail.price) - Number(detail.amount);
+    return (Number(detail.price)*detail.total_quantity) - Number(detail.amount);
   }
 }
 const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> {
@@ -68,28 +66,25 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
     const qty = parseInt(item.quantity);
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
-};
+
   const handleComplete = async() =>{
     try {
       const response = await axios.post('/api/sale/order_complete', {order_no:detail.order_no});
       if(response.data.code=='000') {
         onSuccess()
         toast.success('取貨成功');
+      } 
+    }catch (error) {
+      const err = error as any;
+      toast.error(err.response?.data?.msg || "伺服器錯誤");
+    }
+  }
+  const handleDelete = async() =>{
+    try {
+      const response = await axios.post('/api/sale/delete_order', {order_no:detail.order_no,type:8});
+      if(response.data.code=='000') {
+        onSuccess()
+        toast.success('退訂成功');
       } 
     }catch (error) {
       const err = error as any;
@@ -111,25 +106,25 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易途徑</div>
-                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.transaction}/>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={TransactionTypeMap[detail.transaction]}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>付款方式</div>
-                <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.pay}/>
+                <input type="text" className={style.input} readOnly tabIndex={-1} value={PayTypeMap[detail.pay]}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>交易狀態</div>
-               <input type="text" className={style.input} readOnly tabIndex={-1} value={detail.type}/>
+               <input type="text" className={style.input} readOnly tabIndex={-1} value={SaleTypeMap[detail.type]}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔時間</div>
-               <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedTime(detail.paid_date)}/>
+               <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedTime(detail.create_date)}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>{detail.type==='訂貨' ?'訂貨日期':'收貨日期'}</div>
-              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.date)}/>
+              <div className={style.inputTitle}>{detail.type===2 ?'訂貨日期':'取貨日期'}</div>
+              <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.paid_at)}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -153,37 +148,37 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商</div>
-              <input type="text" value={getProductFormat('manufactor',detail.manufactor)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('manufactor',detail.manufactor,productInfoRelation)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>品牌</div>
-              <input type="text" value={getProductFormat('brand',detail.brand)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('brand',detail.brand,productInfoRelation)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" value={getProductFormat('size',detail.size)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('size',detail.size,productInfoRelation)} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" value={getProductFormat('color',detail.color)} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('color',detail.color,productInfoRelation)} className={style.input} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別1</div>
-              <input type="text" value={getProductFormat('type',detail.product_type1)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type1,productInfoRelation)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別2</div>
-              <input type="text" value={getProductFormat('type',detail.product_type2)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type2,productInfoRelation)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別3</div>
-              <input type="text" value={getProductFormat('type',detail.product_type3)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type3,productInfoRelation)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別4</div>
-              <input type="text" value={getProductFormat('type',detail.product_type4)||''} className={style.input} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type4,productInfoRelation)||''} className={style.input} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -227,11 +222,11 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>{detail.type ==='訂貨' ? '預付訂金' : '已付訂金'}</div>
+              <div className={style.inputTitle}>{detail.type ===2 ? '預付訂金' : '已付訂金'}</div>
               <input type="text" className={style.input} value={"$ "+getPrepaidPrice(detail)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>{detail.type ==='訂貨' ? '剩餘尾款' : '結清尾款'}</div>
+              <div className={style.inputTitle}>{detail.type ===2 ? '剩餘尾款' : '結清尾款'}</div>
               <input type="text" className={style.input} value={"$ "+getRemainingPrice(detail)} readOnly tabIndex={-1}/>
             </div>
           </div>
@@ -242,7 +237,8 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
             </div>
           </div>
           <div className={style.buttons}>
-            {detail.type ==='訂貨' && <div className={classNames(style.button)} onClick={()=>handleComplete()}>取貨</div>}
+            {detail.type ===2 && <div className={classNames(style.button)} onClick={()=>handleComplete()}>取貨</div>}
+            {detail.type ===2 && <div className={classNames(style.button,style.cancel)} onClick={()=>handleDelete()}>退訂</div>}
             <div className={classNames(style.button,style.cancel)} onClick={()=>onClose()}>關閉</div>
           </div>
         </div>

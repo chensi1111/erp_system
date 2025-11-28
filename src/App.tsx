@@ -17,7 +17,6 @@ import StockHistory from "./pages/Stock/StockHistory/StockHistory";
 import StockSafe from "./pages/Stock/StockSafe/StockSafe";
 import ProductSaleCalculate from "./pages/Report/ProductSaleCalculate/ProdurctSaleCalculate";
 import SaleRanking from "./pages/Report/SaleRanking/SaleRanking";
-import ProductOrder from "./pages/Daily/ProductOrder/ProductOrder";
 import RestockCalculate from "./pages/Report/RestockCalculate/RestockCalculate";
 import SaleCalculate from "./pages/Report/SaleCalculate/SaleCalculate";
 function App() {
@@ -80,10 +79,6 @@ function App() {
           <Route
             path="/report/saleRanking"
             element={<SaleRanking />}
-          />
-          <Route
-            path="/daily/productOrder"
-            element={<ProductOrder />}
           />
           <Route
             path="/report/restockCalculate"
