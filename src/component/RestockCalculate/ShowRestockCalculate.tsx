@@ -1,6 +1,11 @@
 import style from "./ShowRestockCalculate.module.css";
 import classNames from "classnames";
 import  { Dayjs } from "dayjs";
+import Pagination from '@mui/material/Pagination';
+import { useState,useEffect } from "react";
+import axios from '../../api/axios'
+import {toast} from 'react-toastify'
+// utils
 import { formattedDate,formattedTime } from "../../utils/formattedTime";
 
 interface Info {
@@ -22,12 +27,27 @@ interface Detail {
 }
 interface ShowRestockCalculateProps {
   onClose: () => void;
-  detail: Detail[];
   manufactorInfo:Info;
   selectedDate:Dayjs
 }
 
-const ShowRestockCalculate=({ onClose, detail,manufactorInfo,selectedDate }: ShowRestockCalculateProps)=> {
+const ShowRestockCalculate=({ onClose,manufactorInfo,selectedDate }: ShowRestockCalculateProps)=> {
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [detail, setDetail] = useState<Detail[]>([])
+  const getDetail = async () =>{
+    try {
+      const res = await axios.post('/api/report/restock_detail',{manufactor:manufactorInfo.manufactor,page,pageSize:10,selectedDate:selectedDate.format("YYYY-MM")});
+      setDetail(res.data.data.list);
+      setTotalPages(res.data.data.totalPages);
+    } catch (error) {
+      const err = error as any;
+      toast.error(err.response?.data?.msg || "伺服器錯誤");
+    }
+  }
+  useEffect(()=>{
+    getDetail()
+  },[page])
   return (
     <div className={style.wrapper}>
       <div className={style.container}>
@@ -97,6 +117,7 @@ const ShowRestockCalculate=({ onClose, detail,manufactorInfo,selectedDate }: Sho
              </tbody>
             </table>
           </div>
+          {detail.length >0 && <Pagination count={totalPages} page={page} onChange={(_, val) => setPage(val)} siblingCount={0} boundaryCount={1} sx={{ul: {whiteSpace: 'nowrap', display: 'flex', flexWrap: 'nowrap', justifyContent: 'center' }}}/>}
           <div className={style.buttons}>
             <div className={classNames(style.button,style.cancel)} onClick={()=>onClose()}>關閉</div>
           </div>

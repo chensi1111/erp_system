@@ -82,8 +82,10 @@
 table th {
   user-select: none;
 }
-table .icon {
+table img.icon{
   cursor: pointer;
+  width: 20px;
+  height: 20px;
   margin-left: 10px;
   font-size: 20px;
   transform: translateY(4px);

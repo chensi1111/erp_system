@@ -18,11 +18,13 @@
 }
 .searchSelect{
   padding: 5px;
+  height: 40px;
 }
 .searchContainer {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  align-items: center;
+  width: calc(100% - 400px);
 }
 .searchInput {
   width: 100%;
@@ -48,27 +50,37 @@
 table th{
   user-select: none;
 }
-table .icon{
+table img.icon{
   cursor: pointer;
+  width: 20px;
+  height: 20px;
   margin-left: 10px;
   font-size: 20px;
   transform: translateY(4px);
 }
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 20%;
+  width: 15%;
 }
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 20%;
+  width: 15%;
 }
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 20%;
+  width: 15%;
 }
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 20%;
+  width: 15%;
+}
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 15%;
+}
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 15%;
 }
 
 .table th {
@@ -111,15 +123,29 @@ table .icon{
   background: rgb(10, 90, 170);
 }
 
-.dateContainer {
-  margin-bottom: 15px;
+.infos {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
 }
-.infoContainer{
-  display: flex;
-  gap: 20px;
+.info {
+  width: calc(16.66% - 15px);
+  background: white;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.infoTitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.infoValue {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
 }
 .infoItem {
   font-size: 20px;
@@ -128,5 +154,11 @@ table .icon{
   font-size: 20px;
   font-weight: bold;
   margin-right: 5px;
+}
+.allSearch {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
 }
 

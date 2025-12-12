@@ -1,5 +1,6 @@
 import style from "./ShowStockHistory.module.css";
 import classNames from "classnames";
+// utils
 import { formattedTime } from "../../utils/formattedTime";
 import { HistoryTypeMap } from "../../utils/map";
 interface Quantities {

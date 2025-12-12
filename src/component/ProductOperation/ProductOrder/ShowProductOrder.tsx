@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import axios from "../../../api/axios"
 import { toast } from "react-toastify";
+// utils
 import { formattedDate,formattedTime } from "../../../utils/formattedTime";
 import { getProductFormat } from "../../../utils/productInfoMap";
 import { SaleTypeMap,PayTypeMap,TransactionTypeMap } from "../../../utils/map";
@@ -22,9 +23,9 @@ interface OrderDetail {
     size:string,
     quantity:string
   }],
-  price:string,
-  prepaid_price:string,
-  remaining_price:string,
+  price:number,
+  prepaid_price:number,
+  remaining_price:number,
   product_type1:string,
   product_type2:string,
   product_type3:string,
@@ -45,7 +46,7 @@ interface ShowProductOrderProps {
 }
 
 const getPrepaidPrice = (detail:OrderDetail) =>{
-  if(detail.type===2){
+  if(detail.type===2||detail.type===4){
     return detail.amount;
   }else{
     return (Number(detail.price)*detail.total_quantity) - Number(detail.amount);
@@ -66,6 +67,16 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
     const qty = parseInt(item.quantity);
     return sum + (isNaN(qty) ? 0 : qty);
   }, 0);
+  const dateLabelMap: Record<number, string> = {
+  2: "訂貨日期",
+  3: "取貨日期",
+  4: "退訂日期",
+};
+  const prepaidLabelMap: Record<number, string> = {
+  2: "預付訂金",
+  3: "已付訂金",
+  4: "已付訂金",
+};
 
   const handleComplete = async() =>{
     try {
@@ -81,7 +92,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
   }
   const handleDelete = async() =>{
     try {
-      const response = await axios.post('/api/sale/delete_order', {order_no:detail.order_no,type:8});
+      const response = await axios.post('/api/sale/delete_order', {order_no:detail.order_no,type:4});
       if(response.data.code=='000') {
         onSuccess()
         toast.success('退訂成功');
@@ -123,7 +134,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
                <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedTime(detail.create_date)}/>
             </div>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>{detail.type===2 ?'訂貨日期':'取貨日期'}</div>
+              <div className={style.inputTitle}>{dateLabelMap[detail.type]}</div>
               <input type="text" className={style.input} readOnly tabIndex={-1} value={formattedDate(detail.paid_at)}/>
             </div>
           </div>
@@ -222,13 +233,17 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
-              <div className={style.inputTitle}>{detail.type ===2 ? '預付訂金' : '已付訂金'}</div>
+              <div className={style.inputTitle}>{prepaidLabelMap[detail.type]}</div>
               <input type="text" className={style.input} value={"$ "+getPrepaidPrice(detail)} readOnly tabIndex={-1}/>
             </div>
-            <div className={style.inputContainer}>
+            {detail.type!==4 && <div className={style.inputContainer}>
               <div className={style.inputTitle}>{detail.type ===2 ? '剩餘尾款' : '結清尾款'}</div>
               <input type="text" className={style.input} value={"$ "+getRemainingPrice(detail)} readOnly tabIndex={-1}/>
-            </div>
+            </div>}
+            {detail.type===4 && <div className={style.inputContainer}>
+              <div className={style.inputTitle}>歸還訂金</div>
+              <input type="text" className={style.input} value={"$ "+getPrepaidPrice(detail)} readOnly tabIndex={-1}/>
+            </div>}
           </div>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>

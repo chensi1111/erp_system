@@ -6,6 +6,7 @@ import axios from '../../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
+// utils
 import { TransactionTypeMap } from "../../../utils/map";
 import { getProductFormat } from "../../../utils/productInfoMap";
 interface specificationList{
@@ -300,6 +301,7 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
                           value={quantities[index].quantity}
                           placeholder={'餘 '+(info?.stock_qty[index]?.available_quantity || '0')}
                           onChange={(e) => {
+                            if (!/^\d*$/.test(e.target.value)) return;
                             const newQuantities = [...quantities];
                             newQuantities[index].quantity = e.target.value;
                             setQuantities(newQuantities);

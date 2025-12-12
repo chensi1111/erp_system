@@ -6,6 +6,7 @@ import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+// utils
 import { getProductFormat } from "../../utils/productInfoMap";
 const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => void;onSuccess: () => void;Specification:string})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
@@ -43,7 +44,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
   }
   const getProductInfo = async() =>{
     try {
-      const res = await axios.post('/api/product/detail',{specification:Specification});
+      const res = await axios.post('/api/product/specification',{specification:Specification});
       if(res.data.code==='000'){
         const data=res.data.data
         setProduct_id(data.product_id)
@@ -59,6 +60,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
         setProductType4(data.product_type4)
         setPrice(data.recommended_price)
         setRemark(data.remark)
+        setPurchase(data.purchase_price)
       }
     } catch (error) {
       const err = error as any;

@@ -18,47 +18,47 @@
 .kpiContainer {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   gap: 20px;
   margin-bottom: 30px;
 }
 .kpiBox {
-  width: 200px;
+  width: calc(25% - 20px);
   height: 150px;
   border: 1px solid rgb(220, 220, 220);
   border-radius: 15px;
   background-color: white;
-  padding: 10px 15px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.boxTitle{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    font-weight: bold;
+.boxTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
 }
-.item{
-    display: flex;
-    gap: 30px;
+.item {
+  display: flex;
+  gap: 30px;
 }
-.detailBox{
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.detailBox {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-.detail{
-    font-size: 20px;
-    font-weight: bold;
+.detail {
+  font-size: 20px;
+  font-weight: bold;
 }
-.detail.lastMonth{
-    font-size: 16px;
-    color: red;
-    font-weight: normal;
+.detail.lastMonth {
+  font-size: 16px;
+  color: red;
+  font-weight: normal;
 }
-.detail.add{
-    color: green;
+.detail.add {
+  color: green;
 }

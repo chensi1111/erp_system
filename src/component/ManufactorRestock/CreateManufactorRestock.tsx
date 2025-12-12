@@ -4,8 +4,10 @@ import classNames from "classnames";
 import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector,useDispatch } from "react-redux";
+// store
 import type { RootState } from "../../store/store";
 import { addNewProduct } from "../../store/restockList"
+// utils
 import { getProductFormat } from "../../utils/productInfoMap";
 interface productIdList{
   product_id:""
@@ -266,6 +268,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
                           value={quantities[index].all_quantity}
                           placeholder={'餘 '+(detail.stock_qty[index]?.available_quantity || '0')}
                           onChange={(e) => {
+                            if (!/^\d*$/.test(e.target.value)) return;
                             const newQuantities = [...quantities];
                             newQuantities[index].all_quantity = e.target.value;
                             newQuantities[index].available_quantity = e.target.value;

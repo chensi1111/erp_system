@@ -5,6 +5,7 @@ import axios from "../../api/axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+// utils
 import { formattedTime } from "../../utils/formattedTime";
 import { getProductFormat } from "../../utils/productInfoMap";
 interface ProductDetail {
@@ -24,7 +25,7 @@ interface ProductDetail {
   purchase_price:number;
   last_cost:number;
   cumulative_cost:number;
-  total_quantity:number;
+  cumulative_in_quantity:number;
   remark: string;
 }
 interface ShowProductDocumentProps {
@@ -34,9 +35,9 @@ interface ShowProductDocumentProps {
   type: boolean;
 }
 
-const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
-  if(total_quantity===0) return 0;
-  return (cumulative_cost/total_quantity).toFixed(2);
+const getAverageCost = (cumulative_cost:number,cumulative_in_quantity:number) => {
+  if(!cumulative_cost||cumulative_in_quantity===0) return 0;
+  return (cumulative_cost/cumulative_in_quantity).toFixed(2);
 }
 
 const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocumentProps)=> {
@@ -229,11 +230,11 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最新進價</div>
-              <input type="text" className={style.input} value={"$ "+formData.last_cost} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+(formData.last_cost||0)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>平均進價</div>
-              <input type="text" className={style.input} value={"$ "+getAverageCost(formData.cumulative_cost,formData.total_quantity)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+getAverageCost(formData.cumulative_cost,formData.cumulative_in_quantity)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

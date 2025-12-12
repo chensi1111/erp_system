@@ -1,6 +1,7 @@
 import style from "./ShowStockSafe.module.css";
 import classNames from "classnames";
 import { useState } from "react";
+// utils
 import { formattedTime } from "../../utils/formattedTime";
 interface Stock_qty {
     size:string,

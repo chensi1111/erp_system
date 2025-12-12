@@ -5,10 +5,13 @@ import classNames from "classnames";
 import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector,useDispatch } from "react-redux";
-import type { RootState } from "../../store/store";
+// component
 import CreateManufactorRestock from "./CreateManufactorRestock";
 import ShowManufactorRestock from "./ShowManufactorRestock";
+// store
+import type { RootState } from "../../store/store";
 import { getProductList,getManufactor,clearProducts,deleteProduct } from "../../store/restockList"
+// utils
 import { getProductFormat } from "../../utils/productInfoMap";
 const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onSuccess: () => void;type:number})=> {
   const dispatch = useDispatch()

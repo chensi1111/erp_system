@@ -29,7 +29,7 @@ const TypeSalesPieChart = ({ data }:any) => {
   // 加總各 type 的銷售量
   const mergedData = Object.values(
     data.reduce((acc:any, item:any) => {
-      const quantity = Number(item.total_quantity) || 0;
+      const quantity = Number(item.sale_quantity) || 0;
 
       // 取出所有有值的類別 ID
       const typeIds = [
@@ -45,9 +45,9 @@ const TypeSalesPieChart = ({ data }:any) => {
             ?.type_name || typeId;
 
         if (!acc[typeName]) {
-          acc[typeName] = { type: typeName, total_quantity: 0 };
+          acc[typeName] = { type: typeName, sale_quantity: 0 };
         }
-        acc[typeName].total_quantity += quantity;
+        acc[typeName].sale_quantity += quantity;
       });
 
       return acc;
@@ -63,7 +63,7 @@ const TypeSalesPieChart = ({ data }:any) => {
           <PieChart>
             <Pie
               data={mergedData}
-              dataKey="total_quantity"
+              dataKey="sale_quantity"
               nameKey="type"
               cx="50%"
               cy="50%"
@@ -83,8 +83,8 @@ const TypeSalesPieChart = ({ data }:any) => {
             <Tooltip
               formatter={(value, name, props) => {
                 const percent = (
-                  (props.payload.total_quantity /
-                    mergedData.reduce((sum:any, i:any) => sum + i.total_quantity, 0)) *
+                  (props.payload.sale_quantity /
+                    mergedData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
                 return [`${percent}% (${value.toLocaleString()})`, name];

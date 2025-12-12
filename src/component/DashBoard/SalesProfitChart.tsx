@@ -96,55 +96,6 @@ const SalesProfitChart = () => {
         </ResponsiveContainer>
       </div>
     </div>
-    <div className={style.chartContainer}>
-      <div className={style.chart}>
-        <div className={style.year}>{currentYear}</div>
-        <div className={style.chartTitle}>網路銷售</div>
-        <ResponsiveContainer height={350}>
-          <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="handingFee"
-              stroke="#8884d8"
-              strokeWidth={2}
-              name="手續費"
-            />
-            <Line
-              type="monotone"
-              dataKey="handingFeeCount"
-              stroke="#82ca9d"
-              strokeWidth={2}
-              name="數量"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      <div className={style.chart}>
-        <div className={style.year}>{currentYear}</div>
-        <div className={style.chartTitle}>淨利</div>
-        <ResponsiveContainer height={350}>
-          <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="netProfit"
-              stroke="#8884d8"
-              strokeWidth={2}
-              name="淨利"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
     </>
   );
 };

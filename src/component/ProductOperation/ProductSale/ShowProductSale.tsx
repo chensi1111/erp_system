@@ -2,6 +2,7 @@ import style from "./ShowProductSale.module.css";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
+// utils
 import { PayTypeMap,TransactionTypeMap,SaleTypeMap } from "../../../utils/map";
 import { formattedDate,formattedTime } from "../../../utils/formattedTime";
 import { getProductFormat } from "../../../utils/productInfoMap";

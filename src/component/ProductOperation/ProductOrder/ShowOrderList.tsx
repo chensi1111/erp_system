@@ -1,13 +1,13 @@
 import style from "./ShowOrderList.module.css";
 import classNames from "classnames";
-import { formattedDate, formattedTime } from "../../../utils/formattedTime";
 import { useEffect, useState } from "react";
 import axios from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from '@mui/material/Pagination';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
-
-
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
+// utils
+import { formattedDate, formattedTime } from "../../../utils/formattedTime";
 interface ShowOrderListProps {
   onClose: () => void;
   onSuccess: () => void
@@ -68,7 +68,7 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
   }
   const handleDelete = async(order_no:string) =>{
     try {
-      const response = await axios.post('/api/sale/delete_order', {order_no,type:8});
+      const response = await axios.post('/api/sale/delete_order', {order_no,type:4});
       if(response.data.code=='000') {
         onSuccess()
         toast.success('退訂成功');
@@ -92,9 +92,9 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
                  <th>
                 <span>單號</span>
                 {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                  <img src={arrowDropUp} alt="arrowUp" onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                 <img src={arrowDropDown} alt="arrowDown" onClick={() => setSort('ASC')} className={style.icon} />
                 )}
                 </th>
                  <th>建檔時間</th>

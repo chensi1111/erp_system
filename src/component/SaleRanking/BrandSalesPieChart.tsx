@@ -19,9 +19,9 @@ const BrandSalesPieChart = ({ data }:any) => {
         brandId;
 
       if (!acc[brandName]) {
-        acc[brandName] = { brand: brandName, total_quantity: 0 };
+        acc[brandName] = { brand: brandName, sale_quantity: 0 };
       }
-      acc[brandName].total_quantity += Number(item.total_quantity) || 0;
+      acc[brandName].sale_quantity += Number(item.sale_quantity) || 0;
       return acc;
     }, {})
   ) as any;
@@ -35,7 +35,7 @@ const BrandSalesPieChart = ({ data }:any) => {
           <PieChart>
             <Pie
               data={mergedData}
-              dataKey="total_quantity"
+              dataKey="sale_quantity"
               nameKey="brand"
               cx="50%"
               cy="50%"
@@ -52,8 +52,8 @@ const BrandSalesPieChart = ({ data }:any) => {
             <Tooltip
               formatter={(value, name, props) => {
                 const percent = (
-                  (props.payload.total_quantity /
-                    mergedData.reduce((sum:any, i:any) => sum + i.total_quantity, 0)) *
+                  (props.payload.sale_quantity /
+                    mergedData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
                 return [`${percent}% (${value.toLocaleString()})`, name];

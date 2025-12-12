@@ -10,7 +10,7 @@ const COLORS = [
 const ProductSalesPieChart = ({ data }:any) => {
   const chartData = data.map((item:any) => ({
   ...item,
-  total_quantity: Number(item.total_quantity)
+  sale_quantity: Number(item.sale_quantity)
 }));
   return (
     <Card sx={{ height: 400 }}>
@@ -22,8 +22,8 @@ const ProductSalesPieChart = ({ data }:any) => {
           <PieChart>
             <Pie
               data={chartData}
-              dataKey="total_quantity"
-              nameKey="product_name"
+              dataKey="sale_quantity"
+              nameKey="specification"
               cx="50%"
               cy="50%"
               outerRadius={100}
@@ -39,8 +39,8 @@ const ProductSalesPieChart = ({ data }:any) => {
             <Tooltip
               formatter={(value, name, props) => {
                 const percent = (
-                  (props.payload.total_quantity /
-                    chartData.reduce((sum:any, i:any) => sum + i.total_quantity, 0)) *
+                  (props.payload.sale_quantity /
+                    chartData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
                 return [`${percent}% (${value.toLocaleString()})`, name];

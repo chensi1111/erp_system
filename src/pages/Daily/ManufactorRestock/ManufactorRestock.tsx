@@ -1,30 +1,37 @@
 import style from "./ManufactorRestock.module.css";
 import classNames from "classnames";
-import { formattedDate } from "../../../utils/formattedTime";
-import { FaPlus } from "react-icons/fa6";
-import ManufactorRestockTable from "../../../component/ManufactorRestock/ManufactorRestockTable";
-import ShowManufactorRestockTable from "../../../component/ManufactorRestock/ShowManufactorRestockTable";
-import { useState,useEffect,useRef } from "react";
-import axios from '../../../api/axios'
-import {toast} from 'react-toastify'
-import Pagination from '@mui/material/Pagination';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
-import dayjs, { Dayjs } from "dayjs";
-import 'dayjs/locale/zh-tw';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Switch, FormControlLabel } from '@mui/material';
+import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+import axios from "../../../api/axios";
+import { toast } from "react-toastify";
+import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/zh-tw";
+// mui
+import Pagination from "@mui/material/Pagination";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { Switch, FormControlLabel } from "@mui/material";
+// store
 import { getProductInfoRelation } from "../../../store/productInfoRelationSlice";
 import { getSafeStockCount } from "../../../store/safeStcokSlice";
+// component
+import ManufactorRestockTable from "../../../component/ManufactorRestock/ManufactorRestockTable";
+import ShowManufactorRestockTable from "../../../component/ManufactorRestock/ShowManufactorRestockTable";
+// icon
+import plus from "../../../assets/icons/plusIcon.svg"
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
+// utils
+import { formattedDate } from "../../../utils/formattedTime";
+import { checkToday } from "../../../utils/checkToday";
 interface Restock {
   restock_id: string;
-  manufactor:string;
-  total_quantity:number;
-  total_price:number;
-  date:string,
-  type:number
+  manufactor: string;
+  total_quantity: number;
+  total_price: number;
+  date: string;
+  type: number;
 }
 interface Summary {
   total_in_quantity: number;
@@ -32,66 +39,79 @@ interface Summary {
   total_out_quantity: number;
   total_out_price: number;
 }
-const checkToday = (dateString: string) => {
-  return dayjs(dateString).isSame(dayjs(), 'day');
-}
+
 function ManufactorRestock() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const currentYear = dayjs();
-  const [showOneDay,setShowOneDay] =useState(true)
+  const [showOneDay, setShowOneDay] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
-  const [searchType, setSearchType] = useState('restock_id');
+  const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
+  const [searchType, setSearchType] = useState("restock_id");
   const [filter, setFilter] = useState({
-    restock_id: '',
-    manufactor:''
+    restock_id: "",
+    manufactor: "",
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [type,setType] = useState(0);
-  const [openCreate,setOpenCreate] = useState(false);
-  const [openShow,setOpenShow] = useState(false);
+  const [type, setType] = useState(0);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openShow, setOpenShow] = useState(false);
   const [data, setData] = useState<Restock[]>([]);
-  const [detail, setDetail] = useState<any>(null)
-  const [summary, setSummary] = useState<Summary>()
+  const [detail, setDetail] = useState<any>(null);
+  const [summary, setSummary] = useState<Summary>({
+    total_in_quantity: 0,
+    total_in_price: 0,
+    total_out_quantity: 0,
+    total_out_price: 0,
+  });
   const debounceRef = useRef<number | null>(null);
+
   const getList = async () => {
     try {
-      const res = await axios.post('/api/restock/list',{page,pageSize:10,filter,sort,showOneDay,selectedDate});
+      const res = await axios.post("/api/restock/list", {
+        page,
+        pageSize: 10,
+        filter,
+        sort,
+        showOneDay,
+        selectedDate,
+      });
       setData(res.data.data.list);
       setSummary(res.data.data.summary);
       setTotalPages(res.data.data.totalPages);
-      const countRes = await axios.post('/api/stock/safe_count');
+      const countRes = await axios.post("/api/stock/safe_count");
       dispatch(getSafeStockCount(countRes.data.data.total));
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleCreate = (type:number) => {
+  const handleCreate = (type: number) => {
     setType(type);
     setOpenCreate(true);
-  }
-  const handleDetail = async (restock_id:string) => {
+  };
+  const handleDetail = async (restock_id: string) => {
     try {
-      const res = await axios.post('/api/restock/detail',{restock_id});
-      if(res.data.code==='000'){
-        setDetail(res.data.data)
-        setOpenShow(true)
+      const res = await axios.post("/api/restock/detail", { restock_id });
+      if (res.data.code === "000") {
+        setDetail(res.data.data);
+        setOpenShow(true);
       }
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
-  }
-  const handleDelete = async (restock_id:string,type:number) => {
+  };
+  const handleDelete = async (restock_id: string, type: number) => {
     try {
-      const res = await axios.post('/api/restock/delete',{restock_id,type});
-      if(res.data.code==='000'){
-        toast.success('取消成功');
-        const updateData = data.filter(item => item.restock_id !== restock_id);
-        if(updateData.length ===0 && page>1){
-          setPage(page-1);
+      const res = await axios.post("/api/restock/delete", { restock_id, type });
+      if (res.data.code === "000") {
+        toast.success("取消成功");
+        const updateData = data.filter(
+          (item) => item.restock_id !== restock_id
+        );
+        if (updateData.length === 0 && page > 1) {
+          setPage(page - 1);
         }
         getList();
       }
@@ -99,30 +119,30 @@ function ManufactorRestock() {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
-  }
-  const handleSetFilter = (value:string) => {
-    if(searchType==='restock_id'){
+  };
+  const handleSetFilter = (value: string) => {
+    if (searchType === "restock_id") {
       setFilter({
         restock_id: value,
-        manufactor:''
-      })
-    }else{
+        manufactor: "",
+      });
+    } else {
       setFilter({
-        restock_id: '',
-        manufactor:value
-      })
+        restock_id: "",
+        manufactor: value,
+      });
     }
-  }
-  const handleSetSearchType = (value:string) => {
+  };
+  const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ restock_id: '',manufactor:''});
-  }
-  const createProductInfos=async()=>{
-    const response = await axios.post('/api/product/info');
-    if(response.data.code=='000') {
-      dispatch(getProductInfoRelation(response.data.data))
+    setFilter({ restock_id: "", manufactor: "" });
+  };
+  const createProductInfos = async () => {
+    const response = await axios.post("/api/product/info");
+    if (response.data.code == "000") {
+      dispatch(getProductInfoRelation(response.data.data));
     }
-  }
+  };
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -136,92 +156,157 @@ function ManufactorRestock() {
   }, [filter]);
 
   useEffect(() => {
-   getList();
-  }, [page,sort,showOneDay,selectedDate]);
+    getList();
+  }, [page, sort, showOneDay, selectedDate]);
   useEffect(() => {
-    createProductInfos()
-  },[])
+    createProductInfos();
+  }, []);
   return (
     <div className={style.container}>
-      {openCreate && <ManufactorRestockTable 
-      onClose={() => setOpenCreate(false)} 
-      onSuccess={() => {
-        setOpenCreate(false);
-        getList(); 
-      }}
-      type={type}/>}
-      {openShow && <ShowManufactorRestockTable
-      detail={detail} 
-      onClose={() => setOpenShow(false)} 
-      />}
+      {openCreate && (
+        <ManufactorRestockTable
+          onClose={() => setOpenCreate(false)}
+          onSuccess={() => {
+            setOpenCreate(false);
+            getList();
+          }}
+          type={type}
+        />
+      )}
+      {openShow && (
+        <ShowManufactorRestockTable
+          detail={detail}
+          onClose={() => setOpenShow(false)}
+        />
+      )}
       <div className={style.topContainer}>
         <div className={style.title}>廠商作業</div>
         <div className={style.buttons}>
-          <div className={style.button} onClick={()=>handleCreate(0)}><FaPlus/>廠商進貨</div>
-          <div className={classNames(style.button,style.refund)} onClick={()=>handleCreate(1)}><FaPlus/>廠商退貨</div>
+          <div className={style.button} onClick={() => handleCreate(0)}>
+            <img src={plus} alt="plus" />
+            廠商進貨
+          </div>
+          <div
+            className={classNames(style.button, style.refund)}
+            onClick={() => handleCreate(1)}
+          >
+            <img src={plus} alt="plus"/>
+            廠商退貨
+          </div>
         </div>
       </div>
-      <div className={style.searchContainer}>
-        <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
+      <div className={style.allSearch}>
+         <div className={style.searchContainer}>
+        <select
+          value={searchType}
+          onChange={(e) => handleSetSearchType(e.target.value)}
+          className={style.searchSelect}
+        >
           <option value="restock_id">單號</option>
           <option value="manufactor">廠商代號</option>
         </select>
-        {searchType==='restock_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.restock_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='manufactor' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType === "restock_id" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.restock_id}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "manufactor" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.manufactor}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
       </div>
-      <div className={style.infoContainer}>
-        <div className={style.timeContainer}>
-        <FormControlLabel
-          control={
-          <Switch checked={showOneDay} onChange={(e) => setShowOneDay(e.target.checked)}/>
-        }
-        label={showOneDay ? '顯示單日' : '顯示整月'}
-      />
-       {showOneDay && <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
-        <DatePicker
-          label="選擇日期"
-          value={selectedDate}
-          onChange={(newValue) => {
-            if(!newValue) return
-            setSelectedDate(newValue);
-          }}
-          maxDate={currentYear}
-          yearsOrder="desc"
-        />
-      </LocalizationProvider>}
-      {!showOneDay && <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
-        <DatePicker
-        label="選擇年月"
-        value={selectedDate}
-        onChange={(newValue) => {
-          if(!newValue) return
-          setSelectedDate(newValue);
-        }}
-        maxDate={currentYear}
-        openTo="month"
-        views={['year', 'month']}
-        yearsOrder="desc"
-        format="YYYY/MM"
-      />
-      </LocalizationProvider>}
+      <div className={style.timeContainer}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOneDay}
+                onChange={(e) => setShowOneDay(e.target.checked)}
+              />
+            }
+            label={showOneDay ? "顯示單日" : "顯示整月"}
+          />
+          {showOneDay && (
+            <LocalizationProvider
+              dateAdapter={AdapterDayjs}
+              adapterLocale="zh-tw"
+            >
+              <DatePicker
+                label="選擇日期"
+                value={selectedDate}
+                onChange={(newValue) => {
+                  if (!newValue) return;
+                  setSelectedDate(newValue);
+                }}
+                maxDate={currentYear}
+                yearsOrder="desc"
+              />
+            </LocalizationProvider>
+          )}
+          {!showOneDay && (
+            <LocalizationProvider
+              dateAdapter={AdapterDayjs}
+              adapterLocale="zh-tw"
+            >
+              <DatePicker
+                label="選擇年月"
+                value={selectedDate}
+                onChange={(newValue) => {
+                  if (!newValue) return;
+                  setSelectedDate(newValue);
+                }}
+                maxDate={currentYear}
+                openTo="month"
+                views={["year", "month"]}
+                yearsOrder="desc"
+                format="YYYY/MM"
+              />
+            </LocalizationProvider>
+          )}
         </div>
-      <div className={style.infos}>
-        <div className={style.info}>進貨數量 : <span>{summary?.total_in_quantity}</span></div>
-        <div className={style.info}>進貨金額 : <span>$ {summary?.total_in_price}</span></div>
-        <div className={style.info}>退貨數量 : <span>{summary?.total_out_quantity}</span></div>
-        <div className={style.info}>退貨金額 : <span>$ {summary?.total_out_price}</span></div>
       </div>
-      </div>
-       <div className={style.tableContainer}>
+        <div className={style.infos}>
+          <div className={style.info}>
+            <div className={style.infoTitle}>進貨數量</div>
+            <div className={style.infoValue}>{summary.total_in_quantity}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>進貨金額</div>
+            <div className={style.infoValue}>$ {summary.total_in_price}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>退貨數量</div>
+            <div className={style.infoValue}>{summary.total_out_quantity}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>退貨金額</div>
+            <div className={style.infoValue}>$ {summary.total_out_price}</div>
+          </div>
+        </div>
+      <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
             <tr>
               <th>
                 <span>單號</span>
-                {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                {sort === "ASC" ? (
+                  <img src={arrowDropUp} alt="arrowUp"
+                    onClick={() => setSort("DESC")}
+                    className={style.icon}
+                  />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                  <img src={arrowDropDown} alt="arrowDown"
+                    onClick={() => setSort("ASC")}
+                    className={style.icon}
+                  />
                 )}
               </th>
               <th>類型</th>
@@ -236,30 +321,68 @@ function ManufactorRestock() {
             {data.map((m) => (
               <tr key={m.restock_id}>
                 <td>{m.restock_id}</td>
-                <td className={classNames(m.type===0 && style.restock,style.typeTitle)}>{m.type ===0 ? '進貨' : '退貨'}</td>
+                <td
+                  className={classNames(
+                    m.type === 0 && style.restock,
+                    style.typeTitle
+                  )}
+                >
+                  {m.type === 0 ? "進貨" : "退貨"}
+                </td>
                 <td>{m.manufactor}</td>
                 <td>{m.total_quantity}</td>
                 <td>$ {m.total_price}</td>
                 <td>{formattedDate(m.date)}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={()=>handleDetail(m.restock_id)}>
+                  <button
+                    className={style.detailBtn}
+                    onClick={() => handleDetail(m.restock_id)}
+                  >
                     詳細
                   </button>
-                  {checkToday(m.date) && <button className={style.deleteBtn} onClick={()=>handleDelete(m.restock_id,m.type)}>
-                    取消
-                  </button>}
+                  {checkToday(m.date) && (
+                    <button
+                      className={style.deleteBtn}
+                      onClick={() => handleDelete(m.restock_id, m.type)}
+                    >
+                      取消
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
-            {data.length===0 && <tr>
-              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
-            </tr>}
+            {data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{ textAlign: "center", padding: "20px 0" }}
+                >
+                  查無資料
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      {data.length >0 && <Pagination count={totalPages} page={page} onChange={(_, val) => setPage(val)} siblingCount={0} boundaryCount={1} sx={{ul: {whiteSpace: 'nowrap', display: 'flex', flexWrap: 'nowrap', justifyContent: 'center' }}}/>}
+      {data.length > 0 && (
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, val) => setPage(val)}
+          siblingCount={0}
+          boundaryCount={1}
+          sx={{
+            ul: {
+              whiteSpace: "nowrap",
+              display: "flex",
+              flexWrap: "nowrap",
+              justifyContent: "center",
+            },
+          }}
+        />
+      )}
     </div>
-  )   
+  );
 }
 
 export default ManufactorRestock;
