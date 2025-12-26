@@ -195,8 +195,10 @@ table img.icon{
   margin-bottom: 10px;
   align-items: center;
 }
-.timeContainer{
+.dateContainer {
+  margin-bottom: 15px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 .typeTitle{

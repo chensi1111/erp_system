@@ -243,8 +243,8 @@ function SaleCalculate() {
               sx={{ minWidth: 150, backgroundColor: "white" }}
             >
               <MenuItem value="today">今日</MenuItem>
-              <MenuItem value="thisWeek">本周</MenuItem>
-              <MenuItem value="thisMonth">本月</MenuItem>
+              <MenuItem value="7days">一周</MenuItem>
+              <MenuItem value="1month">一個月</MenuItem>
               <MenuItem value="custom">自訂範圍</MenuItem>
             </Select>
           </FormControl>

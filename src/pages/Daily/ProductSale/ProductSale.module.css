@@ -212,8 +212,10 @@ table img.icon{
   font-weight: bold;
   color: #333;
 }
-.timeContainer {
+.dateContainer {
+  margin-bottom: 15px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 .sizeBadges {

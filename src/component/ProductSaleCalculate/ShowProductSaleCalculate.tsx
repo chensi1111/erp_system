@@ -43,10 +43,10 @@ const ShowSaleCalculate=({ onClose, detail,rangeType,customRange }: ShowSaleCalc
     switch (rangeType) {
       case 'today':
         return '今日';
-      case 'thisWeek':
-        return '本周'
-      case 'thisMonth':
-        return '本月'
+      case '7days':
+        return '一周'
+      case '1month':
+        return '一個月'
       case 'custom':
         return `${customRange.start} ~ ${customRange.end}`
     }

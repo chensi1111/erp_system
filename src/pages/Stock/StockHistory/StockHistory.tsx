@@ -59,7 +59,8 @@ function StockHistory() {
   const [searchType, setSearchType] = useState("change_number");
   const [filter, setFilter] = useState({
     change_number: "",
-    product_name: "",
+    product_id: "",
+    specification:"",
     change_type: 0,
   });
   const [page, setPage] = useState(1);
@@ -115,26 +116,36 @@ function StockHistory() {
     if (searchType === "change_number") {
       setFilter({
         change_number: value,
-        product_name: "",
+        product_id: "",
+        specification:"",
         change_type: 0,
       });
-    } else if (searchType === "product_name") {
+    } else if (searchType === "product_id") {
       setFilter({
         change_number: "",
-        product_name: value,
+        product_id: value,
+        specification:"",
+        change_type: 0,
+      });
+    } else if (searchType === "specification") {
+      setFilter({
+        change_number: "",
+        product_id: "",
+        specification:value,
         change_type: 0,
       });
     } else {
       setFilter({
         change_number: "",
-        product_name: "",
+        product_id: "",
+        specification:"",
         change_type: Number(value),
       });
     }
   };
   const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ change_number: "", product_name: "", change_type: 0 });
+    setFilter({ change_number: "", product_id: "",specification:"", change_type: 0 });
   };
   const formattedQuantity = (type: number, value: number | string) => {
     if (type === 4 || type === 5 || type === 8) {
@@ -182,7 +193,8 @@ function StockHistory() {
           className={style.searchSelect}
         >
           <option value="change_number">庫存單號</option>
-          <option value="product_name">商品名稱</option>
+          <option value="product_id">商品型號</option>
+          <option value="specification">商品規格</option>
           <option value="change_type">類型</option>
         </select>
         {searchType === "change_number" && (
@@ -194,11 +206,20 @@ function StockHistory() {
             onChange={(e) => handleSetFilter(e.target.value)}
           />
         )}
-        {searchType === "product_name" && (
+        {searchType === "product_id" && (
           <input
             type="text"
             placeholder="搜尋關鍵字"
-            value={filter.product_name}
+            value={filter.product_id}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "specification" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.specification}
             className={style.searchInput}
             onChange={(e) => handleSetFilter(e.target.value)}
           />

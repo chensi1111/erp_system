@@ -1,7 +1,7 @@
 import style from "./ProductSale.module.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "../../../api/axios";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import classNames from "classnames";
@@ -13,10 +13,14 @@ import ShowProductOrder from "../../../component/ProductOperation/ProductOrder/S
 import ShowOrderList from "../../../component/ProductOperation/ProductOrder/ShowOrderList";
 // mui
 import Pagination from "@mui/material/Pagination";
-import { Switch, FormControlLabel } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  TextField,
+} from "@mui/material";
 // icon
 import plus from "../../../assets/icons/plusIcon.svg"
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -100,9 +104,11 @@ interface SaleDetail {
 }
 function ProductSale() {
   const dispatch = useDispatch();
-  const currentYear = dayjs();
-  const [showOneDay, setShowOneDay] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+  const [rangeType, setRangeType] = useState("today"); // today | 7days | month | custom
+  const [customRange, setCustomRange] = useState({
+    start: "",
+    end: "",
+  });
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [searchType, setSearchType] = useState("order_no");
   const [filter, setFilter] = useState({
@@ -182,8 +188,8 @@ function ProductSale() {
         pageSize: 10,
         filter,
         sort,
-        showOneDay,
-        selectedDate,
+        rangeType,
+        customRange
       });
       setDate(res.data.data.list);
       setTotal(res.data.data.total);
@@ -363,7 +369,7 @@ function ProductSale() {
 
   useEffect(() => {
     getList();
-  }, [page, sort, showOneDay, selectedDate]);
+  }, [page, sort, rangeType, customRange]);
   useEffect(() => {
     createProductInfos();
   }, []);
@@ -477,54 +483,64 @@ function ProductSale() {
             />
           )}
         </div>
-        <div className={style.timeContainer}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showOneDay}
-                onChange={(e) => setShowOneDay(e.target.checked)}
-              />
-            }
-            label={showOneDay ? "顯示單日" : "顯示整月"}
-          />
-          {showOneDay && (
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-              adapterLocale="zh-tw"
+      </div>
+        <div className={style.dateContainer}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <FormControl size="small">
+            <InputLabel>日期範圍</InputLabel>
+            <Select
+              value={rangeType}
+              label="日期範圍"
+              onChange={(e) => setRangeType(e.target.value)}
+              sx={{ minWidth: 150, backgroundColor: "white" }}
             >
-              <DatePicker
-                label="選擇日期"
-                value={selectedDate}
-                onChange={(newValue) => {
-                  if (!newValue) return;
-                  setSelectedDate(newValue);
+              <MenuItem value="today">今日</MenuItem>
+              <MenuItem value="7days">一周</MenuItem>
+              <MenuItem value="1month">一個月</MenuItem>
+              <MenuItem value="custom">自訂範圍</MenuItem>
+            </Select>
+          </FormControl>
+
+          {rangeType === "custom" && (
+            <>
+              <TextField
+                size="small"
+                type="date"
+                value={customRange.start}
+                sx={{ backgroundColor: "white" }}
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  // 如果 end 比新的 start 早，就重置 end
+                  setCustomRange((prev) => ({
+                    start: newStart,
+                    end: prev.end && prev.end <= newStart ? "" : prev.end,
+                  }));
                 }}
-                maxDate={currentYear}
-                yearsOrder="desc"
               />
-            </LocalizationProvider>
-          )}
-          {!showOneDay && (
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-              adapterLocale="zh-tw"
-            >
-              <DatePicker
-                label="選擇年月"
-                value={selectedDate}
-                onChange={(newValue) => {
-                  if (!newValue) return;
-                  setSelectedDate(newValue);
+              <TextField
+                size="small"
+                type="date"
+                value={customRange.end}
+                sx={{ backgroundColor: "white" }}
+                onChange={(e) =>
+                  setCustomRange({ ...customRange, end: e.target.value })
+                }
+                slotProps={{
+                  htmlInput: {
+                    min: customRange.start
+                      ? new Date(
+                          new Date(customRange.start).getTime() +
+                            24 * 60 * 60 * 1000
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      : undefined,
+                  },
                 }}
-                maxDate={currentYear}
-                openTo="month"
-                views={["year", "month"]}
-                yearsOrder="desc"
-                format="YYYY/MM"
               />
-            </LocalizationProvider>
+            </>
           )}
-        </div>
+        </Box>
       </div>
       <div className={style.infos}>
         <div className={style.info}>
