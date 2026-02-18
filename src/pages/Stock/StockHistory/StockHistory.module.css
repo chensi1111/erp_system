@@ -34,6 +34,7 @@
 }
 .searchSelect{
   padding: 5px;
+  height: 40px;
 }
 .searchContainer {
   display: flex;
@@ -64,8 +65,10 @@
 table th{
   user-select: none;
 }
-table .icon{
+table img.icon{
   cursor: pointer;
+  width: 20px;
+  height: 20px;
   margin-left: 10px;
   font-size: 20px;
   transform: translateY(4px);
@@ -157,15 +160,19 @@ table .icon{
   font-weight: bold;
 }
 .saleType {
-  color: #e53935;
+  color: rgb(17, 115, 212);
   font-weight: bold;
 }
-.cancelType {
-  color: rgb(17, 115, 212);
+.refundType {
+  color: #e53935;
   font-weight: bold;
 }
 .orderType {
   color: purple;
+  font-weight: bold;
+}
+.cancelType {
+  color:brown;
   font-weight: bold;
 }
 

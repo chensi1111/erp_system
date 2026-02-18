@@ -1,12 +1,15 @@
 import style from "./TypeDocument.module.css";
-import { FaPlus } from "react-icons/fa6";
-import CreateTypeDocument from "../../../component/TypeDocument/CreateTypeDocument";
-import ShowTypeDocument from "../../../component/TypeDocument/ShowTypeDocument";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import Pagination from '@mui/material/Pagination';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io"; 
+// component
+import CreateTypeDocument from "../../../component/TypeDocument/CreateTypeDocument";
+import ShowTypeDocument from "../../../component/TypeDocument/ShowTypeDocument";
+// icon
+import plus from "../../../assets/icons/plusIcon.svg"
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 interface Type {
   type_id: string;
   type_name:  string;
@@ -122,7 +125,7 @@ function TypeDocument() {
       onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
       <div className={style.topContainer}>
         <div className={style.title}>類別基本資料</div>
-        <div className={style.button} onClick={()=>setOpenCreate(true)}><FaPlus/>新增類別</div>
+        <div className={style.button} onClick={()=>setOpenCreate(true)}><img src={plus} alt="plus"/>新增類別</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
@@ -139,9 +142,9 @@ function TypeDocument() {
               <th>
                 <span>類別編號</span>
                 {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                  <img src={arrowDropUp} alt="arrowUp" onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                 <img src={arrowDropDown} alt="arrowDown" onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
               <th>類別名稱</th>

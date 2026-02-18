@@ -1,27 +1,32 @@
 import style from "./RestockCalculate.module.css";
-import ShowRestockCalculate from "../../../component/RestockCalculate/ShowRestockCalculate";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
-import Pagination from '@mui/material/Pagination';
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/zh-tw';
+// component
+import ShowRestockCalculate from "../../../component/RestockCalculate/ShowRestockCalculate";
+// mui
+import Pagination from '@mui/material/Pagination';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
+// icon
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 interface Report {
   manufactor:string,
   manufactor_name:string,
-  total_quantity:string,
-  total_price:string
+  total_in_quantity: string,
+  total_in_price: string,
+  total_return_quantity: string,
+  total_return_price: string
 }
-interface Detail {
-  restock_id:string,
-  create_date:string,
-  total_quantity:string,
-  total_price:string,
-  date:string
+interface Summary {
+  total_in_quantity: string,
+  total_in_price: string,
+  total_return_quantity: string,
+  total_return_price: string
 }
 
 function RestockCalculate() {
@@ -34,17 +39,22 @@ function RestockCalculate() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalRestock, setTotalRestock] = useState('')
-  const [totalQuantity, setTotalQuantity] = useState('')
+  const [summary,setSummary] = useState<Summary>({
+    total_in_quantity: '0',
+    total_in_price: '0',
+    total_return_quantity: '0',
+    total_return_price: '0'
+  });
   const [openShow,setOpenShow] = useState(false);
   const [data, setData] = useState<Report[]>([]);
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
-  const [detail, setDetail] = useState<Detail[]>([]);
   const [manufactorInfo,setManufactorInfo] = useState({
     manufactor:"",
     manufactor_name:"",
-    total_quantity:"",
-    total_price:"",
+    total_in_quantity:"",
+    total_in_price:"",
+    total_return_quantity:"",
+    total_return_price:""
   })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
@@ -52,31 +62,23 @@ function RestockCalculate() {
       const res = await axios.post('/api/report/restock_list',{page,pageSize:10,filter,sort,selectedDate:selectedDate?.format("YYYY-MM")});
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalRestock(res.data.data.summary.total_restock_amount);
-      setTotalQuantity(res.data.data.summary.total_restock_volume);
+      setSummary(res.data.data.summary);
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
   const getDetail = async (info:any) => {
-    const {manufactor,manufactor_name,total_quantity,total_price} =info
-    try {
-      const res = await axios.post('/api/report/restock_detail',{manufactor});
-      if(res.data.code==='000'){
-        setDetail(res.data.data.list);
+    const {manufactor,manufactor_name,total_in_price,total_in_quantity,total_return_quantity,total_return_price} =info
         setOpenShow(true);
         setManufactorInfo({
           manufactor,
           manufactor_name,
-          total_quantity,
-          total_price,
+          total_in_quantity,
+          total_in_price,
+          total_return_quantity,
+          total_return_price
         })
-      }
-    } catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-    }
   };
   const handleSetFilter = (value:string) => {
     if(searchType==='manufactor'){
@@ -108,17 +110,17 @@ function RestockCalculate() {
   return (
     <div className={style.container}>
       {openShow && <ShowRestockCalculate 
-      onClose={() => setOpenShow(false)} detail={detail} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
+      onClose={() => setOpenShow(false)} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
       <div className={style.topContainer}>
-        <div className={style.title}>廠商進貨總表</div>
+        <div className={style.title}>廠商進退貨總表</div>
       </div>
-      <div className={style.searchContainer}>
+      <div className={style.allSearch}>
+        <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
           <option value="manufactor">廠商編號</option>
         </select>
         {searchType==='manufactor' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
-      <div className={style.dateContainer}>
     <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
       <DatePicker
         label="選擇年月"
@@ -135,11 +137,25 @@ function RestockCalculate() {
         sx={{ minWidth: 250 }}
       />
     </LocalizationProvider>
-        <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總進貨量:</span>{totalQuantity}</div>
-          <div className={style.infoItem}><span>總進貨額:</span>$ {totalRestock}</div>
-        </div>
-    </div>
+      </div>
+     <div className={style.infos}>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總進貨量</div>
+            <div className={style.infoValue}>{summary.total_in_quantity}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總進貨額</div>
+            <div className={style.infoValue}>$ {summary.total_in_price}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總退貨量</div>
+            <div className={style.infoValue}>{summary.total_return_quantity}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總退貨額</div>
+            <div className={style.infoValue}>$ {summary.total_return_price}</div>
+          </div>
+      </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
@@ -147,14 +163,16 @@ function RestockCalculate() {
               <th>
                 <span>廠商編號</span>
                 {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                  <img src={arrowDropUp} alt="arrowUp" onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                 <img src={arrowDropDown} alt="arrowDown" onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
               <th>廠商名稱</th>
               <th>總進貨量</th>
               <th>總進貨額</th>
+              <th>總退貨量</th>
+              <th>總退貨額</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -163,8 +181,10 @@ function RestockCalculate() {
               <tr key={m.manufactor}>
                 <td>{m.manufactor}</td>
                 <td>{m.manufactor_name}</td>
-                <td>{m.total_quantity}</td>
-                <td>{"$ "+m.total_price}</td>
+                <td>{m.total_in_quantity}</td>
+                <td>{"$ "+m.total_in_price}</td>
+                <td>{m.total_return_quantity}</td>
+                <td>{"$ "+m.total_return_price}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m)}>
                     詳細
@@ -173,7 +193,7 @@ function RestockCalculate() {
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={5} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>

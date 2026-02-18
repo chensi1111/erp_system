@@ -1,9 +1,11 @@
 import style from "./ProductSaleCalculate.module.css";
+import { useState, useEffect, useRef } from "react";
+import axios from "../../../api/axios";
+import { toast } from "react-toastify";
+// component
 import ShowSaleCalculate from "../../../component/ProductSaleCalculate/ShowProductSaleCalculate";
-import { useState,useEffect,useRef } from "react";
-import axios from '../../../api/axios'
-import {toast} from 'react-toastify'
-import Pagination from '@mui/material/Pagination';
+// mui
+import Pagination from "@mui/material/Pagination";
 import {
   FormControl,
   InputLabel,
@@ -12,107 +14,121 @@ import {
   Box,
   TextField,
 } from "@mui/material";
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
+// icon
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
+// utils
+import { getGrossProfit } from "../../../utils/calculate";
 interface Report {
   product_id: string;
-  product_name: string;
-  specification:string;
-  total_quantity:string;
-  total_sales:string;
-  total_profit:string;
+  specification: string;
+  sale_quantity: number;
+  sale_amount: number;
+  refund_quantity: number;
+  refund_amount: number;
+  ordering_quantity: number;
+  order_amount: number;
+  return_order_quantity: number;
+  return_order_amount: number;
+  gross_profit: number;
 }
 interface ReportDetail {
-  product_id: string,
-  product_name: string,
-  specification: string,
-  manufactor:string,
-  brand:string,
-  size:string,
-  color:string,
-  product_type1:string,
-  product_type2:string,
-  product_type3:string,
-  product_type4:string,
-  total_quantity:string,
-  total_sales:string,
-  total_profit:string,
-  total_cost:string,
-  sizes:Sizes[],
-  size_list:string
-}
-interface Sizes {
-  size:string;
-  total_quantity:string
+  product_id: string;
+  product_name: string;
+  specification: string;
+  manufactor: string;
+  brand: string;
+  size: string;
+  color: string;
+  product_type1: string;
+  product_type2: string;
+  product_type3: string;
+  product_type4: string;
+  sale_quantity: number,
+  refund_quantity: number,
+  ordering_quantity: number,
+  return_order_quantity:number,
+  sale_amount: number,
+  refund_amount: number,
+  ordering_amount: number,
+  return_order_amount: number
 }
 function SaleCalculate() {
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
-  const [searchType, setSearchType] = useState('product_id');
+  const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
+  const [searchType, setSearchType] = useState("product_id");
   const [filter, setFilter] = useState({
-    product_id: '',
-    specification:"",
-    product_name: '',
+    product_id: "",
+    specification: "",
+    product_name: "",
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalSale, setTotalSale] = useState('')
-  const [totalQuantity, setTotalQuantity] = useState('')
-  const [totalProfit, setTotalProfit] = useState('')
-  const [totalCost, setTotalCost] = useState('')
-  const [totalFee, setTotalFee] = useState('')
-  const [openShow,setOpenShow] = useState(false);
+  const [openShow, setOpenShow] = useState(false);
   const [data, setData] = useState<Report[]>([]);
   const [rangeType, setRangeType] = useState("today"); // today | 7days | month | custom
   const [customRange, setCustomRange] = useState({
     start: "",
     end: "",
   });
-  const [detail, setDetail] = useState<ReportDetail>(
-    {
-      product_id: "",
-      product_name:  "",
-      specification: "",
-      manufactor:"",
-      brand:"",
-      size:"",
-      color:"",
-      product_type1:"",
-      product_type2:"",
-      product_type3:"",
-      product_type4:"",
-      total_quantity:"",
-      total_sales:"",
-      total_profit:"",
-      total_cost:"",
-      sizes:[],
-      size_list:""
-    }
-  );
+  const [detail, setDetail] = useState<ReportDetail>({
+    product_id: "",
+    product_name: "",
+    specification: "",
+    manufactor: "",
+    brand: "",
+    size: "",
+    color: "",
+    product_type1: "",
+    product_type2: "",
+    product_type3: "",
+    product_type4: "",
+    sale_quantity: 0,
+    refund_quantity: 0,
+    ordering_quantity: 0,
+    return_order_quantity:0,
+    sale_amount: 0,
+    refund_amount: 0,
+    ordering_amount: 0,
+    return_order_amount: 0
+  });
   const [summary, setSummary] = useState({
-    total_cost:"",
-    total_handling_fee:"",
-    total_order_quantity:"",
-    total_paid_quantity:"",
-    total_pickup_quantity:"",
-    total_paid:"",
-    total_prepaid:"",
-    total_remaining:""
-  })
+    sale_quantity: 0,
+    refund_quantity: 0,
+    ordering_quantity: 0,
+    return_order_quantity: 0,
+    sale_amount: 0,
+    refund_amount: 0,
+    order_amount: 0,
+    return_order_amount: 0,
+    gross_profit:0
+  });
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
     try {
-      const res = await axios.post('/api/report/list',{page,pageSize:10,filter,sort,rangeType,customRange});
+      const res = await axios.post("/api/report/list", {
+        page,
+        pageSize: 10,
+        filter,
+        sort,
+        rangeType,
+        customRange,
+      });
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setSummary(res.data.data.summary)
+      setSummary(res.data.data.summary);
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (specification:string) => {
+  const getDetail = async (specification: string) => {
     try {
-      const res = await axios.post('/api/report/detail',{specification,rangeType,customRange});
-      if(res.data.code==='000'){
+      const res = await axios.post("/api/report/detail", {
+        specification,
+        rangeType,
+        customRange,
+      });
+      if (res.data.code === "000") {
         setDetail(res.data.data.list);
         setOpenShow(true);
       }
@@ -121,31 +137,31 @@ function SaleCalculate() {
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const handleSetFilter = (value:string) => {
-    if(searchType==='product_id'){
+  const handleSetFilter = (value: string) => {
+    if (searchType === "product_id") {
       setFilter({
         product_id: value,
-        specification:'',
-        product_name: '',
-      })
-    }else if (searchType==='specification'){
+        specification: "",
+        product_name: "",
+      });
+    } else if (searchType === "specification") {
       setFilter({
-        product_id: '',
-        specification:value,
-        product_name: '',
-      })
-    }else{
+        product_id: "",
+        specification: value,
+        product_name: "",
+      });
+    } else {
       setFilter({
-        product_id: '',
-        specification:'',
+        product_id: "",
+        specification: "",
         product_name: value,
-      })
+      });
     }
-  }
-  const handleSetSearchType = (value:string) => {
+  };
+  const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ product_id: '',specification: '', product_name: '' });
-  }
+    setFilter({ product_id: "", specification: "", product_name: "" });
+  };
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -159,110 +175,179 @@ function SaleCalculate() {
   }, [filter]);
 
   useEffect(() => {
-    setData([])
-    if(rangeType==='custom' && (!customRange.start || !customRange.end)){
-      return
+    setData([]);
+    if (rangeType === "custom" && (!customRange.start || !customRange.end)) {
+      return;
     }
-   getList();
-  }, [page,sort,rangeType,customRange]);
+    getList();
+  }, [page, sort, rangeType, customRange]);
   return (
     <div className={style.container}>
-      {openShow && <ShowSaleCalculate 
-      onClose={() => setOpenShow(false)} detail={detail} rangeType={rangeType} customRange={customRange} />}
+      {openShow && (
+        <ShowSaleCalculate
+          onClose={() => setOpenShow(false)}
+          detail={detail}
+          rangeType={rangeType}
+          customRange={customRange}
+        />
+      )}
       <div className={style.topContainer}>
         <div className={style.title}>商品銷售總表</div>
       </div>
       <div className={style.searchContainer}>
-        <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
+        <select
+          value={searchType}
+          onChange={(e) => handleSetSearchType(e.target.value)}
+          className={style.searchSelect}
+        >
           <option value="product_id">商品編號</option>
           <option value="specification">商品規格</option>
           <option value="product_name">商品名稱</option>
         </select>
-        {searchType==='product_id' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_id} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='specification' && <input type="text" placeholder="搜尋關鍵字" value={filter.specification} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
-        {searchType==='product_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.product_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
+        {searchType === "product_id" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.product_id}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "specification" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.specification}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "product_name" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.product_name}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
       </div>
       <div className={style.dateContainer}>
-          <Box display="flex" alignItems="center" gap={2}>
-      <FormControl size="small">
-        <InputLabel>日期範圍</InputLabel>
-        <Select
-          value={rangeType}
-          label="日期範圍"
-          onChange={(e) => setRangeType(e.target.value)}
-          sx={{ minWidth: 150,backgroundColor:"white" }}
-        >
-          <MenuItem value="today">今日</MenuItem>
-          <MenuItem value="thisWeek">本周</MenuItem>
-          <MenuItem value="thisMonth">本月</MenuItem>
-          <MenuItem value="custom">自訂範圍</MenuItem>
-        </Select>
-      </FormControl>
+        <Box display="flex" alignItems="center" gap={2}>
+          <FormControl size="small">
+            <InputLabel>日期範圍</InputLabel>
+            <Select
+              value={rangeType}
+              label="日期範圍"
+              onChange={(e) => setRangeType(e.target.value)}
+              sx={{ minWidth: 150, backgroundColor: "white" }}
+            >
+              <MenuItem value="today">今日</MenuItem>
+              <MenuItem value="7days">一周</MenuItem>
+              <MenuItem value="1month">一個月</MenuItem>
+              <MenuItem value="custom">自訂範圍</MenuItem>
+            </Select>
+          </FormControl>
 
-      {rangeType === "custom" && (
-        <>
-          <TextField
-            size="small"
-            type="date"
-            value={customRange.start}
-            sx={{ backgroundColor:"white" }}
-            onChange={(e) => {
-              const newStart = e.target.value;
-              // 如果 end 比新的 start 早，就重置 end
-              setCustomRange((prev) => ({
-                start: newStart,
-                end: prev.end && prev.end <= newStart ? "" : prev.end,
-              }));
-            }}
-          />
-          <TextField
-            size="small"
-            type="date"
-            value={customRange.end}
-            sx={{ backgroundColor:"white" }}
-            onChange={(e) =>
-              setCustomRange({ ...customRange, end: e.target.value })
-            }
-            slotProps={{
-             htmlInput: {
-                 min: customRange.start ? new Date(new Date(customRange.start).getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-                 : undefined,
-              },
-           }}
-          />
-        </>
-      )}
+          {rangeType === "custom" && (
+            <>
+              <TextField
+                size="small"
+                type="date"
+                value={customRange.start}
+                sx={{ backgroundColor: "white" }}
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  // 如果 end 比新的 start 早，就重置 end
+                  setCustomRange((prev) => ({
+                    start: newStart,
+                    end: prev.end && prev.end <= newStart ? "" : prev.end,
+                  }));
+                }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                value={customRange.end}
+                sx={{ backgroundColor: "white" }}
+                onChange={(e) =>
+                  setCustomRange({ ...customRange, end: e.target.value })
+                }
+                slotProps={{
+                  htmlInput: {
+                    min: customRange.start
+                      ? new Date(
+                          new Date(customRange.start).getTime() +
+                            24 * 60 * 60 * 1000
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      : undefined,
+                  },
+                }}
+              />
+            </>
+          )}
         </Box>
-        <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總金額:</span>$ {Number(summary.total_paid) + Number(summary.total_remaining)}</div>
-          <div className={style.infoItem}><span>總銷量:</span>{Number(summary.total_paid_quantity) + Number(summary.total_pickup_quantity)}</div>
-          <div className={style.infoItem}><span>總訂貨量:</span>{summary.total_order_quantity}</div>
-          <div className={style.infoItem}><span>總訂金:</span>$ {summary.total_prepaid}</div>
-          <div className={style.infoItem}><span>總尾款:</span>$ {summary.total_remaining}</div>
-          <div className={style.infoItem}><span>總成本:</span>$ {summary.total_cost}</div>
-          <div className={style.infoItem}><span>網路手續:</span>$ {summary.total_handling_fee||0}</div>
-          <div className={style.infoItem}><span>淨利:</span></div>
+      </div>
+      <div className={style.infos}>
+        <div className={style.info}>
+          <div className={style.infoTitle}>銷貨數 / 額</div>
+          <div className={style.infoValue}>
+            {summary.sale_quantity} / $ {summary.sale_amount}
+          </div>
         </div>
-    </div>
-       <div className={style.tableContainer}>
+        <div className={style.info}>
+          <div className={style.infoTitle}>退貨數 / 額</div>
+          <div className={style.infoValue}>
+            {summary.refund_quantity} / $ {summary.refund_amount}
+          </div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>訂貨中 / 額</div>
+          <div className={style.infoValue}>
+            {summary.ordering_quantity} / $ {summary.order_amount}
+          </div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>退訂數 / 額</div>
+          <div className={style.infoValue}>
+            {summary.return_order_quantity} / ${" "}
+            {summary.return_order_amount}
+          </div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>毛利</div>
+          <div className={style.infoValue}>$ {summary.gross_profit}</div>
+        </div>
+        <div className={style.info}>
+          <div className={style.infoTitle}>毛利率</div>
+          <div className={style.infoValue}>{((summary.gross_profit) / (summary.sale_amount - summary.refund_amount)*100).toFixed(2)}%</div>
+        </div>
+      </div>
+      <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
             <tr>
               <th>
                 <span>商品編號</span>
-                {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                {sort === "ASC" ? (
+                  <img src={arrowDropUp} alt="arrowUp"
+                    onClick={() => setSort("DESC")}
+                    className={style.icon}
+                  />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                  <img src={arrowDropDown} alt="arrowDown"
+                    onClick={() => setSort("ASC")}
+                    className={style.icon}
+                  />
                 )}
               </th>
               <th>商品規格</th>
-              <th>銷售量</th>
-              <th>訂貨量</th>
-              <th>總金額</th>
-              <th>總訂金</th>
-              <th>總尾款</th>
-              <th>總銷售</th>
+              <th>銷售量 / 額</th>
+              <th>退貨量 / 額</th>
+              <th>訂貨中 / 額</th>
+              <th>退訂量 / 額</th>
               <th>毛利</th>
               <th>操作</th>
             </tr>
@@ -272,29 +357,61 @@ function SaleCalculate() {
               <tr key={m.specification}>
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
-                <td>{m.total_quantity}</td>
-                <td>{m.order_quantity}</td>
-                <td>{m.total_amount}</td>
-                <td>$ {m.prepaid_amount}</td>
-                <td>$ {m.remaining_amount}</td>
-                <td>$ {m.paid_amount}</td>
-                <td>$ {Number(m.total_amount) - Number(m.total_cost)}</td>
+                <td>
+                  {m.sale_quantity} / $ {m.sale_amount}
+                </td>
+                <td>
+                  {m.refund_quantity} / $ {m.refund_amount}
+                </td>
+                <td>
+                  {m.ordering_quantity} / $ {m.order_amount}
+                </td>
+                <td>
+                  {m.return_order_quantity} / $ {m.return_order_amount}
+                </td>
+                <td>$ {getGrossProfit(m)}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.specification)}>
+                  <button
+                    className={style.detailBtn}
+                    onClick={() => getDetail(m.specification)}
+                  >
                     詳細
                   </button>
                 </td>
               </tr>
             ))}
-            {data.length===0 && <tr>
-              <td colSpan={10} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
-            </tr>}
+            {data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={8}
+                  style={{ textAlign: "center", padding: "20px 0" }}
+                >
+                  查無資料
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      {data.length >0 && <Pagination count={totalPages} page={page} onChange={(_, val) => setPage(val)} siblingCount={0} boundaryCount={1} sx={{ul: {whiteSpace: 'nowrap', display: 'flex', flexWrap: 'nowrap', justifyContent: 'center' }}}/>}
+      {data.length > 0 && (
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, val) => setPage(val)}
+          siblingCount={0}
+          boundaryCount={1}
+          sx={{
+            ul: {
+              whiteSpace: "nowrap",
+              display: "flex",
+              flexWrap: "nowrap",
+              justifyContent: "center",
+            },
+          }}
+        />
+      )}
     </div>
-  )   
+  );
 }
 
 export default SaleCalculate;

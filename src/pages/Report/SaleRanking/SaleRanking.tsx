@@ -1,6 +1,6 @@
 import style from "./SaleRanking.module.css";
-import ShowSaleRanking from "../../../component/SaleRanking/ShowSaleRanking";
-import { useState,useEffect } from "react";
+import ShowSaleRanking from "../../../component/ProductSaleCalculate/ShowProductSaleCalculate"
+import React, { useState,useEffect } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
 import {
@@ -13,17 +13,24 @@ import {
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import {getProductInfoRelation} from "../../../store/productInfoRelationSlice"
-import ProductSalesPieChart from "../../../component/SaleRanking/ProductSalesPieChart";
-import BrandSalesPieChart from "../../../component/SaleRanking/BrandSalesPieChart";
-import ColorSalesPieChart from "../../../component/SaleRanking/ColorSalesPieChart";
-import TypeSalesPieChart from "../../../component/SaleRanking/TypeSalesPieChart";
+const ProductSalesPieChart = React.lazy(()=>import('../../../component/SaleRanking/ProductSalesPieChart'))
+const BrandSalesPieChart = React.lazy(()=>import('../../../component/SaleRanking/BrandSalesPieChart'))
+const ColorSalesPieChart = React.lazy(()=>import('../../../component/SaleRanking/ColorSalesPieChart'))
+const TypeSalesPieChart = React.lazy(()=>import('../../../component/SaleRanking/TypeSalesPieChart'))
+// utils
+import { getGrossProfit } from "../../../utils/calculate";
 interface Report {
   product_id: string;
-  product_name: string;
-  specification:string;
-  total_quantity:string;
-  total_sales:string;
-  total_profit:string;
+  specification: string;
+  sale_quantity: number;
+  sale_amount: number;
+  refund_quantity: number;
+  refund_amount: number;
+  ordering_quantity: number;
+  order_amount: number;
+  return_order_quantity: number;
+  return_order_amount: number;
+  gross_profit: number;
 }
 interface ReportDetail {
   product_id: string,
@@ -37,16 +44,14 @@ interface ReportDetail {
   product_type2:string,
   product_type3:string,
   product_type4:string,
-  total_quantity:string,
-  total_sales:string,
-  total_profit:string,
-  total_cost:string,
-  sizes:Sizes[],
-  size_list:string
-}
-interface Sizes {
-  size:string;
-  total_quantity:string
+  sale_quantity: number,
+  refund_quantity: number,
+  ordering_quantity: number,
+  return_order_quantity:number,
+  sale_amount: number,
+  refund_amount: number,
+  ordering_amount: number,
+  return_order_amount: number
 }
 function SaleRanking() {
   const dispatch = useDispatch()
@@ -70,17 +75,19 @@ function SaleRanking() {
       product_type2:"",
       product_type3:"",
       product_type4:"",
-      total_quantity:"",
-      total_sales:"",
-      total_profit:"",
-      total_cost:"",
-      sizes:[],
-      size_list:""
+      sale_quantity: 0,
+      refund_quantity: 0,
+      ordering_quantity: 0,
+      return_order_quantity:0,
+      sale_amount: 0,
+      refund_amount: 0,
+      ordering_amount: 0,
+      return_order_amount: 0
     }
   );
   const getList = async () => {
     try {
-      const res = await axios.post('/api/report/rank_list',{rangeType,customRange});
+      const res = await axios.post('/api/report/top_list',{rangeType,customRange});
       setData(res.data.data.list);
     } catch (error) {
       const err = error as any;
@@ -134,8 +141,8 @@ function SaleRanking() {
           sx={{ minWidth: 150,backgroundColor:"white" }}
         >
           <MenuItem value="today">今日</MenuItem>
-          <MenuItem value="thisWeek">本周</MenuItem>
-          <MenuItem value="thisMonth">本月</MenuItem>
+          <MenuItem value="7days">一周</MenuItem>
+          <MenuItem value="1month">一個月</MenuItem>
           <MenuItem value="custom">自訂範圍</MenuItem>
         </Select>
       </FormControl>
@@ -181,8 +188,11 @@ function SaleRanking() {
             <tr>
               <th>商品編號</th>
               <th>商品規格</th>
-              <th>商品名稱</th>
-              <th>總銷量</th>
+              <th>銷售量 / 額</th>
+              <th>退貨量 / 額</th>
+              <th>訂貨中 / 額</th>
+              <th>退訂量 / 額</th>
+              <th>毛利</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -191,17 +201,31 @@ function SaleRanking() {
               <tr key={m.specification}>
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
-                <td>{m.product_name}</td>
-                <td>{m.total_quantity}</td>
+                <td>
+                  {m.sale_quantity} / $ {m.sale_amount}
+                </td>
+                <td>
+                  {m.refund_quantity} / $ {m.refund_amount}
+                </td>
+                <td>
+                  {m.ordering_quantity} / $ {m.order_amount}
+                </td>
+                <td>
+                  {m.return_order_quantity} / $ {m.return_order_amount}
+                </td>
+                <td>$ {getGrossProfit(m)}</td>
                 <td className={style.actions}>
-                  <button className={style.detailBtn} onClick={() => getDetail(m.specification)}>
+                  <button
+                    className={style.detailBtn}
+                    onClick={() => getDetail(m.specification)}
+                  >
                     詳細
                   </button>
                 </td>
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={5} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={8} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>

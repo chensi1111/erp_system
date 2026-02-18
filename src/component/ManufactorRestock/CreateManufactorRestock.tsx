@@ -4,62 +4,78 @@ import classNames from "classnames";
 import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector,useDispatch } from "react-redux";
+// store
 import type { RootState } from "../../store/store";
 import { addNewProduct } from "../../store/restockList"
+// utils
+import { getProductFormat } from "../../utils/productInfoMap";
 interface productIdList{
   product_id:""
+}
+interface StockQty {
+  size:string,
+  available_quantity:string
+}
+interface RestockDetail {
+  total_quantity:number;
+  total_price:number;
+  product_name:string;
+  manufactor:string;
+  brand:string;
+  size:string;
+  color:string;
+  product_type1:string;
+  product_type2:string;
+  product_type3:string;
+  product_type4:string;
+  size_list:string,
+  stock_qty:StockQty[];
 }
 const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
   const dispatch = useDispatch()
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const restockList = useSelector((state: RootState) =>state.restockList)
+  const [detail,setDetail] = useState<RestockDetail>({
+    total_quantity:0,
+    total_price:0,
+    product_name:'',
+    manufactor:'',
+    brand:'',
+    size:'',
+    color:'',
+    product_type1:'',
+    product_type2:'',
+    product_type3:'',
+    product_type4:'',
+    size_list:'',
+    stock_qty:[]
+  })
   const [product_id, setProductId] = useState('');
-  const [product_name, setProductName] = useState('');
   const [specification, setSpecification] = useState('')
   const [productIdList, setProductIdList] =useState<productIdList[]>([])
-  const [manufactor_id,setManufactorId] = useState('')
-  const [brand_id,setBrandId] = useState('')
-  const [size_id,setSizeId] = useState('')
   const [sizeList, setSizeList] = useState<string[]>([]);
-  const [color_id,setColorId] = useState('')
-  const [rawSizeList, setRawSizeList] = useState('')
   const [quantities, setQuantities] = useState<{ size: string; all_quantity: string,available_quantity:string,reserved_quantity:String,safe_stock:string }[]>(
     Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity: "",reserved_quantity: "",safe_stock:"" }))
   );
-  const [product_type1,setProductType1] = useState('')
-  const [product_type2,setProductType2] = useState('')
-  const [product_type3,setProductType3] = useState('')
-  const [product_type4,setProductType4] = useState('')
   const [price,setPrice] = useState('')
   const productIdDebounceRef = useRef<number | null>(null);
   const specificationDebounceRef = useRef<number | null>(null);
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
-};
   const clearProductInfo = () =>{
-    setProductName('')
-    setManufactorId('')
-    setBrandId('')
-    setSizeId('')
-    setColorId('')
-    setProductType1('')
-    setProductType2('')
-    setProductType3('')
-    setProductType4('')
-    setRawSizeList('')
+    setDetail({
+      total_quantity:0,
+      total_price:0,
+      product_name:'',
+      manufactor:'',
+      brand:'',
+      size:'',
+      color:'',
+      product_type1:'',
+      product_type2:'',
+      product_type3:'',
+      product_type4:'',
+      size_list:'',
+      stock_qty:[]
+    })
     setSizeList([])
     setPrice('')
   }
@@ -79,17 +95,11 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
       const response = await axios.post('/api/restock/productInfo',{specification,product_id})
       if(response.data.code==='000'){
         const info = response.data.data
-        setProductName(info.product_name)
-        setManufactorId(info.manufactor)
-        setBrandId(info.brand)
-        setSizeId(info.size)
-        setColorId(info.color)
-        setProductType1(info.product_type1)
-        setProductType2(info.product_type2)
-        setProductType3(info.product_type3)
-        setProductType4(info.product_type4)
+        setDetail({
+          ...info,
+          stock_qty: info.stock_qty ?? []
+        });
         setPrice(info.purchase_price)
-        setRawSizeList(info.size_list)
         if (info.size_list) {
           const list = info.size_list.split(',').slice(0, 10); // 最多10個
           setSizeList(list);
@@ -101,11 +111,9 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
     }
  
   }
-  const total_quantity = quantities.reduce((sum, item) => {
-    const qty = parseInt(item.all_quantity);
-    return sum + (isNaN(qty) ? 0 : qty);
-  }, 0);
+  const total_quantity = quantities.reduce((sum, item) => { const qty = parseInt(item.all_quantity); return sum + (isNaN(qty) ? 0 : qty); }, 0);
   const handleCreate = async () => {
+    if(!detail) return
     const data = {
       product_id,
       specification,
@@ -113,16 +121,16 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
       price,
       total_price:Number(price) * total_quantity,
       total_quantity,
-      product_name,
-      manufactor:getProductFormat('manufactor',manufactor_id),
-      brand:getProductFormat('brand',brand_id),
-      size:getProductFormat('size',size_id),
-      color:getProductFormat('color',color_id),
-      type1:getProductFormat('type',product_type1)||'',
-      type2:getProductFormat('type',product_type2)||'',
-      type3:getProductFormat('type',product_type3)||'',
-      type4:getProductFormat('type',product_type4)||'',
-      sizeList:rawSizeList
+      product_name:detail.product_name,
+      manufactor:getProductFormat('manufactor',detail.manufactor,productInfoRelation),
+      brand:getProductFormat('brand',detail.brand,productInfoRelation),
+      size:getProductFormat('size',detail.size,productInfoRelation),
+      color:getProductFormat('color',detail.color,productInfoRelation),
+      type1:getProductFormat('type',detail.product_type1,productInfoRelation)||'',
+      type2:getProductFormat('type',detail.product_type2,productInfoRelation)||'',
+      type3:getProductFormat('type',detail.product_type3,productInfoRelation)||'',
+      type4:getProductFormat('type',detail.product_type4,productInfoRelation)||'',
+      sizeList:detail.size_list
     }
     dispatch(addNewProduct(data))
     onClose()
@@ -200,43 +208,43 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品名稱</div>
-              <input type="text" className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1} value={product_name}/>
+              <input type="text" className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1} value={detail.product_name}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>廠商</div>
-              <input type="text" value={getProductFormat('manufactor',manufactor_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('manufactor',detail.manufactor,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>品牌</div>
-              <input type="text" value={getProductFormat('brand',brand_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('brand',detail.brand,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>尺碼</div>
-              <input type="text" value={getProductFormat('size',size_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('size',detail.size,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>顏色</div>
-              <input type="text" value={getProductFormat('color',color_id)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('color',detail.color,productInfoRelation)} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別1</div>
-              <input type="text" value={getProductFormat('type',product_type1)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type1,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別2</div>
-              <input type="text" value={getProductFormat('type',product_type2)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type2,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別3</div>
-              <input type="text" value={getProductFormat('type',product_type3)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type3,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>類別4</div>
-              <input type="text" value={getProductFormat('type',product_type4)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
+              <input type="text" value={getProductFormat('type',detail.product_type4,productInfoRelation)||''} className={classNames(style.input,style.readOnly)} readOnly tabIndex={-1}/>
             </div>
           </div>
           {sizeList.length!==0 && <div className={style.singleInput}>
@@ -258,13 +266,16 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
                       <td key={index} className={classNames(!sizeList[index] && style.hideInput)}>
                         <input type="text" 
                           value={quantities[index].all_quantity}
+                          placeholder={'餘 '+(detail.stock_qty[index]?.available_quantity || '0')}
                           onChange={(e) => {
+                            if (!/^\d*$/.test(e.target.value)) return;
                             const newQuantities = [...quantities];
                             newQuantities[index].all_quantity = e.target.value;
                             newQuantities[index].available_quantity = e.target.value;
                             setQuantities(newQuantities);
                           }}
                           maxLength={3}
+                          className={style.sizeInput}
                         />
                       </td>
                     ))}

@@ -1,11 +1,13 @@
 import style from "./ShowProductDocument.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+// utils
+import { formattedTime } from "../../utils/formattedTime";
+import { getProductFormat } from "../../utils/productInfoMap";
 interface ProductDetail {
   product_id: string;
   product_name:  string;
@@ -22,7 +24,8 @@ interface ProductDetail {
   recommended_price:number;
   purchase_price:number;
   last_cost:number;
-  average_cost:number;
+  cumulative_cost:number;
+  cumulative_in_quantity:number;
   remark: string;
 }
 interface ShowProductDocumentProps {
@@ -31,8 +34,10 @@ interface ShowProductDocumentProps {
   detail: ProductDetail;
   type: boolean;
 }
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
+
+const getAverageCost = (cumulative_cost:number,cumulative_in_quantity:number) => {
+  if(!cumulative_cost||cumulative_in_quantity===0) return 0;
+  return (cumulative_cost/cumulative_in_quantity).toFixed(2);
 }
 
 const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocumentProps)=> {
@@ -43,22 +48,6 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
   const handleChange = (key: keyof ProductDetail, value: string | number) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
-  const getProductFormat = (type: 'manufactor' | 'brand' | 'size' | 'color' | 'type', id: string) => {
-  switch (type) {
-    case 'manufactor':
-      return productInfoRelation.manufactorList.find(item => item.manufactor_id === id)?.manufactor_name || '';
-    case 'brand':
-      return productInfoRelation.brandList.find(item => item.brand_id === id)?.brand_name || '';
-    case 'size':
-      return productInfoRelation.sizeList.find(item => item.size_id === id)?.size_name || '';
-    case 'color':
-      return productInfoRelation.colorList.find(item => item.color_id === id)?.color_name || '';
-    case 'type':
-      return productInfoRelation.typeList.find(item => item.type_id === id)?.type_name || '';
-    default:
-      return '';
-  }
-};
   const handleSave = async () => {
     try {
       const response = await axios.post('/api/product/update', {...formData});
@@ -87,7 +76,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔時間</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>
@@ -110,7 +99,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.manufactor_id} value={item.manufactor_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',formData.manufactor)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('manufactor',formData.manufactor,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>品牌</div>
@@ -126,7 +115,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.brand_id} value={item.brand_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('brand',formData.brand)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('brand',formData.brand,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>尺碼</div>
@@ -142,7 +131,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.size_id} value={item.size_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('size',formData.size)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('size',formData.size,productInfoRelation)}></input>
           </div>
           <div className={style.selectContainer}>
               <div className={style.inputTitle}>顏色</div>
@@ -158,7 +147,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.color_id} value={item.color_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('color',formData.color)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('color',formData.color,productInfoRelation)}></input>
           </div>
           <div className={style.typeContainer}>
             <div className={style.selectContainer}>
@@ -175,7 +164,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type1)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type1,productInfoRelation)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別2</div>
@@ -191,7 +180,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type2)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type2,productInfoRelation)}></input>
             </div>
           </div>
           <div className={style.typeContainer}>
@@ -209,7 +198,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type3)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type3,productInfoRelation)}></input>
             </div>
             <div className={style.selectContainer}>
               <div className={style.inputTitle}>類別4</div>
@@ -225,7 +214,7 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
                     <option key={item.type_id} value={item.type_id} />
                  ))}
               </datalist>
-              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type4)}></input>
+              <input type="text" disabled className={style.selectName} value={getProductFormat('type',formData.product_type4,productInfoRelation)}></input>
             </div>
           </div>
           <div className={style.multipleInput}>
@@ -241,11 +230,11 @@ const ShowProductDocument=({ onClose,onSuccess, detail,type }: ShowProductDocume
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>最新進價</div>
-              <input type="text" className={style.input} value={"$ "+formData.last_cost||''} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+(formData.last_cost||0)} readOnly tabIndex={-1}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>平均進價</div>
-              <input type="text" className={style.input} value={"$ "+formData.average_cost||''} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={"$ "+getAverageCost(formData.cumulative_cost,formData.cumulative_in_quantity)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

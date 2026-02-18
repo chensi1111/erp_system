@@ -1,9 +1,10 @@
 import style from "./ShowSizeDocument.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+// utils
+import { formattedTime } from "../../utils/formattedTime";
 interface SizeDetail {
   size_id: string;
   size_name:  string;
@@ -16,9 +17,6 @@ interface ShowSizeDocumentProps {
   onSuccess: () => void;
   detail: SizeDetail;
   type: boolean;
-}
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 function stringToSizes(str: string) {
   const arr = str
@@ -79,7 +77,7 @@ const ShowSizeDocument=({ onClose,onSuccess, detail,type }: ShowSizeDocumentProp
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔時間</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

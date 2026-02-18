@@ -148,7 +148,7 @@
   border-radius: 10px;
   margin-bottom: 20px;
   max-height: calc(10 * 40px + 45px);
-  overflow-y: auto;
+  font-size: 14px;
 }
 .table {
   width: 100%;
@@ -171,7 +171,7 @@ table th{
 }
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 20%;
+  width: 10%;
 }
 .table th:nth-child(4),
 .table td:nth-child(4) {
@@ -191,4 +191,11 @@ table th{
 }
 .table tr:hover td {
   background-color: rgb(250, 250, 250);
+}
+.type{
+  font-weight: bold;
+  color:rgb(17, 115, 212)
+}
+.type.return{
+  color: rgb(229, 57, 53)
 }

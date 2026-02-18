@@ -1,9 +1,9 @@
 import style from "./ShowManufactorDocument.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+import { formattedTime } from "../../utils/formattedTime";
 interface ManufactorDetail {
   manufactor_id: string;
   manufactor_name:  string;
@@ -23,9 +23,7 @@ interface ShowManufactorDocumentProps {
   detail: ManufactorDetail;
   type: boolean;
 }
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
-}
+
 const ShowManufactorDocument=({ onClose,onSuccess, detail,type }: ShowManufactorDocumentProps)=> {
   const [isEditing, setIsEditing] = useState(type);
   const [formData, setFormData] = useState<ManufactorDetail>(detail);
@@ -62,7 +60,7 @@ const ShowManufactorDocument=({ onClose,onSuccess, detail,type }: ShowManufactor
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔時間</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

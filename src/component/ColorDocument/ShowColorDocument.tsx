@@ -1,9 +1,9 @@
 import style from "./ShowColorDocument.module.css";
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { useState } from "react";
 import axios from "../../api/axios";
 import { toast } from "react-toastify";
+import { formattedTime } from "../../utils/formattedTime";
 interface ColorDetail {
   color_id: string;
   color_name:  string;
@@ -15,9 +15,6 @@ interface ShowColorDocumentProps {
   onSuccess: () => void;
   detail: ColorDetail;
   type: boolean;
-}
-const formattedDate = (dateString: string) => {
-  return dayjs(dateString).format('YYYY/MM/DD HH:mm:ss');
 }
 
 const ShowColorDocument=({ onClose,onSuccess, detail,type }: ShowColorDocumentProps)=> {
@@ -52,7 +49,7 @@ const ShowColorDocument=({ onClose,onSuccess, detail,type }: ShowColorDocumentPr
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>建檔時間</div>
-              <input type="text" className={style.input} value={formattedDate(formData.create_date)} readOnly tabIndex={-1}/>
+              <input type="text" className={style.input} value={formattedTime(formData.create_date)} readOnly tabIndex={-1}/>
             </div>
           </div>
           <div className={style.singleInput}>

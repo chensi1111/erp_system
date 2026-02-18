@@ -167,3 +167,6 @@ textarea {
     border: none !important;
     pointer-events: none;
 }
+.sizeInput {
+  text-align: center;
+}

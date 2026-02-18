@@ -1,26 +1,32 @@
 import style from "./SaleCalculate.module.css";
-import ShowSaleCalculate from "../../../component/SaleCalculate/ShowSaleCalculate";
 import { useState,useEffect,useRef } from "react";
 import axios from '../../../api/axios'
 import {toast} from 'react-toastify'
-import Pagination from '@mui/material/Pagination';
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/zh-tw';
+// component
+import ShowSaleCalculate from "../../../component/SaleCalculate/ShowSaleCalculate";
+// mui
+import Pagination from '@mui/material/Pagination';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { IoIosArrowDropup ,IoIosArrowDropdown   } from "react-icons/io";
+// icon
+import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
+import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 interface Report {
   manufactor:string,
   manufactor_name:string,
-  total_quantity:string,
-  total_price:string
+  order_quantity:number,
+  order_amount:number,
+  sale_quantity:number,
+  sale_amount:number
 }
-interface Detail {
-  restock_id:string,
-  create_date:string,
-  total_quantity:string,
-  total_price:string
+interface Summary {
+  total_sale_volume: number,
+  total_sale_amount: number,
+  total_order_volume: number,
+  total_order_amount: number
 }
 
 function SaleCalculate() {
@@ -34,17 +40,22 @@ function SaleCalculate() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalSale, setTotalSale] = useState('')
-  const [totalQuantity, setTotalQuantity] = useState('')
+  const [summary,setSummary] = useState<Summary>({
+    total_sale_volume: 0,
+    total_sale_amount: 0,
+    total_order_volume: 0,
+    total_order_amount: 0
+  })
   const [openShow,setOpenShow] = useState(false);
   const [data, setData] = useState<Report[]>([]);
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
-  const [detail, setDetail] = useState<Detail[]>([]);
   const [manufactorInfo,setManufactorInfo] = useState({
     manufactor:"",
     manufactor_name:"",
-    total_quantity:"",
-    total_price:"",
+    order_quantity:0,
+    order_amount:0,
+    sale_quantity:0,
+    sale_amount:0
   })
   const debounceRef = useRef<number | null>(null);
   const getList = async () => {
@@ -52,31 +63,23 @@ function SaleCalculate() {
       const res = await axios.post('/api/report/sale_list',{page,pageSize:10,filter,sort,selectedDate:selectedDate?.format("YYYY-MM")});
       setData(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalSale(res.data.data.summary.total_sale_amount);
-      setTotalQuantity(res.data.data.summary.total_sale_volume);
+      setSummary(res.data.data.summary)
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
   const getDetail = async (info:any) => {
-    const {manufactor,manufactor_name,total_quantity,total_price} =info
-    try {
-      const res = await axios.post('/api/report/sale_detail',{manufactor});
-      if(res.data.code==='000'){
-        setDetail(res.data.data.list);
+    const {manufactor,manufactor_name,order_quantity,order_amount,sale_quantity,sale_amount} =info
         setOpenShow(true);
         setManufactorInfo({
           manufactor,
           manufactor_name,
-          total_quantity,
-          total_price,
+          order_quantity,
+          order_amount,
+          sale_quantity,
+          sale_amount
         })
-      }
-    } catch (error) {
-      const err = error as any;
-      toast.error(err.response?.data?.msg || "伺服器錯誤");
-    }
   };
   const handleSetFilter = (value:string) => {
     if(searchType==='manufactor'){
@@ -114,11 +117,12 @@ function SaleCalculate() {
   return (
     <div className={style.container}>
       {openShow && <ShowSaleCalculate 
-      onClose={() => setOpenShow(false)} detail={detail} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
+      onClose={() => setOpenShow(false)} manufactorInfo={manufactorInfo} selectedDate={selectedDate} />}
       <div className={style.topContainer}>
         <div className={style.title}>廠商銷貨總表</div>
       </div>
-      <div className={style.searchContainer}>
+      <div className={style.allSearch}>
+        <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
           <option value="manufactor">廠商編號</option>
           <option value="manufactor_name">廠商名稱</option>
@@ -126,7 +130,6 @@ function SaleCalculate() {
         {searchType==='manufactor' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
         {searchType==='manufactor_name' && <input type="text" placeholder="搜尋關鍵字" value={filter.manufactor_name} className={style.searchInput} onChange={(e)=>handleSetFilter(e.target.value)}/>}
       </div>
-      <div className={style.dateContainer}>
     <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="zh-tw">
       <DatePicker
         label="選擇年月"
@@ -143,11 +146,25 @@ function SaleCalculate() {
         sx={{ minWidth: 250 }}
       />
     </LocalizationProvider>
-        <div className={style.infoContainer}>
-          <div className={style.infoItem}><span>總銷貨量:</span>{totalQuantity}</div>
-          <div className={style.infoItem}><span>總銷貨額:</span>$ {totalSale}</div>
-        </div>
-    </div>
+      </div>
+    <div className={style.infos}>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總銷貨量</div>
+            <div className={style.infoValue}>{summary.total_sale_volume}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總銷貨額</div>
+            <div className={style.infoValue}>$ {summary.total_sale_amount}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>訂貨中數量</div>
+            <div className={style.infoValue}>{summary.total_order_volume}</div>
+          </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>訂貨中金額</div>
+            <div className={style.infoValue}>$ {summary.total_order_amount}</div>
+          </div>
+      </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
@@ -155,12 +172,14 @@ function SaleCalculate() {
               <th>
                 <span>廠商編號</span>
                 {sort === 'ASC' ? (
-                  <IoIosArrowDropup onClick={() => setSort('DESC')} className={style.icon} />
+                  <img src={arrowDropUp} alt="arrowUp" onClick={() => setSort('DESC')} className={style.icon} />
                 ) : (
-                 <IoIosArrowDropdown onClick={() => setSort('ASC')} className={style.icon} />
+                 <img src={arrowDropDown} alt="arrowDown" onClick={() => setSort('ASC')} className={style.icon} />
                 )}
               </th>
               <th>廠商名稱</th>
+              <th>訂貨中數量</th>
+              <th>訂貨中金額</th>
               <th>總銷貨量</th>
               <th>總銷貨額</th>
               <th>操作</th>
@@ -171,8 +190,10 @@ function SaleCalculate() {
               <tr key={m.manufactor}>
                 <td>{m.manufactor}</td>
                 <td>{m.manufactor_name}</td>
-                <td>{m.total_quantity}</td>
-                <td>{"$ "+m.total_price}</td>
+                <td>{m.order_quantity}</td>
+                <td>$ {m.order_amount}</td>
+                <td>{m.sale_quantity}</td>
+                <td>$ {m.sale_amount}</td>
                 <td className={style.actions}>
                   <button className={style.detailBtn} onClick={() => getDetail(m)}>
                     詳細
@@ -181,7 +202,7 @@ function SaleCalculate() {
               </tr>
             ))}
             {data.length===0 && <tr>
-              <td colSpan={5} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
+              <td colSpan={7} style={{textAlign:'center',padding:'20px 0'}}>查無資料</td>
             </tr>}
           </tbody>
         </table>
