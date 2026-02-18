@@ -46,6 +46,7 @@ function ProductDocument() {
   const [totalPages, setTotalPages] = useState(1);
   const [openCreate,setOpenCreate] = useState(false);
   const [specification,setSpecification] = useState('')
+  const [product_id,setProductId] = useState('')
   const [openShow,setOpenShow] = useState(false);
   const [data, setDate] = useState<Product[]>([]);
   const [type, setType] = useState(false);
@@ -70,8 +71,9 @@ function ProductDocument() {
       remark: "",
     }
   );
-  const handleCreateOpen = (specification:string) =>{
+  const handleCreateOpen = (specification:string,product_id:string) =>{
     setSpecification(specification)
+    setProductId(product_id)
     setOpenCreate(true)
   }
   const debounceRef = useRef<number | null>(null);
@@ -166,7 +168,8 @@ function ProductDocument() {
   return (
     <div className={style.container}>
       {openCreate && <CreateProductDocument
-      Specification={specification} 
+      Specification={specification}
+      Product_id={product_id}
       onClose={() => setOpenCreate(false)} 
       onSuccess={() => {
         setOpenCreate(false);
@@ -176,7 +179,7 @@ function ProductDocument() {
       onClose={() => setOpenShow(false)} detail={detail} type={type} onSuccess={()=>{setOpenShow(false);getList()}} />}
       <div className={style.topContainer}>
         <div className={style.title}>商品基本資料</div>
-        <div className={style.button} onClick={()=>handleCreateOpen('')}><FaPlus/>新增商品</div>
+        <div className={style.button} onClick={()=>handleCreateOpen('','')}><FaPlus/>新增商品</div>
       </div>
       <div className={style.searchContainer}>
         <select value={searchType} onChange={(e)=>handleSetSearchType(e.target.value)} className={style.searchSelect}>
@@ -218,7 +221,7 @@ function ProductDocument() {
                   <button className={style.editBtn} onClick={() => getDetail(m.specification,m.product_id,true)}>
                     編輯
                   </button>
-                  <button className={style.addBtn} onClick={() => handleCreateOpen(m.specification)}>
+                  <button className={style.addBtn} onClick={() => handleCreateOpen(m.specification,m.product_id)}>
                     增加規格
                   </button>
                   <button className={style.deleteBtn} onClick={()=>handleDelete(m.specification)}>

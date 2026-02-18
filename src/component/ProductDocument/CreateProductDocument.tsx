@@ -6,7 +6,7 @@ import axios from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => void;onSuccess: () => void;Specification:string})=> {
+const CreateProductDocument=({onClose,onSuccess,Specification,Product_id}: {onClose: () => void;onSuccess: () => void;Specification:string;Product_id:string})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const [product_id, setProduct_id] = useState('');
   const [specification, setSpecification] = useState('');
@@ -59,7 +59,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
 
   const getProductInfo = async() =>{
     try {
-      const res = await axios.post('/api/product/detail',{specification:Specification});
+      const res = await axios.post('/api/product/detail',{specification:Specification,product_id:Product_id});
       if(res.data.code==='000'){
         const data=res.data.data
         setProduct_id(data.product_id)
@@ -74,6 +74,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
         setProductType3(data.product_type3)
         setProductType4(data.product_type4)
         setPrice(data.recommended_price)
+        setPurchase(data.purchase_price)
         setRemark(data.remark)
       }
     } catch (error) {
@@ -82,7 +83,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
     }
   }
   useEffect(()=>{
-    if(Specification){
+    if(Specification&&Product_id){
       getProductInfo()
     }
   },[])
