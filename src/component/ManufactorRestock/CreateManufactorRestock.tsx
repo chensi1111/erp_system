@@ -294,7 +294,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
           <div className={style.multipleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>進價</div>
-              <input type="text" className={classNames(style.input,!product_id && style.disable)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
+              <input type="text" className={classNames(style.input,!specification && style.disable)} value={price} onChange={(e)=>setPrice(e.target.value)}/>
             </div>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>總計</div>
