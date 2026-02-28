@@ -9,8 +9,8 @@ import type { RootState } from "../../store/store";
 import { addNewProduct } from "../../store/restockList"
 // utils
 import { getProductFormat } from "../../utils/productInfoMap";
-interface productIdList{
-  product_id:""
+interface specificationList{
+  specification:""
 }
 interface StockQty {
   size:string,
@@ -34,6 +34,7 @@ interface RestockDetail {
 const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
   const dispatch = useDispatch()
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
+  const isAutoSetProductId = useRef(false);
   const restockList = useSelector((state: RootState) =>state.restockList)
   const [detail,setDetail] = useState<RestockDetail>({
     total_quantity:0,
@@ -52,7 +53,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
   })
   const [product_id, setProductId] = useState('');
   const [specification, setSpecification] = useState('')
-  const [productIdList, setProductIdList] =useState<productIdList[]>([])
+  const [specificationList, setSpecificationList] =useState<specificationList[]>([])
   const [sizeList, setSizeList] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<{ size: string; all_quantity: string,available_quantity:string,reserved_quantity:String,safe_stock:string }[]>(
     Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity: "",reserved_quantity: "",safe_stock:"" }))
@@ -79,22 +80,24 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
     setSizeList([])
     setPrice('')
   }
-  const getProductId = async() => {
+  const getSpecification = async() => {
     try {
-      const response = await axios.post('/api/restock/specification',{specification})
+      const response = await axios.post('/api/restock/specification',{product_id})
       if(response.data.code==='000'){
-        setProductIdList(response.data.data)
+        setSpecificationList(response.data.data)
       }
     } catch (error) {
       toast.error('無此商品型號')
-      setProductIdList([])
+      setSpecificationList([])
     }
   }
   const getProductInfo = async() => {
     try {
-      const response = await axios.post('/api/restock/productInfo',{specification,product_id})
+      const response = await axios.post('/api/restock/productInfo',{specification})
       if(response.data.code==='000'){
         const info = response.data.data
+        isAutoSetProductId.current = true
+        setProductId(info.product_id)
         setDetail({
           ...info,
           stock_qty: info.stock_qty ?? []
@@ -136,35 +139,38 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
     onClose()
   }
   useEffect(() => {
-    if(!specification) {
-      clearProductInfo()
-      setProductId('')
+    if (isAutoSetProductId.current) {
+      isAutoSetProductId.current = false
       return
     }
+    clearProductInfo()
+    setSpecification('')
+    if(!product_id){
+      setSpecificationList([])
+      return
+    } 
+    if (productIdDebounceRef.current)
+      clearTimeout(productIdDebounceRef.current);
+    productIdDebounceRef.current = setTimeout(() => {
+      getSpecification();
+    }, 1000);
+    return () => {
+      if (productIdDebounceRef.current)
+        clearTimeout(productIdDebounceRef.current);
+    };
+  },[product_id])
+  useEffect(() => {
+    if(!specification) return
     if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
 
     specificationDebounceRef.current = setTimeout(() => {
-      setProductId('')
-      clearProductInfo()
-      getProductId();
+      getProductInfo();
     }, 1000);
 
     return () => {
       if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
     };
   }, [specification]);
-   useEffect(() => {
-    if(!specification||!product_id) return
-    if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
-
-    productIdDebounceRef.current = setTimeout(() => {
-      getProductInfo();
-    }, 1000);
-
-    return () => {
-      if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
-    };
-  }, [product_id]);
   useEffect(() => {
     setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity:"",reserved_quantity:"",safe_stock:"" })));
   }, [sizeList]);
@@ -175,6 +181,23 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
         <div className={style.allInputs}>
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
+              <div className={style.inputTitle}>商品型號</div>
+                <input
+                list="product_id"
+                className={classNames(style.input)}
+                value={product_id}
+                onChange={(e)=>setProductId(e.target.value)}
+                />
+                <datalist id="product_id">
+                  {restockList.productList.map((item) => (
+                    <option key={item.product_id} value={item.product_id} />
+                 ))}
+              </datalist>
+              
+            </div>
+          </div>
+          <div className={style.singleInput}>
+            <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品規格</div>
                 <input
                 list="specification"
@@ -183,24 +206,8 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
                 onChange={(e)=>setSpecification(e.target.value)}
                 />
                 <datalist id="specification">
-                  {restockList.productList.map((item) => (
+                  {specificationList.map((item) => (
                     <option key={item.specification} value={item.specification} />
-                 ))}
-              </datalist>
-            </div>
-          </div>
-          <div className={style.singleInput}>
-            <div className={style.inputContainer}>
-              <div className={style.inputTitle}>商品型號</div>
-                <input
-                list="product_id"
-                className={classNames(style.input,!specification && style.disable)}
-                value={product_id}
-                onChange={(e)=>setProductId(e.target.value)}
-                />
-                <datalist id="product_id">
-                  {productIdList.map((item) => (
-                    <option key={item.product_id} value={item.product_id} />
                  ))}
               </datalist>
             </div>

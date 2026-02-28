@@ -17,7 +17,7 @@ interface RestockItem {
   type4:string;
 }
 interface ProductInfo {
-  specification:string
+  product_id:string
 }
 interface RestockState {
   list: RestockItem[];
