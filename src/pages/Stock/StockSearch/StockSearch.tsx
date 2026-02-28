@@ -9,6 +9,7 @@ import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 
 interface Stock {
   product_id: string;
+  manufactor:number;
   specification: string;
   product_name: string;
   stock_qty: Stock_qty[];
@@ -33,10 +34,12 @@ function StockSearch() {
   const [searchType, setSearchType] = useState("product_id");
   const [filter, setFilter] = useState({
     product_id: "",
-    product_name: "",
+    specification: "",
+    manufactor:""
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalStock, setTotalStock] = useState(0)
   const [openShow, setOpenShow] = useState(false);
   const [data, setDate] = useState<Stock[]>([]);
   const [type, setType] = useState(false);
@@ -65,6 +68,7 @@ function StockSearch() {
       });
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
+      setTotalStock(res.data.data.totalStock)
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
@@ -88,18 +92,26 @@ function StockSearch() {
     if (searchType === "product_id") {
       setFilter({
         product_id: value,
-        product_name: "",
+        specification: "",
+        manufactor:""
       });
-    } else {
+    } else if(searchType === "specification") {
       setFilter({
         product_id: "",
-        product_name: value,
+        specification: value,
+        manufactor:""
+      });
+    } else{
+      setFilter({
+        product_id: "",
+        specification: "",
+        manufactor:value
       });
     }
   };
   const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ product_id: "", product_name: "" });
+    setFilter({ product_id: "", specification: "", manufactor:"" });
   };
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -140,7 +152,8 @@ function StockSearch() {
           className={style.searchSelect}
         >
           <option value="product_id">商品編號</option>
-          <option value="product_name">商品名稱</option>
+          <option value="specification">商品規格</option>
+          <option value="manufactor">廠商</option>
         </select>
         {searchType === "product_id" && (
           <input
@@ -151,16 +164,26 @@ function StockSearch() {
             onChange={(e) => handleSetFilter(e.target.value)}
           />
         )}
-        {searchType === "product_name" && (
+        {searchType === "specification" && (
           <input
             type="text"
             placeholder="搜尋關鍵字"
-            value={filter.product_name}
+            value={filter.specification}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "manufactor" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.manufactor}
             className={style.searchInput}
             onChange={(e) => handleSetFilter(e.target.value)}
           />
         )}
       </div>
+      <div className={style.totalStock}>總庫存: {totalStock}</div>
       <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
@@ -180,6 +203,7 @@ function StockSearch() {
                 )}
               </th>
               <th>商品名稱</th>
+              <th>廠商</th>
               <th>商品規格</th>
               <th>庫存量</th>
               <th>操作</th>
@@ -187,9 +211,10 @@ function StockSearch() {
           </thead>
           <tbody>
             {data.map((m) => (
-              <tr key={m.specification}>
+              <tr key={`${m.product_id}-${m.specification}`}>
                 <td>{m.product_id}</td>
                 <td>{m.product_name}</td>
+                <td>{m.manufactor}</td>
                 <td>{m.specification}</td>
                 <td>{getTotalNumber(m.stock_qty)}</td>
                 <td className={style.actions}>
@@ -211,7 +236,7 @@ function StockSearch() {
             {data.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   style={{ textAlign: "center", padding: "20px 0" }}
                 >
                   查無資料

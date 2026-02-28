@@ -12,6 +12,13 @@
   align-items: center;
   margin-bottom: 30px;
 }
+.totalStock{
+  margin-bottom: 20px;
+  font-size: 18px;
+  display: flex;
+  justify-content: end;
+  padding: 0 20px;
+}
 .title {
   font-size: 24px;
   font-weight: bold;
@@ -76,7 +83,7 @@ table img.icon{
 
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 30%;
+  width: 20%;
 }
 .table th:nth-child(3),
 .table td:nth-child(3) {
