@@ -18,6 +18,7 @@
   display: flex;
   justify-content: end;
   padding: 0 20px;
+  gap: 10px;
 }
 .title {
   font-size: 24px;

@@ -39,7 +39,9 @@ function StockSearch() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalStock, setTotalStock] = useState(0)
+  const [totalStock, setTotalStock] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalSale, setTotalSale] = useState(0);
   const [openShow, setOpenShow] = useState(false);
   const [data, setDate] = useState<Stock[]>([]);
   const [type, setType] = useState(false);
@@ -68,7 +70,9 @@ function StockSearch() {
       });
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalStock(res.data.data.totalStock)
+      setTotalStock(res.data.data.totalStock);
+      setTotalCost(res.data.data.totalCostAmount);
+      setTotalSale(res.data.data.totalSaleAmount)
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
@@ -183,7 +187,11 @@ function StockSearch() {
           />
         )}
       </div>
-      <div className={style.totalStock}>總庫存: {totalStock}</div>
+      <div className={style.totalStock}>
+        <div>總庫存: {totalStock}</div>
+        <div>總售價: $ {totalSale}</div>
+        <div>總成本: $ {totalCost}</div>
+        </div>
       <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
