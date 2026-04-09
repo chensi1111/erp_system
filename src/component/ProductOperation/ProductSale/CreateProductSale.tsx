@@ -31,6 +31,7 @@ interface productInfo{
 }
 const CreateProductSale=({onClose,onSuccess,type}: {onClose: () => void;onSuccess: () => void;type:number})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
+  const isAutoSetProductId = useRef(false);
   const [isCreate,setIsCreate] = useState(false)
   const [product_id, setProduct_id] = useState('');
   const [specification, setSpecification] = useState('')
@@ -111,6 +112,8 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
       if(response.data.code==='000'){
         const info = response.data.data
         setInfo(info)
+        isAutoSetProductId.current = true
+        setProduct_id(info.product_id)
         if (info.size_list) {
           const list = info.size_list.split(',').slice(0, 10); // 最多10個
           setSizeList(list);
@@ -176,22 +179,25 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
     };
   }, [specification]);
   useEffect(() => {
+    if (isAutoSetProductId.current) {
+      isAutoSetProductId.current = false
+      return
+    }
     clearProductInfo()
     setSpecification('')
     if(!product_id){
       setSpecificationList([])
       return
     } 
-    if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
-
+    if (productIdDebounceRef.current)
+      clearTimeout(productIdDebounceRef.current);
     productIdDebounceRef.current = setTimeout(() => {
       getSpecification();
     }, 1000);
-
     return () => {
-      if (productIdDebounceRef.current) clearTimeout(productIdDebounceRef.current);
+      if (productIdDebounceRef.current)
+        clearTimeout(productIdDebounceRef.current);
     };
-
   },[product_id])
   useEffect(() => {
     setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "" })));
@@ -228,14 +234,20 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
           <div className={style.singleInput}>
             <div className={style.inputContainer}>
               <div className={style.inputTitle}>商品規格</div>
-              <select className={classNames(style.select,specificationList.length==0 && style.disable)} value={specification} onChange={(e)=>setSpecification(e.target.value)}>
-                <option value={''}></option>
+              <input
+                list="specification-list"
+                className={style.select}
+                value={specification}
+                onChange={(e) => setSpecification(e.target.value)}
+              />
+              <datalist id="specification-list">
                 {specificationList.map((item) => (
-                  <option key={item.specification} value={item.specification}>
-                    {item.specification}
-                  </option>
+                  <option
+                    key={item.specification}
+                    value={item.specification}
+                  />
                 ))}
-              </select>
+              </datalist>
             </div>
           </div>
           <div className={style.singleInput}>

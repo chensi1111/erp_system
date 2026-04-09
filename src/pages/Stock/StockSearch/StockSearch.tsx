@@ -9,6 +9,7 @@ import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 
 interface Stock {
   product_id: string;
+  manufactor:number;
   specification: string;
   product_name: string;
   stock_qty: Stock_qty[];
@@ -35,10 +36,13 @@ function StockSearch() {
     product_id: "",
     product_name: "",
     specification: "",
-    manufactor: "",
+    manufactor:""
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalStock, setTotalStock] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalSale, setTotalSale] = useState(0);
   const [openShow, setOpenShow] = useState(false);
   const [data, setDate] = useState<Stock[]>([]);
   const [type, setType] = useState(false);
@@ -67,6 +71,9 @@ function StockSearch() {
       });
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
+      setTotalStock(res.data.data.totalStock);
+      setTotalCost(res.data.data.totalCostAmount);
+      setTotalSale(res.data.data.totalSaleAmount)
     } catch (error) {
       const err = error as any;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
@@ -86,7 +93,7 @@ function StockSearch() {
     }
   };
 
-  const handleSetFilter = (value: string) => {
+const handleSetFilter = (value: string) => {
     if (searchType === "product_id") {
       setFilter({
         product_id: value,
@@ -164,7 +171,7 @@ function StockSearch() {
           <option value="specification">商品規格</option>
           <option value="manufactor">廠商編號</option>
         </select>
-        {searchType === "product_id" && (
+{searchType === "product_id" && (
           <input
             type="text"
             placeholder="搜尋關鍵字"
@@ -220,6 +227,7 @@ function StockSearch() {
                 )}
               </th>
               <th>商品名稱</th>
+              <th>廠商</th>
               <th>商品規格</th>
               <th>庫存量</th>
               <th>操作</th>
@@ -227,9 +235,10 @@ function StockSearch() {
           </thead>
           <tbody>
             {data.map((m) => (
-              <tr key={m.specification}>
+              <tr key={`${m.product_id}-${m.specification}`}>
                 <td>{m.product_id}</td>
                 <td>{m.product_name}</td>
+                <td>{m.manufactor}</td>
                 <td>{m.specification}</td>
                 <td>{getTotalNumber(m.stock_qty)}</td>
                 <td className={style.actions}>
@@ -251,7 +260,7 @@ function StockSearch() {
             {data.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   style={{ textAlign: "center", padding: "20px 0" }}
                 >
                   查無資料
