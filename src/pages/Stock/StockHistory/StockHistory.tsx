@@ -61,7 +61,8 @@ function StockHistory() {
     change_number: "",
     product_id: "",
     specification:"",
-    change_type: 0,
+    manufactor: "",
+    change_type: "",
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -118,34 +119,46 @@ function StockHistory() {
         change_number: value,
         product_id: "",
         specification:"",
-        change_type: 0,
+        manufactor: "",
+        change_type: "",
       });
     } else if (searchType === "product_id") {
       setFilter({
         change_number: "",
         product_id: value,
         specification:"",
-        change_type: 0,
+        manufactor: "",
+        change_type: "",
       });
     } else if (searchType === "specification") {
       setFilter({
         change_number: "",
         product_id: "",
         specification:value,
-        change_type: 0,
+        manufactor: "",
+        change_type: "",
       });
-    } else {
+    } else if (searchType === "change_type") {
       setFilter({
         change_number: "",
         product_id: "",
         specification:"",
-        change_type: Number(value),
+        manufactor: "",
+        change_type: value,
       });
-    }
+    } else if (searchType === "manufactor") {
+      setFilter({
+        change_number: "",
+        product_id: "",
+        specification:"",
+        manufactor: value,
+        change_type: "",
+      });
   };
+}
   const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ change_number: "", product_id: "",specification:"", change_type: 0 });
+    setFilter({ change_number: "", product_id: "",specification:"", change_type: "", manufactor: "" });
   };
   const formattedQuantity = (type: number, value: number | string) => {
     if (type === 4 || type === 5 || type === 8) {
@@ -195,6 +208,7 @@ function StockHistory() {
           <option value="change_number">庫存單號</option>
           <option value="product_id">商品型號</option>
           <option value="specification">商品規格</option>
+          <option value="manufactor">廠商編號</option>
           <option value="change_type">類型</option>
         </select>
         {searchType === "change_number" && (
@@ -220,6 +234,15 @@ function StockHistory() {
             type="text"
             placeholder="搜尋關鍵字"
             value={filter.specification}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "manufactor" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.manufactor}
             className={style.searchInput}
             onChange={(e) => handleSetFilter(e.target.value)}
           />
@@ -315,4 +338,5 @@ function StockHistory() {
   );
 }
 
-export default StockHistory;
+
+export default StockHistory

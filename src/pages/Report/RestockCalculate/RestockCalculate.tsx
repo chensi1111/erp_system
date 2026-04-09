@@ -155,6 +155,10 @@ function RestockCalculate() {
             <div className={style.infoTitle}>總退貨額</div>
             <div className={style.infoValue}>$ {summary.total_return_price}</div>
           </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>總結餘</div>
+            <div className={style.infoValue}>$ {Number(summary.total_return_price) - Number(summary.total_in_price)}</div>
+          </div>
       </div>
        <div className={style.tableContainer}>
         <table className={style.table}>
