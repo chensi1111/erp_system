@@ -305,6 +305,10 @@ function ManufactorRestock() {
             <div className={style.infoTitle}>退貨金額</div>
             <div className={style.infoValue}>$ {summary.total_out_price}</div>
           </div>
+          <div className={style.info}>
+            <div className={style.infoTitle}>結餘金額</div>
+            <div className={style.infoValue}>$ {summary.total_out_price - summary.total_in_price}</div>
+          </div>
         </div>
       <div className={style.tableContainer}>
         <table className={style.table}>

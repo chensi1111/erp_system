@@ -60,6 +60,7 @@ function SaleCalculate() {
     product_id: "",
     specification: "",
     product_name: "",
+    manufactor:""
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -143,24 +144,34 @@ function SaleCalculate() {
         product_id: value,
         specification: "",
         product_name: "",
+        manufactor:""
       });
     } else if (searchType === "specification") {
       setFilter({
         product_id: "",
         specification: value,
         product_name: "",
+        manufactor:""
       });
-    } else {
+    } else if (searchType === "product_name") {
       setFilter({
         product_id: "",
         specification: "",
         product_name: value,
+        manufactor:""
+      });
+    } else{
+      setFilter({
+        product_id: "",
+        specification: "",
+        product_name: "",
+        manufactor:value
       });
     }
   };
   const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ product_id: "", specification: "", product_name: "" });
+    setFilter({ product_id: "", specification: "", product_name: "", manufactor: "" });
   };
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -203,6 +214,7 @@ function SaleCalculate() {
           <option value="product_id">商品編號</option>
           <option value="specification">商品規格</option>
           <option value="product_name">商品名稱</option>
+          <option value="manufactor">廠商編號</option>
         </select>
         {searchType === "product_id" && (
           <input
@@ -227,6 +239,15 @@ function SaleCalculate() {
             type="text"
             placeholder="搜尋關鍵字"
             value={filter.product_name}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
+        {searchType === "manufactor" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.manufactor}
             className={style.searchInput}
             onChange={(e) => handleSetFilter(e.target.value)}
           />

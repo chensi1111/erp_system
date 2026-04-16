@@ -34,6 +34,7 @@ function StockSearch() {
   const [searchType, setSearchType] = useState("product_id");
   const [filter, setFilter] = useState({
     product_id: "",
+    product_name: "",
     specification: "",
     manufactor:""
   });
@@ -92,30 +93,40 @@ function StockSearch() {
     }
   };
 
-  const handleSetFilter = (value: string) => {
+const handleSetFilter = (value: string) => {
     if (searchType === "product_id") {
       setFilter({
         product_id: value,
+        product_name: "",
         specification: "",
-        manufactor:""
+        manufactor: "",
       });
-    } else if(searchType === "specification") {
+    } else if (searchType === "specification") {
       setFilter({
         product_id: "",
+        product_name: "",
         specification: value,
-        manufactor:""
+        manufactor: "",
       });
-    } else{
+    } else if (searchType === "manufactor") {
       setFilter({
         product_id: "",
+        product_name: "",
         specification: "",
-        manufactor:value
+        manufactor: value,
+      });
+    } else if (searchType === "product_name") {
+      setFilter({
+        product_id: "",
+        product_name: value,
+        specification: "",
+        manufactor: "",
       });
     }
   };
   const handleSetSearchType = (value: string) => {
     setSearchType(value);
-    setFilter({ product_id: "", specification: "", manufactor:"" });
+    setFilter({ product_id: "", product_name: "", specification: "", manufactor: "" });
   };
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -156,10 +167,11 @@ function StockSearch() {
           className={style.searchSelect}
         >
           <option value="product_id">商品編號</option>
+          <option value="product_name">商品名稱</option>
           <option value="specification">商品規格</option>
-          <option value="manufactor">廠商</option>
+          <option value="manufactor">廠商編號</option>
         </select>
-        {searchType === "product_id" && (
+{searchType === "product_id" && (
           <input
             type="text"
             placeholder="搜尋關鍵字"
@@ -177,6 +189,15 @@ function StockSearch() {
             onChange={(e) => handleSetFilter(e.target.value)}
           />
         )}
+        {searchType === "product_name" && (
+          <input
+            type="text"
+            placeholder="搜尋關鍵字"
+            value={filter.product_name}
+            className={style.searchInput}
+            onChange={(e) => handleSetFilter(e.target.value)}
+          />
+        )}
         {searchType === "manufactor" && (
           <input
             type="text"
@@ -187,11 +208,6 @@ function StockSearch() {
           />
         )}
       </div>
-      <div className={style.totalStock}>
-        <div>總庫存: {totalStock}</div>
-        <div>總售價: $ {totalSale}</div>
-        <div>總成本: $ {totalCost}</div>
-        </div>
       <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
