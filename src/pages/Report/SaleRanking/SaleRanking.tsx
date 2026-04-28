@@ -1,7 +1,7 @@
 import style from "./SaleRanking.module.css";
 import ShowSaleRanking from "../../../component/ProductSaleCalculate/ShowProductSaleCalculate"
 import React, { useState,useEffect } from "react";
-import axios from '../../../api/axios'
+import axios, { type ApiError } from '../../../api/axios'
 import {toast} from 'react-toastify'
 import {
   FormControl,
@@ -22,6 +22,12 @@ import { getGrossProfit } from "../../../utils/calculate";
 interface Report {
   product_id: string;
   specification: string;
+  brand?: string;
+  color?: string;
+  product_type1?: string;
+  product_type2?: string;
+  product_type3?: string;
+  product_type4?: string;
   sale_quantity: number;
   sale_amount: number;
   refund_quantity: number;
@@ -90,7 +96,7 @@ function SaleRanking() {
       const res = await axios.post('/api/report/top_list',{rangeType,customRange});
       setData(res.data.data.list);
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -102,7 +108,7 @@ function SaleRanking() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -119,10 +125,10 @@ function SaleRanking() {
       return
     }
    getList();
-  }, [rangeType,customRange]);
+  }, [rangeType,customRange]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     createProductInfos()
-  },[])
+  },[]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.container}>
       {openShow && <ShowSaleRanking 

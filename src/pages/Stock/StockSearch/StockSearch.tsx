@@ -1,7 +1,7 @@
 import style from "./StockSearch.module.css";
 import ShowStockSearch from "../../../component/StockSearch/ShowStockSearch";
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from "@mui/material/Pagination";
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -40,9 +40,9 @@ function StockSearch() {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalStock, setTotalStock] = useState(0);
-  const [totalCost, setTotalCost] = useState(0);
-  const [totalSale, setTotalSale] = useState(0);
+  // const [totalStock, setTotalStock] = useState(0);
+  // const [totalCost, setTotalCost] = useState(0);
+  // const [totalSale, setTotalSale] = useState(0);
   const [openShow, setOpenShow] = useState(false);
   const [data, setDate] = useState<Stock[]>([]);
   const [type, setType] = useState(false);
@@ -54,8 +54,8 @@ function StockSearch() {
     last_in_date: "",
     last_out_date: "",
   });
-  const getTotalNumber = (list: any) => {
-    return list.reduce((total: any, item: any) => {
+  const getTotalNumber = (list: Stock_qty[]) => {
+    return list.reduce((total: number, item: Stock_qty) => {
       const qty = parseInt(item.all_quantity, 10);
       return total + (isNaN(qty) ? 0 : qty);
     }, 0);
@@ -71,11 +71,11 @@ function StockSearch() {
       });
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
-      setTotalStock(res.data.data.totalStock);
-      setTotalCost(res.data.data.totalCostAmount);
-      setTotalSale(res.data.data.totalSaleAmount)
+      // setTotalStock(res.data.data.totalStock);
+      // setTotalCost(res.data.data.totalCostAmount);
+      // setTotalSale(res.data.data.totalSaleAmount)
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -88,7 +88,7 @@ function StockSearch() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -138,11 +138,11 @@ const handleSetFilter = (value: string) => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort]);
+  }, [page, sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={style.container}>

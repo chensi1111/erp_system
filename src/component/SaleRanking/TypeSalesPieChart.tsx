@@ -22,13 +22,26 @@ const COLORS = [
   "#00C49F",
 ];
 
-const TypeSalesPieChart = ({ data }:any) => {
+interface SalesItem {
+  product_type1?: string;
+  product_type2?: string;
+  product_type3?: string;
+  product_type4?: string;
+  sale_quantity: number | string;
+}
+interface MergedType {
+  [key: string]: string | number;
+  type: string;
+  sale_quantity: number;
+}
+
+const TypeSalesPieChart = ({ data }: { data: SalesItem[] }) => {
   const productInfoRelation = useSelector(
     (state: RootState) => state.productInfoRelation
   );
   // 加總各 type 的銷售量
-  const mergedData = Object.values(
-    data.reduce((acc:any, item:any) => {
+  const mergedData: MergedType[] = Object.values(
+    data.reduce<Record<string, MergedType>>((acc, item) => {
       const quantity = Number(item.sale_quantity) || 0;
 
       // 取出所有有值的類別 ID
@@ -37,7 +50,7 @@ const TypeSalesPieChart = ({ data }:any) => {
         item.product_type2,
         item.product_type3,
         item.product_type4,
-      ].filter(Boolean); // 去除空字串
+      ].filter((v): v is string => Boolean(v)); // 去除空字串
 
       typeIds.forEach((typeId) => {
         const typeName =
@@ -52,7 +65,7 @@ const TypeSalesPieChart = ({ data }:any) => {
 
       return acc;
     }, {})
-  ) as any;
+  );
   return (
     <Card sx={{ height: 400 }}>
       <CardContent>
@@ -69,11 +82,11 @@ const TypeSalesPieChart = ({ data }:any) => {
               cy="50%"
               outerRadius={100}
               fill="#8884d8"
-              label={({ name, percent }:any) =>
-                `${name}: ${(percent * 100).toFixed(1)}%`
+              label={({ name, percent }: { name?: string; percent?: number }) =>
+                `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`
               }
             >
-              {mergedData.map((_:any, index:any) => (
+              {mergedData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -82,12 +95,13 @@ const TypeSalesPieChart = ({ data }:any) => {
             </Pie>
             <Tooltip
               formatter={(value, name, props) => {
+                const payload = props.payload as MergedType;
                 const percent = (
-                  (props.payload.sale_quantity /
-                    mergedData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
+                  (payload.sale_quantity /
+                    mergedData.reduce((sum, i) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
-                return [`${percent}% (${value.toLocaleString()})`, name];
+                return [`${percent}% (${Number(value).toLocaleString()})`, name];
               }}
             />
             <Legend />

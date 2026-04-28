@@ -1,6 +1,6 @@
 import style from "./ProductSale.module.css";
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -198,7 +198,7 @@ function ProductSale() {
       const countRes = await axios.post("/api/stock/safe_count");
       dispatch(getSafeStockCount(countRes.data.data.total));
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -223,7 +223,7 @@ function ProductSale() {
         }
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -240,7 +240,7 @@ function ProductSale() {
           getList();
         }
       } catch (error) {
-        const err = error as any;
+        const err = error as ApiError;
         toast.error(err.response?.data?.msg || "伺服器錯誤");
       }
     } else if (type === 2) {
@@ -258,7 +258,7 @@ function ProductSale() {
           getList();
         }
       } catch (error) {
-        const err = error as any;
+        const err = error as ApiError;
         toast.error(err.response?.data?.msg || "伺服器錯誤");
       }
     } else if (type === 3) {
@@ -273,7 +273,7 @@ function ProductSale() {
           getList();
         }
       } catch (error) {
-        const err = error as any;
+        const err = error as ApiError;
         toast.error(err.response?.data?.msg || "伺服器錯誤");
       }
     } else if (type === 1) {
@@ -288,7 +288,7 @@ function ProductSale() {
           getList();
         }
       } catch (error) {
-        const err = error as any;
+        const err = error as ApiError;
         toast.error(err.response?.data?.msg || "伺服器錯誤");
       }
     }
@@ -324,7 +324,7 @@ function ProductSale() {
       dispatch(getProductInfoRelation(response.data.data));
     }
   };
-  const formattedQuantity = (quantities: any[]) => {
+  const formattedQuantity = (quantities: { size: string; quantity: string }[]) => {
     return (
       <div className={style.sizeBadges}>
         {quantities
@@ -337,7 +337,7 @@ function ProductSale() {
       </div>
     );
   };
-  const getProfit = (data: any) => {
+  const getProfit = (data: Sale) => {
     if (data.type === 0 || data.type === 3) {
       return `$ ${(data.price - data.average_cost) * data.total_quantity}`;
     } else if (data.type === 1) {
@@ -346,13 +346,13 @@ function ProductSale() {
       return "";
     }
   };
-  const getPrepaid = (data: any) => {
+  const getPrepaid = (data: Sale) => {
     if (data.type === 2) {
       return `$ ${data.amount}`;
     } else if (data.type === 4) {
       return `$ -${data.amount}`;
     } else {
-      ("");
+      return "";
     }
   };
   useEffect(() => {
@@ -365,14 +365,14 @@ function ProductSale() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort, rangeType, customRange]);
+  }, [page, sort, rangeType, customRange]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     createProductInfos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.container}>
       {openCreate && (

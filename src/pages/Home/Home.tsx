@@ -1,6 +1,6 @@
 import style from "./Home.module.css";
 import classNames from "classnames";
-import axios from "../../api/axios"
+import axios, { type ApiError } from "../../api/axios"
 import {toast} from 'react-toastify'
 import { useState,useEffect } from "react";
 import SalesProfitChart from "../../component/DashBoard/SalesProfitChart";
@@ -40,7 +40,7 @@ function Home() {
       setKpiData(res.data.data);
       setIsReady(true)
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       setIsReady(false)
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }

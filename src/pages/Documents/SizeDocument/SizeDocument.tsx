@@ -1,6 +1,6 @@
 import style from "./SizeDocument.module.css";
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from "@mui/material/Pagination";
 // component
@@ -54,7 +54,7 @@ function SizeDocument() {
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -67,7 +67,7 @@ function SizeDocument() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -83,7 +83,7 @@ function SizeDocument() {
         getList();
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -114,11 +114,11 @@ function SizeDocument() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort]);
+  }, [page, sort]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.container}>
       {openCreate && (

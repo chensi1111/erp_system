@@ -2,7 +2,7 @@ import style from "./ShowProductOrder.module.css";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
-import axios from "../../../api/axios"
+import axios, { type ApiError } from "../../../api/axios"
 import { toast } from "react-toastify";
 // utils
 import { formattedDate,formattedTime } from "../../../utils/formattedTime";
@@ -86,7 +86,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
         toast.success('取貨成功');
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
@@ -98,7 +98,7 @@ const ShowProductOrder=({ onClose,onSuccess, detail }: ShowProductOrderProps)=> 
         toast.success('退訂成功');
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }

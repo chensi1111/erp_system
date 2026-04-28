@@ -1,30 +1,30 @@
 import { createSlice} from "@reduxjs/toolkit";
-interface Manufactor {
+export interface Manufactor {
   manufactor_id: string;
   manufactor_name: string;
 }
 
-interface Brand {
+export interface Brand {
   brand_id: string;
   brand_name: string;
 }
 
-interface Size {
+export interface Size {
   size_id: string;
   size_name: string;
 }
 
-interface Color {
+export interface Color {
   color_id: string;
   color_name: string;
 }
 
-interface Type {
+export interface Type {
   type_id: string;
   type_name: string;
 }
 
-interface ProductInfoRelationState {
+export interface ProductInfoRelationState {
   manufactorList: Manufactor[];
   brandList: Brand[];
   sizeList: Size[];

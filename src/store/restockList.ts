@@ -1,11 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
-interface RestockItem {
+export interface RestockQuantity {
+  size: string;
+  all_quantity: string;
+  available_quantity: string;
+  reserved_quantity: string;
+  safe_stock: string;
+}
+export interface RestockItem {
   product_id: string;
   specification: string;
   total_quantity:number;
   total_price:number;
   price:number;
-  quantities: any[];
+  quantities: RestockQuantity[];
   product_name:string;
   manufactor:string;
   brand:string;
@@ -15,6 +22,7 @@ interface RestockItem {
   type2:string;
   type3:string;
   type4:string;
+  sizeList:string;
 }
 interface ProductInfo {
   product_id:string

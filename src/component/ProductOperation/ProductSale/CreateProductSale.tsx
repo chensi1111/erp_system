@@ -2,7 +2,7 @@ import style from "./CreateProductSale.module.css";
 import { useState,useRef,useEffect } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import axios from '../../../api/axios'
+import axios, { type ApiError } from '../../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
@@ -101,7 +101,7 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
       if(response.data.code==='000'){
         setSpecificationList(response.data.data)
       }
-    } catch (error) {
+    } catch {
       toast.error('無此商品型號')
       setSpecificationList([])
     }
@@ -119,7 +119,7 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
           setSizeList(list);
         }
      } 
-    } catch (error) {
+    } catch {
       toast.error('無此商品規格')
       clearProductInfo()
     }
@@ -156,9 +156,9 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
         onSuccess();
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
-      setErrorCode(err.response?.data?.code);
+      setErrorCode(err.response?.data?.code ?? '');
     }finally{
       setIsCreate(false)
     }
@@ -177,7 +177,7 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
     return () => {
       if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
     };
-  }, [specification]);
+  }, [specification]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isAutoSetProductId.current) {
       isAutoSetProductId.current = false
@@ -198,7 +198,7 @@ const getAverageCost = (cumulative_cost:number,total_quantity:number) => {
       if (productIdDebounceRef.current)
         clearTimeout(productIdDebounceRef.current);
     };
-  },[product_id])
+  },[product_id]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", quantity: "" })));
   }, [sizeList]);
