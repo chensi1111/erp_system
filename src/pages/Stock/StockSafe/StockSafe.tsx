@@ -1,7 +1,7 @@
 import style from "./StockSafe.module.css";
 import ShowStockSafe from "../../../component/StockSafe/ShowStockSafe";
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from "@mui/material/Pagination";
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -47,9 +47,9 @@ function StockSafe() {
     last_in_date: "",
     last_out_date: "",
   });
-  const getTotalNumber = (list: any) => {
-    return list.reduce((total: any, item: any) => {
-      const qty = parseInt(item.quantity, 10);
+  const getTotalNumber = (list: Stock_qty[]) => {
+    return list.reduce((total: number, item: Stock_qty) => {
+      const qty = parseInt((item as unknown as { quantity?: string }).quantity ?? '', 10);
       return total + (isNaN(qty) ? 0 : qty);
     }, 0);
   };
@@ -65,7 +65,7 @@ function StockSafe() {
       setDate(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -77,7 +77,7 @@ function StockSafe() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -109,11 +109,11 @@ function StockSafe() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort]);
+  }, [page, sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={style.container}>

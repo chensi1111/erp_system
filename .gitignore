@@ -51,3 +51,14 @@ out/
 *.ntvs*
 *.njsproj
 *.sln
+
+# Claude Code 個人設定
+.claude/settings.local.json
+
+# 個人工作狀態（依 CLAUDE.md 規定，不進 git）
+.scratch/local/
+
+# Graphify 產出與暫存
+graphify-out/
+.graphify_uncached.txt
+.graphify_*.py

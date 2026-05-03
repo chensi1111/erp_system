@@ -1,12 +1,13 @@
 import style from "./ShowManufactorRestock.module.css";
 import classNames from "classnames";
+import type { RestockQuantity } from "../../store/restockList";
 interface RestockDetail {
   product_id: string;
   specification: string;
   total_quantity:number;
   total_price:number;
   price:number;
-  quantities: any[];
+  quantities: RestockQuantity[];
   product_name:string;
   manufactor:string;
   brand:string;

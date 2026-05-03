@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { Dayjs } from "dayjs";
 import Pagination from '@mui/material/Pagination';
 import { useState,useEffect } from "react";
-import axios from '../../api/axios'
+import axios, { type ApiError } from '../../api/axios'
 import {toast} from 'react-toastify'
 // utils
 import { formattedTime,formattedDate } from "../../utils/formattedTime";
@@ -42,13 +42,13 @@ const ShowSaleCalculate=({ onClose,manufactorInfo,selectedDate }: ShowSaleCalcul
       setDetail(res.data.data.list);
       setTotalPages(res.data.data.totalPages);
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
   useEffect(()=>{
     getDetail()
-  },[page])
+  },[page]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.wrapper}>
       <div className={style.container}>

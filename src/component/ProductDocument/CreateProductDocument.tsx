@@ -2,7 +2,7 @@ import style from "./CreateProductDocument.module.css";
 import { useState,useEffect } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import axios from '../../api/axios'
+import axios, { type ApiError } from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
@@ -37,9 +37,9 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
         onSuccess();
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
-      setErrorCode(err.response?.data?.code);
+      setErrorCode(err.response?.data?.code ?? '');
     }
   }
   const getProductInfo = async() =>{
@@ -64,7 +64,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
         setPurchase(data.purchase_price)
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
@@ -72,7 +72,7 @@ const CreateProductDocument=({onClose,onSuccess,Specification}: {onClose: () => 
     if(Specification){
       getProductInfo()
     }
-  },[])
+  },[]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.wrapper}>
       <div className={style.container} onClick={(e) => e.stopPropagation()}>

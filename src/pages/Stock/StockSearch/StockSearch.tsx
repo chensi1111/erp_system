@@ -1,7 +1,7 @@
 import style from "./StockSearch.module.css";
 import ShowStockSearch from "../../../component/StockSearch/ShowStockSearch";
 import { useState, useEffect, useRef } from "react";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from "@mui/material/Pagination";
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -54,8 +54,8 @@ function StockSearch() {
     last_in_date: "",
     last_out_date: "",
   });
-  const getTotalNumber = (list: any) => {
-    return list.reduce((total: any, item: any) => {
+  const getTotalNumber = (list: Stock_qty[]) => {
+    return list.reduce((total: number, item: Stock_qty) => {
       const qty = parseInt(item.all_quantity, 10);
       return total + (isNaN(qty) ? 0 : qty);
     }, 0);
@@ -75,7 +75,7 @@ function StockSearch() {
       setTotalCost(res.data.data.totalCostAmount);
       setTotalSale(res.data.data.totalSaleAmount)
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -88,7 +88,7 @@ function StockSearch() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -138,11 +138,11 @@ const handleSetFilter = (value: string) => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort]);
+  }, [page, sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={style.container}>
@@ -208,6 +208,11 @@ const handleSetFilter = (value: string) => {
           />
         )}
       </div>
+        <div className={style.totalStock}>
+        <div>總庫存: {totalStock}</div>
+        <div>總售價: $ {totalSale}</div>
+        <div>總成本: $ {totalCost}</div>
+        </div>
       <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>

@@ -7,13 +7,23 @@ const COLORS = [
   "#a4de6c", "#d0ed57", "#ffc0cb", "#ffbb28", "#00C49F"
 ];
 
+interface SalesItem {
+  color?: string;
+  sale_quantity: number | string;
+}
+interface MergedColor {
+  [key: string]: string | number;
+  color: string;
+  sale_quantity: number;
+}
+
 // 傳入後端查詢的前10名銷售資料
-const ColorSalesPieChart = ({ data }:any) => {
+const ColorSalesPieChart = ({ data }: { data: SalesItem[] }) => {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   // 合併相同品牌並轉換品牌名稱
-  const mergedData = Object.values(
-    data.reduce((acc:any, item:any) => {
-      const colorId = item.color;
+  const mergedData: MergedColor[] = Object.values(
+    data.reduce<Record<string, MergedColor>>((acc, item) => {
+      const colorId = item.color ?? '';
       const colorName =
         productInfoRelation.colorList.find(b => b.color_id === colorId)?.color_name ||
         colorId;
@@ -24,7 +34,7 @@ const ColorSalesPieChart = ({ data }:any) => {
       acc[colorName].sale_quantity += Number(item.sale_quantity) || 0;
       return acc;
     }, {})
-  ) as any;
+  );
   return (
     <Card sx={{ height: 400 }}>
       <CardContent>
@@ -41,22 +51,23 @@ const ColorSalesPieChart = ({ data }:any) => {
               cy="50%"
               outerRadius={100}
               fill="#8884d8"
-              label={({ name, percent }:any) =>
-                `${name}: ${(percent * 100).toFixed(1)}%`
+              label={({ name, percent }: { name?: string; percent?: number }) =>
+                `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`
               }
             >
-              {mergedData.map((_:any, index:any) => (
+              {mergedData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip
               formatter={(value, name, props) => {
+                const payload = props.payload as MergedColor;
                 const percent = (
-                  (props.payload.sale_quantity /
-                    mergedData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
+                  (payload.sale_quantity /
+                    mergedData.reduce((sum, i) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
-                return [`${percent}% (${value.toLocaleString()})`, name];
+                return [`${percent}% (${Number(value).toLocaleString()})`, name];
               }}
             />
             <Legend />

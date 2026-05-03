@@ -2,7 +2,7 @@ import style from "./ManufactorRestockTable.module.css";
 import { useState } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import axios from '../../api/axios'
+import axios, { type ApiError } from '../../api/axios'
 import { toast } from "react-toastify";
 import { useSelector,useDispatch } from "react-redux";
 // component
@@ -11,6 +11,7 @@ import ShowManufactorRestock from "./ShowManufactorRestock";
 // store
 import type { RootState } from "../../store/store";
 import { getProductList,getManufactor,clearProducts,deleteProduct } from "../../store/restockList"
+import type { RestockItem, RestockQuantity } from "../../store/restockList"
 // utils
 import { getProductFormat } from "../../utils/productInfoMap";
 const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onSuccess: () => void;type:number})=> {
@@ -22,7 +23,7 @@ const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onS
   const [manufactor,setManufactor] = useState('')
   const [openCreate,setOpenCreate] = useState(false)
   const [openShow,setOpenShow] = useState(false)
-  const [detail,setDetail] = useState<any>(null)
+  const [detail,setDetail] = useState<RestockItem | null>(null)
 
   const [date,setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [remark, setRemark] = useState('');
@@ -36,7 +37,7 @@ const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onS
         setOpenCreate(true)
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   } 
@@ -60,14 +61,14 @@ const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onS
         onSuccess();
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
-      setErrorCode(err.response?.data?.code);
+      setErrorCode(err.response?.data?.code ?? '');
     }finally{
       setIsCreate(false)
     }
   }
-  const formattedQuantity = (quantities: any[]) => {
+  const formattedQuantity = (quantities: RestockQuantity[]) => {
   return (
     <div className={style.sizeBadges}>
       {quantities
@@ -85,7 +86,7 @@ const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onS
     dispatch(clearProducts())
     onClose()
   }
-  const handleDetail = (detail:any) => {
+  const handleDetail = (detail: RestockItem) => {
     setDetail(detail)
     setOpenShow(true)
   }
@@ -185,7 +186,7 @@ const ManufactorRestockTable=({onClose,onSuccess,type}: {onClose: () => void;onS
       </div>
       {openCreate && <CreateManufactorRestock 
       onClose={() => setOpenCreate(false)} />}
-      {openShow && <ShowManufactorRestock 
+      {openShow && detail && <ShowManufactorRestock
       onClose={() => setOpenShow(false)} detail={detail} />}
     </div>
   );

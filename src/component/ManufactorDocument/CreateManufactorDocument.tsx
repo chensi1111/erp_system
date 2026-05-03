@@ -2,7 +2,7 @@ import style from "./CreateManufactorDocument.module.css";
 import { useState } from "react";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import axios from '../../api/axios'
+import axios, { type ApiError } from '../../api/axios'
 import { toast } from "react-toastify";
 const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuccess: () => void;})=> {
   const [manufactor_id, setManufactor_id] = useState('');
@@ -27,9 +27,9 @@ const CreateManufactorDocument=({onClose,onSuccess,}: {onClose: () => void;onSuc
         onSuccess();
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
-      setErrorCode(err.response?.data?.code);
+      setErrorCode(err.response?.data?.code ?? '');
     }
   }
   return (

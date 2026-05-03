@@ -42,17 +42,17 @@ function SideNav() {
         break;
     }
   };
-  const getCount = async () => {
-    try {
-      const res = await axios.post('/api/stock/safe_count');
-      dispatch(getSafeStockCount(res.data.data.total));
-    } catch (error) {
-      console.log(error)
-  };
-}
   useEffect(()=>{
+    const getCount = async () => {
+      try {
+        const res = await axios.post('/api/stock/safe_count');
+        dispatch(getSafeStockCount(res.data.data.total));
+      } catch (error) {
+        console.log(error)
+      }
+    }
     getCount()
-  },[])
+  },[dispatch])
   return (
     <div className={style.container}>
       <div className={style.logoContainer}>

@@ -2,7 +2,7 @@ import style from "./ManufactorRestock.module.css";
 import classNames from "classnames";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
-import axios from "../../../api/axios";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import "dayjs/locale/zh-tw";
 // mui
@@ -21,6 +21,7 @@ import { getSafeStockCount } from "../../../store/safeStcokSlice";
 // component
 import ManufactorRestockTable from "../../../component/ManufactorRestock/ManufactorRestockTable";
 import ShowManufactorRestockTable from "../../../component/ManufactorRestock/ShowManufactorRestockTable";
+import type { ShowManufactorRestockTableDetail } from "../../../component/ManufactorRestock/ShowManufactorRestockTable";
 // icon
 import plus from "../../../assets/icons/plusIcon.svg"
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -62,7 +63,7 @@ function ManufactorRestock() {
   const [openCreate, setOpenCreate] = useState(false);
   const [openShow, setOpenShow] = useState(false);
   const [data, setData] = useState<Restock[]>([]);
-  const [detail, setDetail] = useState<any>(null);
+  const [detail, setDetail] = useState<ShowManufactorRestockTableDetail | null>(null);
   const [summary, setSummary] = useState<Summary>({
     total_in_quantity: 0,
     total_in_price: 0,
@@ -87,7 +88,7 @@ function ManufactorRestock() {
       const countRes = await axios.post("/api/stock/safe_count");
       dispatch(getSafeStockCount(countRes.data.data.total));
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -103,7 +104,7 @@ function ManufactorRestock() {
         setOpenShow(true);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -121,7 +122,7 @@ function ManufactorRestock() {
         getList();
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
@@ -158,14 +159,14 @@ function ManufactorRestock() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getList();
-  }, [page, sort, rangeType, customRange]);
+  }, [page, sort, rangeType, customRange]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     createProductInfos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.container}>
       {openCreate && (
@@ -178,7 +179,7 @@ function ManufactorRestock() {
           type={type}
         />
       )}
-      {openShow && (
+      {openShow && detail && (
         <ShowManufactorRestockTable
           detail={detail}
           onClose={() => setOpenShow(false)}

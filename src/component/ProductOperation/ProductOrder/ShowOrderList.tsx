@@ -1,7 +1,7 @@
 import style from "./ShowOrderList.module.css";
 import classNames from "classnames";
-import { useEffect, useState } from "react";
-import axios from "../../../api/axios";
+import { useEffect, useState, useCallback } from "react";
+import axios, { type ApiError } from "../../../api/axios";
 import { toast } from "react-toastify";
 import Pagination from '@mui/material/Pagination';
 import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
@@ -12,11 +12,16 @@ interface ShowOrderListProps {
   onClose: () => void;
   onSuccess: () => void
 }
+interface OrderQuantity {
+  size: string;
+  quantity: string;
+  safe_stock: string;
+}
 interface OrderList {
   order_no:string;
   product_id:string;
   specification:string;
-  quantities:[];
+  quantities: OrderQuantity[];
   total_quantity:number;
   amount:number;
   paid_at:string;
@@ -28,7 +33,7 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
-  const getOrderList = async () => {
+  const getOrderList = useCallback(async () => {
     try {
       const res = await axios.post("/api/sale/order_list",{page,pageSize:5,sort});
       if (res.data.code === "000") {
@@ -36,11 +41,11 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
         setTotalPages(res.data.data.totalPages);
       }
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
-  };
-  const formattedQuantity = (quantities: any[]) => {
+  }, [page, sort]);
+  const formattedQuantity = (quantities: OrderQuantity[]) => {
   return (
     <div className={style.sizeBadges}>
       {quantities
@@ -62,7 +67,7 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
         toast.success('取貨成功');
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
@@ -74,13 +79,13 @@ const ShowOrderList = ({ onClose,onSuccess }: ShowOrderListProps) => {
         toast.success('退訂成功');
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }
   useEffect(() => {
     getOrderList();
-  }, [page,sort]);
+  }, [getOrderList]);
   return (
     <div className={style.wrapper}>
       <div className={style.container}>

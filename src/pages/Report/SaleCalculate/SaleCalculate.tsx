@@ -1,6 +1,6 @@
 import style from "./SaleCalculate.module.css";
 import { useState,useEffect,useRef } from "react";
-import axios from '../../../api/axios'
+import axios, { type ApiError } from '../../../api/axios'
 import {toast} from 'react-toastify'
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/zh-tw';
@@ -65,11 +65,11 @@ function SaleCalculate() {
       setTotalPages(res.data.data.totalPages);
       setSummary(res.data.data.summary)
     } catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   };
-  const getDetail = async (info:any) => {
+  const getDetail = async (info: Report) => {
     const {manufactor,manufactor_name,order_quantity,order_amount,sale_quantity,sale_amount} =info
         setOpenShow(true);
         setManufactorInfo({
@@ -108,12 +108,12 @@ function SaleCalculate() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setData([])
    getList();
-  }, [page,sort,selectedDate]);
+  }, [page,sort,selectedDate]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={style.container}>
       {openShow && <ShowSaleCalculate 

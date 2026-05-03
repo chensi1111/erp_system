@@ -12,14 +12,36 @@ import {
 } from "recharts";
 import style from "./SalesProfitChart.module.css";
 
+interface YearStat {
+  month: string;
+  sale: {
+    total_sale_amount: number | string;
+    total_profit: number | string;
+    total_sale_volume: number | string;
+    total_fee: number | string;
+    fee_count: number | string;
+  };
+  restock: { total_restock_volume: number | string };
+}
+interface ChartItem {
+  month: string;
+  sales: number;
+  profit: number;
+  salesAmount: number;
+  restockAmount: number;
+  handingFee: number;
+  handingFeeCount: number;
+  netProfit: number;
+}
+
 const SalesProfitChart = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<ChartItem[]>([]);
   const currentYear = new Date().getFullYear();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.post("/api/dashboard/year");
-        const chartData = res.data.data.map((item: any) => ({
+        const chartData: ChartItem[] = res.data.data.map((item: YearStat) => ({
           month: item.month.slice(-2),
           sales: Number(item.sale.total_sale_amount),
           profit: Number(item.sale.total_profit),

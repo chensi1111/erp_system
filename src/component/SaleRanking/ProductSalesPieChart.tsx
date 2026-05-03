@@ -6,12 +6,22 @@ const COLORS = [
   "#a4de6c", "#d0ed57", "#ffc0cb", "#ffbb28", "#00C49F"
 ];
 
+interface SalesItem {
+  specification: string;
+  sale_quantity: number | string;
+}
+interface ChartDataItem {
+  [key: string]: string | number | undefined;
+  specification: string;
+  sale_quantity: number;
+}
+
 // 傳入後端查詢的前10名銷售資料
-const ProductSalesPieChart = ({ data }:any) => {
-  const chartData = data.map((item:any) => ({
-  ...item,
-  sale_quantity: Number(item.sale_quantity)
-}));
+const ProductSalesPieChart = ({ data }: { data: SalesItem[] }) => {
+  const chartData: ChartDataItem[] = data.map(item => ({
+    ...item,
+    sale_quantity: Number(item.sale_quantity)
+  }));
   return (
     <Card sx={{ height: 400 }}>
       <CardContent>
@@ -28,22 +38,23 @@ const ProductSalesPieChart = ({ data }:any) => {
               cy="50%"
               outerRadius={100}
               fill="#8884d8"
-              label={({ name, percent }:any) =>
-                `${name}: ${(percent * 100).toFixed(1)}%`
+              label={({ name, percent }: { name?: string; percent?: number }) =>
+                `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`
               }
             >
-              {data.map((_:any, index:any) => (
+              {data.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip
               formatter={(value, name, props) => {
+                const payload = props.payload as ChartDataItem;
                 const percent = (
-                  (props.payload.sale_quantity /
-                    chartData.reduce((sum:any, i:any) => sum + i.sale_quantity, 0)) *
+                  (payload.sale_quantity /
+                    chartData.reduce((sum, i) => sum + i.sale_quantity, 0)) *
                   100
                 ).toFixed(1);
-                return [`${percent}% (${value.toLocaleString()})`, name];
+                return [`${percent}% (${Number(value).toLocaleString()})`, name];
               }}
             />
             <Legend />

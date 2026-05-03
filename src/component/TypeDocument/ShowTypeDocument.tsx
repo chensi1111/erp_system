@@ -1,7 +1,7 @@
 import style from "./ShowTypeDocument.module.css";
 import classNames from "classnames";
 import { useState } from "react";
-import axios from "../../api/axios";
+import axios, { type ApiError } from "../../api/axios";
 import { toast } from "react-toastify";
 // utils
 import { formattedTime } from "../../utils/formattedTime";
@@ -33,7 +33,7 @@ const ShowTypeDocument=({ onClose,onSuccess, detail,type }: ShowTypeDocumentProp
         toast.success('更新成功');
       } 
     }catch (error) {
-      const err = error as any;
+      const err = error as ApiError;
       toast.error(err.response?.data?.msg || "伺服器錯誤");
     }
   }

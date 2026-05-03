@@ -55,7 +55,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
   const [specification, setSpecification] = useState('')
   const [specificationList, setSpecificationList] =useState<specificationList[]>([])
   const [sizeList, setSizeList] = useState<string[]>([]);
-  const [quantities, setQuantities] = useState<{ size: string; all_quantity: string,available_quantity:string,reserved_quantity:String,safe_stock:string }[]>(
+  const [quantities, setQuantities] = useState<{ size: string; all_quantity: string,available_quantity:string,reserved_quantity:string,safe_stock:string }[]>(
     Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity: "",reserved_quantity: "",safe_stock:"" }))
   );
   const [price,setPrice] = useState('')
@@ -86,7 +86,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
       if(response.data.code==='000'){
         setSpecificationList(response.data.data)
       }
-    } catch (error) {
+    } catch {
       toast.error('無此商品型號')
       setSpecificationList([])
     }
@@ -108,7 +108,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
           setSizeList(list);
         }
      } 
-    } catch (error) {
+    } catch {
       toast.error('無此商品規格')
       clearProductInfo()
     }
@@ -158,7 +158,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
       if (productIdDebounceRef.current)
         clearTimeout(productIdDebounceRef.current);
     };
-  },[product_id])
+  },[product_id]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if(!specification) return
     if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
@@ -170,7 +170,7 @@ const CreateManufactorRestock=({onClose}: {onClose: () => void})=> {
     return () => {
       if (specificationDebounceRef.current) clearTimeout(specificationDebounceRef.current);
     };
-  }, [specification]);
+  }, [specification]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     setQuantities(Array.from({ length: 10 }, (_, index) => ({ size: sizeList[index] || "", all_quantity: "",available_quantity:"",reserved_quantity:"",safe_stock:"" })));
   }, [sizeList]);

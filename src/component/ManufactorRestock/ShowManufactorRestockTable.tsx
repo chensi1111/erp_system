@@ -2,15 +2,36 @@ import style from "./ShowManufactorRestockTable.module.css";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+import type { RestockQuantity } from "../../store/restockList";
 // utils
 import { formattedDate,formattedTime } from "../../utils/formattedTime";
 import { getProductFormat } from "../../utils/productInfoMap";
 import { RestockTypeMap } from "../../utils/map";
-const ShowManufactorRestockTable=({onClose,detail}: {onClose: () => void,detail:any})=> {
+interface RestockHistory {
+  restock_id: string;
+  type: number;
+  transaction: number;
+  date: string;
+  create_date: string;
+  manufactor: string;
+  remark: string;
+}
+interface RestockHistoryItem {
+  product_id: string;
+  specification: string;
+  total_quantity: number;
+  quantities: RestockQuantity[];
+  price: number;
+}
+export interface ShowManufactorRestockTableDetail {
+  restock: RestockHistory;
+  items: RestockHistoryItem[];
+}
+const ShowManufactorRestockTable=({onClose,detail}: {onClose: () => void, detail: ShowManufactorRestockTableDetail})=> {
   const productInfoRelation = useSelector((state: RootState) => state.productInfoRelation);
   const restock = detail.restock
   const items =detail.items
-  const formattedQuantity = (quantities: any[]) => {
+  const formattedQuantity = (quantities: RestockQuantity[]) => {
   return (
     <div className={style.sizeBadges}>
       {quantities
@@ -25,10 +46,10 @@ const ShowManufactorRestockTable=({onClose,detail}: {onClose: () => void,detail:
   );
 };
 const getTotalQuantity = () => {
-  return items.reduce((sum:any, item:any) => sum + Number(item.total_quantity), 0);
+  return items.reduce((sum: number, item: RestockHistoryItem) => sum + Number(item.total_quantity), 0);
 };
 const getTotalPrice = () => {
-  return items.reduce((sum:any, item:any) => {
+  return items.reduce((sum: number, item: RestockHistoryItem) => {
     return sum + Number(item.total_quantity) * Number(item.price);
   }, 0);
 };
@@ -83,7 +104,7 @@ const getTotalPrice = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((m:any,index:any) => (
+            {items.map((m, index) => (
               <tr key={index}>
                 <td>{m.product_id}</td>
                 <td>{m.specification}</td>
