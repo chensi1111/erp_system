@@ -28,7 +28,7 @@ import arrowDropUp from "../../../assets/icons/arrowDropUp.svg"
 import arrowDropDown from "../../../assets/icons/arrowDropDown.svg"
 // utils
 import { formattedDate } from "../../../utils/formattedTime";
-import { checkToday } from "../../../utils/checkToday";
+// import { checkToday } from "../../../utils/checkToday";
 interface Restock {
   restock_id: string;
   manufactor: string;
@@ -360,14 +360,12 @@ function ManufactorRestock() {
                   >
                     詳細
                   </button>
-                  {checkToday(m.date) && (
                     <button
                       className={style.deleteBtn}
                       onClick={() => handleDelete(m.restock_id, m.type)}
                     >
                       取消
                     </button>
-                  )}
                 </td>
               </tr>
             ))}
